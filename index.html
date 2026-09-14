@@ -2205,17 +2205,6 @@
         updateCallPhoneLink_();
       });
 
-      function updateCallPhoneLink_() {
-        const value = document.getElementById("field-phone").value.trim();
-        const btn = document.getElementById("btn-call-phone");
-        if (/^0\d{2}-\d{7}$/.test(value)) {
-          btn.href = "tel:" + value.replace(/-/g, "");
-          btn.classList.remove("hidden");
-        } else {
-          btn.classList.add("hidden");
-        }
-      }
-
       document.querySelectorAll('input[name="prefix"]').forEach(function (el) {
         el.addEventListener("change", updatePillStates_);
       });
