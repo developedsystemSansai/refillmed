@@ -2075,7 +2075,7 @@
       if (settings.COLOR_PRIMARY) {
         const rgb = hexToRgb_(settings.COLOR_PRIMARY);
         if (rgb) {
-          root.style.setProperty("--primary-rgb", rgb.r + ", " + rgb.g + ", " + rgb.b);
+          root.style.setProperty("--primary-rgb", rgb.r + "," + rgb.g + "," + rgb.b);
         }
       }
 
