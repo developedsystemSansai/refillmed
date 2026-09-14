@@ -2772,8 +2772,30 @@
     }
 
     function cssEscape_(value) {
-      return String(value).replace(/["\\]/g, "\\$&");
+    return String(value).replace(/["\\]/g, "\\$&");
+}
+
+/**
+* อัปเดตปุ่มโทรออกและสถานะของช่องเบอร์โทรศัพท์
+* - ถ้าเบอร์อยู่ในรูปแบบ 0xx-xxxxxxx → แสดงปุ่มโทรออก และตั้ง href เป็น tel:
+* - ถ้าไม่ใช่ → ซ่อนปุ่มโทรออก
+*/
+function updateCallPhoneLink_() {
+    const value = document.getElementById("field-phone").value.trim();
+    const btn = document.getElementById("btn-call-phone");
+    if (!btn) return;
+    if (/^0\d{2}-\d{7}$/.test(value)) {
+        btn.href = "tel:" + value.replace(/-/g, "");
+        btn.classList.remove("hidden");
+    } else {
+        btn.classList.add("hidden");
     }
+}
+
+/**
+* แปลง URL รูปภาพจาก Google Drive ให้อยู่ในรูปแบบที่ฝังแสดงผลด้วย <img> ได้จริง
+...
+function toDriveViewableUrl_(url) {
 
     /**
      * แปลง URL รูปภาพจาก Google Drive ให้อยู่ในรูปแบบที่ฝังแสดงผลด้วย <img> ได้จริง
