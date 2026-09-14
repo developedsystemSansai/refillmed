@@ -1493,198 +1493,190 @@
             <div id="recent-list"></div>
           </div>
         </section>
-
-        <!-- ============ บันทึกการรับยา ============ -->
-        <div class="record-modal-backdrop" id="record-modal-backdrop"></div>
-        <section class="page-section" id="section-record-form">
-          <div class="section-header">
-            <h2>บันทึกการรับยาค้าง</h2>
-            <button type="button" class="btn btn-outline hidden" id="btn-close-record-modal" style="width:auto;">
-              <span class="material-icons-outlined">close</span>
-              <span class="btn-label">ปิด</span>
-            </button>
-          </div>
-
-          <div class="card" id="edit-mode-banner" style="display:none; margin-bottom:14px; background: rgba(var(--primary-rgb),0.08); border: 1px solid var(--primary);">
-            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
-              <div style="display:flex; align-items:center; gap:8px; font-size:13.5px; font-weight:600; color:var(--primary);">
-                <span class="material-icons-outlined">edit</span>
-                <span>กำลังแก้ไขรายการ: <span id="edit-mode-id"></span></span>
-              </div>
-              <button type="button" class="btn btn-outline" id="btn-cancel-edit" style="width:auto;">ยกเลิกการแก้ไข</button>
-            </div>
-          </div>
-
-          <!-- คำนำหน้า (เดิม + ใหม่) -->
-<div class="field-group">
-  <label class="field-label">คำนำหน้า <span class="required">*</span></label>
-  <div class="choice-group">
-    <!-- กลุ่มผู้ใหญ่ -->
-    <label class="choice-pill">
-      <input type="radio" name="prefix" value="นาย">
-      <span>นาย</span>
-    </label>
-    <label class="choice-pill">
-      <input type="radio" name="prefix" value="นางสาว">
-      <span>นางสาว</span>
-    </label>
-    <label class="choice-pill">
-      <input type="radio" name="prefix" value="นาง">
-      <span>นาง</span>
-    </label>
-
-    <!-- กลุ่มเด็ก (เพิ่มใหม่) -->
-    <label class="choice-pill">
-      <input type="radio" name="prefix" value="เด็กชาย">
-      <span>เด็กชาย</span>
-    </label>
-    <label class="choice-pill">
-      <input type="radio" name="prefix" value="เด็กหญิง">
-      <span>เด็กหญิง</span>
-    </label>
-
-    <!-- ไม่ระบุ/ไม่ทราบ (เพิ่มใหม่) -->
-    <label class="choice-pill">
-      <input type="radio" name="prefix" value="ไม่ทราบ">
-      <span>ไม่ทราบ</span>
-    </label>
-    <label class="choice-pill">
-      <input type="radio" name="prefix" value="ไม่ระบุ">
-      <span>ไม่ระบุ</span>
-    </label>
+<!-- ============ บันทึกการรับยา ============ -->
+<div class="record-modal-backdrop" id="record-modal-backdrop"></div>
+<section class="page-section" id="section-record-form">
+  <div class="section-header">
+    <h2>บันทึกการรับยาค้าง</h2>
+    <button type="button" class="btn btn-outline hidden" id="btn-close-record-modal" style="width:auto;">
+      <span class="material-icons-outlined">close</span>
+      <span class="btn-label">ปิด</span>
+    </button>
   </div>
-</div>
-                <div class="form-field">
-                  <label>HN <span class="req">*</span></label>
-                  <input type="text" id="field-hn" maxlength="50" required>
-                </div>
-              </div>
-
-              <div class="form-grid">
-                <div class="form-field full">
-                  <label>ชื่อ-สกุล <span class="req">*</span></label>
-                  <input type="text" id="field-fullname" maxlength="200" required>
-                </div>
-              </div>
-
-              <div class="form-field full">
-                <label>รับ ไอเทมยา <span class="req">*</span></label>
-                <div class="card" style="padding:12px; max-height:280px; overflow-y:auto; background:var(--background); border-style:dashed;" id="med-checklist-container"></div>
-
-                <div style="display:flex; gap:8px; margin-top:10px;">
-                  <input type="text" id="field-med-custom-input" placeholder="พิมพ์ชื่อยาอื่นๆ ที่ไม่มีในรายการ แล้วกด Enter" style="flex:1; border:1px solid var(--border); border-radius:10px; padding:11px 13px; font-size:14px;">
-                  <button type="button" class="btn btn-secondary" id="btn-add-custom-med" style="width:auto;">
-                    <span class="material-icons-outlined">add</span>
-                  </button>
-                </div>
-                <div class="choice-group" id="custom-med-chips" style="margin-top:10px;"></div>
-                <p id="med-selection-error" style="color:var(--danger); font-size:12.5px; margin:8px 0 0 0; display:none;">
-                  กรุณาเลือกหรือระบุรายการยาอย่างน้อย 1 รายการ
-                </p>
-
-                <div id="med-qty-section" class="hidden" style="margin-top:14px;">
-                  <label style="display:block; margin-bottom:8px;">ระบุจำนวนของแต่ละรายการที่เลือก <span class="req">*</span></label>
-                  <div id="med-qty-list"></div>
-                </div>
-              </div>
-
-              <div class="form-field">
-  <label>วันที่ค้าง (วันที่ไม่ได้ยา) <span class="req">*</span></label>
-  <input type="date" id="field-pendingdate" required>
-  <p style="font-size:12px; color:var(--muted); margin:6px 0 0 0;">
-    คือวันที่คนไข้มาครั้งแรกแล้วไม่ได้ยาครบ (วันที่เริ่มค้าง) <strong>ไม่ใช่วันที่มาบันทึกเพิ่มเติมวันนี้</strong>
-  </p>
-</div>
-                <div class="form-field">
-  <label>จำนวนยาที่ได้รับ <strong>ในครั้งนี้</strong> <span class="req">*</span></label>
-  <div class="choice-group" id="group-status">
-    <label class="choice-pill">
-      <input type="radio" name="status" value="ครบ">
-      <span>ครบ (ปิดเคส)</span>
-    </label>
-    <label class="choice-pill">
-      <input type="radio" name="status" value="ไม่ครบ">
-      <span>ไม่ครบ (ต้องติดตาม)</span>
-    </label>
+  <div class="card" id="edit-mode-banner" style="display:none; margin-bottom:14px; background: rgba(var(--primary-rgb),0.08); border: 1px solid var(--primary);">
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+      <div style="display:flex; align-items:center; gap:8px; font-size:13.5px; font-weight:600; color:var(--primary);">
+        <span class="material-icons-outlined">edit</span>
+        <span>กำลังแก้ไขรายการ: <span id="edit-mode-id"></span></span>
+      </div>
+      <button type="button" class="btn btn-outline" id="btn-cancel-edit" style="width:auto;">ยกเลิกการแก้ไข</button>
+    </div>
   </div>
-</div>
+  <div class="card">
+    <form id="record-form" autocomplete="off">
 
-              <div class="form-field full hidden" id="field-shortage-wrap">
-  <label>ขาดเหลืออะไร (สำหรับการติดตามครั้งต่อไป) <span class="req">*</span></label>
-  <textarea id="field-shortage-detail" maxlength="500" placeholder="ระบุรายการยาหรือจำนวนที่ยังขาด ต้องมารับเพิ่มเติม"></textarea>
-</div>
-
-              <div class="form-field full">
-                <label>ผู้มารับ <span class="req">*</span></label>
-                <div class="choice-group" id="group-receiver">
-                  <label class="choice-pill">
-                    <input type="checkbox" name="receiver" value="คนไข้">
-                    <span>คนไข้</span>
-                  </label>
-                  <label class="choice-pill">
-                    <input type="checkbox" name="receiver" value="ญาติ">
-                    <span>ญาติ</span>
-                  </label>
-                  <label class="choice-pill">
-                    <input type="checkbox" name="receiver" value="ตัวแทนรับยา">
-                    <span>ตัวแทนรับยา</span>
-                  </label>
-                </div>
-              </div>
-
-              <div class="form-field full">
-                <label>เบอร์โทรศัพท์ (ไม่บังคับ)</label>
-                <div class="phone-input-wrap">
-                  <span class="material-icons-outlined">call</span>
-                  <input type="tel" id="field-phone" placeholder="0xx-xxxxxxx" maxlength="11" inputmode="numeric">
-                  <a href="#" class="btn-call-phone hidden" id="btn-call-phone" title="โทรออก" target="_blank" rel="noopener">
-                    <span class="material-icons-outlined">phone_forwarded</span>
-                  </a>
-                </div>
-                <p id="phone-error" style="color:var(--danger); font-size:12.5px; margin:6px 0 0 0; display:none;">
-                  กรุณากรอกเบอร์โทรศัพท์ในรูปแบบ 0xx-xxxxxxx
-                </p>
-              </div>
-
-              <div class="form-field full">
-                <label>ภาพถ่ายรายการยา (ถ้ามี)</label>
-                <div class="photo-input-wrap">
-                  <button type="button" class="btn btn-outline" id="btn-attach-photo" style="width:auto;">
-                    <span class="material-icons-outlined">attach_file</span>
-                    <span class="btn-label">แนบรูปจากคลังภาพ</span>
-                  </button>
-                  <button type="button" class="btn btn-outline" id="btn-take-photo" style="width:auto;">
-                    <span class="material-icons-outlined">photo_camera</span>
-                    <span class="btn-label">ถ่ายรูป</span>
-                  </button>
-                  <input type="file" id="field-photo-attach" accept="image/*" class="hidden">
-                  <input type="file" id="field-photo-camera" accept="image/*" capture="environment" class="hidden">
-                  <img id="photo-preview" class="photo-preview" alt="ตัวอย่างรูปภาพ">
-                  <button type="button" class="btn btn-outline hidden" id="btn-remove-photo" style="width:auto;">
-                    <span class="material-icons-outlined">close</span>
-                  </button>
-                </div>
-                <p id="existing-photo-note" class="hidden" style="font-size:12px; color:var(--muted); margin:6px 0 0 0;">
-                  รูปปัจจุบันของรายการนี้แสดงอยู่ด้านบน หากไม่แนบรูปใหม่ ระบบจะคงรูปเดิมไว้
-                </p>
-              </div>
-
-              <div class="form-field full">
-                <label>หมายเหตุ</label>
-                <textarea id="field-note" maxlength="1000" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)"></textarea>
-              </div>
-
-              <div class="form-actions">
-                <button type="button" class="btn btn-outline" id="btn-clear-form">ล้างข้อมูล</button>
-                <button type="submit" class="btn btn-primary" id="btn-submit-record" style="width:auto;">
-                  <span class="material-icons-outlined">save</span>
-                  <span class="btn-label" id="btn-submit-record-label">บันทึกข้อมูล</span>
-                  <span class="spinner"></span>
-                </button>
-              </div>
-            </form>
+      <!-- แถวที่ 1: คำนำหน้า + HN -->
+      <div class="form-grid">
+        <div class="form-field">
+          <label>คำนำหน้า <span class="req">*</span></label>
+          <div class="choice-group" id="group-prefix">
+            <label class="choice-pill">
+              <input type="radio" name="prefix" value="นาย"><span>นาย</span>
+            </label>
+            <label class="choice-pill">
+              <input type="radio" name="prefix" value="นางสาว"><span>นางสาว</span>
+            </label>
+            <label class="choice-pill">
+              <input type="radio" name="prefix" value="นาง"><span>นาง</span>
+            </label>
+            <label class="choice-pill">
+              <input type="radio" name="prefix" value="เด็กชาย"><span>เด็กชาย</span>
+            </label>
+            <label class="choice-pill">
+              <input type="radio" name="prefix" value="เด็กหญิง"><span>เด็กหญิง</span>
+            </label>
+            <label class="choice-pill">
+              <input type="radio" name="prefix" value="ไม่ทราบ"><span>ไม่ทราบ</span>
+            </label>
+            <label class="choice-pill">
+              <input type="radio" name="prefix" value="ไม่ระบุ"><span>ไม่ระบุ</span>
+            </label>
           </div>
-        </section>
+        </div>
+        <div class="form-field">
+          <label>HN <span class="req">*</span></label>
+          <input type="text" id="field-hn" maxlength="50" required>
+        </div>
+      </div>
+
+      <!-- ชื่อ-สกุล (เต็มแถว) -->
+      <div class="form-field full">
+        <label>ชื่อ-สกุล <span class="req">*</span></label>
+        <input type="text" id="field-fullname" maxlength="200" required>
+      </div>
+
+      <!-- รายการยา (เต็มแถว) -->
+      <div class="form-field full">
+        <label>รับ ไอเทมยา <span class="req">*</span></label>
+        <div class="card" style="padding:12px; max-height:280px; overflow-y:auto; background:var(--background); border-style:dashed;" id="med-checklist-container"></div>
+        <div style="display:flex; gap:8px; margin-top:10px;">
+          <input type="text" id="field-med-custom-input" placeholder="พิมพ์ชื่อยาอื่นๆ ที่ไม่มีในรายการ แล้วกด Enter" style="flex:1; border:1px solid var(--border); border-radius:10px; padding:11px 13px; font-size:14px;">
+          <button type="button" class="btn btn-secondary" id="btn-add-custom-med" style="width:auto;">
+            <span class="material-icons-outlined">add</span>
+          </button>
+        </div>
+        <div class="choice-group" id="custom-med-chips" style="margin-top:10px;"></div>
+        <p id="med-selection-error" style="color:var(--danger); font-size:12.5px; margin:8px 0 0 0; display:none;">
+          กรุณาเลือกหรือระบุรายการยาอย่างน้อย 1 รายการ
+        </p>
+        <div id="med-qty-section" class="hidden" style="margin-top:14px;">
+          <label style="display:block; margin-bottom:8px;">ระบุจำนวนของแต่ละรายการที่เลือก <span class="req">*</span></label>
+          <div id="med-qty-list"></div>
+        </div>
+      </div>
+
+      <!-- แถว: วันที่ค้าง + จำนวนที่ได้รับ -->
+      <div class="form-grid">
+        <div class="form-field">
+          <label>วันที่ค้าง (วันที่ไม่ได้ยา) <span class="req">*</span></label>
+          <input type="date" id="field-pendingdate" required>
+          <p style="font-size:12px; color:var(--muted); margin:6px 0 0 0;">
+            คือวันที่คนไข้มาครั้งแรกแล้วไม่ได้ยาครบ (วันที่เริ่มค้าง) <strong>ไม่ใช่วันที่มาบันทึกเพิ่มเติมวันนี้</strong>
+          </p>
+        </div>
+        <div class="form-field">
+          <label>จำนวนยาที่ได้รับ <strong>ในครั้งนี้</strong> <span class="req">*</span></label>
+          <div class="choice-group" id="group-status">
+            <label class="choice-pill">
+              <input type="radio" name="status" value="ครบ"><span>ครบ (ปิดเคส)</span>
+            </label>
+            <label class="choice-pill">
+              <input type="radio" name="status" value="ไม่ครบ"><span>ไม่ครบ (ต้องติดตาม)</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- ขาดเหลืออะไร (แสดงเมื่อเลือก "ไม่ครบ") -->
+      <div class="form-field full hidden" id="field-shortage-wrap">
+        <label>ขาดเหลืออะไร (สำหรับการติดตามครั้งต่อไป) <span class="req">*</span></label>
+        <textarea id="field-shortage-detail" maxlength="500" placeholder="ระบุรายการยาหรือจำนวนที่ยังขาด ต้องมารับเพิ่มเติม"></textarea>
+      </div>
+
+      <!-- ผู้มารับ -->
+      <div class="form-field full">
+        <label>ผู้มารับ <span class="req">*</span></label>
+        <div class="choice-group" id="group-receiver">
+          <label class="choice-pill">
+            <input type="checkbox" name="receiver" value="คนไข้"><span>คนไข้</span>
+          </label>
+          <label class="choice-pill">
+            <input type="checkbox" name="receiver" value="ญาติ"><span>ญาติ</span>
+          </label>
+          <label class="choice-pill">
+            <input type="checkbox" name="receiver" value="ตัวแทนรับยา"><span>ตัวแทนรับยา</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- เบอร์โทรศัพท์ -->
+      <div class="form-field full">
+        <label>เบอร์โทรศัพท์ (ไม่บังคับ)</label>
+        <div class="phone-input-wrap">
+          <span class="material-icons-outlined">call</span>
+          <input type="tel" id="field-phone" placeholder="0xx-xxxxxxx" maxlength="11" inputmode="numeric">
+          <a href="#" class="btn-call-phone hidden" id="btn-call-phone" title="โทรออก" target="_blank" rel="noopener">
+            <span class="material-icons-outlined">phone_forwarded</span>
+          </a>
+        </div>
+        <p id="phone-error" style="color:var(--danger); font-size:12.5px; margin:6px 0 0 0; display:none;">
+          กรุณากรอกเบอร์โทรศัพท์ในรูปแบบ 0xx-xxxxxxx
+        </p>
+      </div>
+
+      <!-- ภาพถ่าย -->
+      <div class="form-field full">
+        <label>ภาพถ่ายรายการยา (ถ้ามี)</label>
+        <div class="photo-input-wrap">
+          <button type="button" class="btn btn-outline" id="btn-attach-photo" style="width:auto;">
+            <span class="material-icons-outlined">attach_file</span>
+            <span class="btn-label">แนบรูปจากคลังภาพ</span>
+          </button>
+          <button type="button" class="btn btn-outline" id="btn-take-photo" style="width:auto;">
+            <span class="material-icons-outlined">photo_camera</span>
+            <span class="btn-label">ถ่ายรูป</span>
+          </button>
+          <input type="file" id="field-photo-attach" accept="image/*" class="hidden">
+          <input type="file" id="field-photo-camera" accept="image/*" capture="environment" class="hidden">
+          <img id="photo-preview" class="photo-preview" alt="ตัวอย่างรูปภาพ">
+          <button type="button" class="btn btn-outline hidden" id="btn-remove-photo" style="width:auto;">
+            <span class="material-icons-outlined">close</span>
+          </button>
+        </div>
+        <p id="existing-photo-note" class="hidden" style="font-size:12px; color:var(--muted); margin:6px 0 0 0;">
+          รูปปัจจุบันของรายการนี้แสดงอยู่ด้านบน หากไม่แนบรูปใหม่ ระบบจะคงรูปเดิมไว้
+        </p>
+      </div>
+
+      <!-- หมายเหตุ -->
+      <div class="form-field full">
+        <label>หมายเหตุ</label>
+        <textarea id="field-note" maxlength="1000" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)"></textarea>
+      </div>
+
+      <!-- ปุ่ม action -->
+      <div class="form-actions">
+        <button type="button" class="btn btn-outline" id="btn-clear-form">ล้างข้อมูล</button>
+        <button type="submit" class="btn btn-primary" id="btn-submit-record" style="width:auto;">
+          <span class="material-icons-outlined">save</span>
+          <span class="btn-label" id="btn-submit-record-label">บันทึกข้อมูล</span>
+          <span class="spinner"></span>
+        </button>
+      </div>
+
+    </form>
+  </div>
+</section>
 
         <!-- ============ ประวัติการบันทึก ============ -->
         <section class="page-section" id="section-history">
