@@ -824,6 +824,69 @@
       background: rgba(var(--primary-rgb), 0.06);
     }
 
+    .med-qty-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 9px 12px;
+      margin-bottom: 8px;
+      background: var(--surface);
+    }
+
+    .med-qty-row .med-qty-name {
+      flex: 1 1 160px;
+      font-size: 13.5px;
+      font-weight: 500;
+      min-width: 140px;
+    }
+
+    .med-qty-row input[type="number"] {
+      width: 80px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 9px;
+      font-size: 13.5px;
+    }
+
+    .med-qty-row select {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 9px;
+      font-size: 13.5px;
+      background: var(--surface);
+    }
+
+    .confirm-summary dl {
+      margin: 0;
+      display: grid;
+      grid-template-columns: 130px 1fr;
+      row-gap: 10px;
+      column-gap: 10px;
+    }
+
+    .confirm-summary dt {
+      font-size: 12.5px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .confirm-summary dd {
+      margin: 0;
+      font-size: 14px;
+      word-break: break-word;
+    }
+
+    .confirm-summary img.confirm-photo {
+      max-width: 160px;
+      max-height: 160px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      display: block;
+    }
+
     .photo-input-wrap {
       display: flex;
       align-items: center;
@@ -1331,12 +1394,20 @@
                 <p id="med-selection-error" style="color:var(--danger); font-size:12.5px; margin:8px 0 0 0; display:none;">
                   กรุณาเลือกหรือระบุรายการยาอย่างน้อย 1 รายการ
                 </p>
+
+                <div id="med-qty-section" class="hidden" style="margin-top:14px;">
+                  <label style="display:block; margin-bottom:8px;">ระบุจำนวนของแต่ละรายการที่เลือก <span class="req">*</span></label>
+                  <div id="med-qty-list"></div>
+                </div>
               </div>
 
               <div class="form-grid">
                 <div class="form-field">
                   <label>วันที่ค้าง <span class="req">*</span></label>
                   <input type="date" id="field-pendingdate" required>
+                  <p style="font-size:12px; color:var(--muted); margin:6px 0 0 0;">
+                    คือวันที่นัดมารับยา (วันที่ผู้ป่วยค้างรับยาตั้งแต่วันนั้น) ไม่ใช่วันที่มาบันทึกวันนี้
+                  </p>
                 </div>
                 <div class="form-field">
                   <label>จำนวนที่ได้รับ <span class="req">*</span></label>
@@ -1374,6 +1445,14 @@
                     <span>ตัวแทนรับยา</span>
                   </label>
                 </div>
+              </div>
+
+              <div class="form-field full">
+                <label>เบอร์โทรศัพท์ (ไม่บังคับ)</label>
+                <input type="tel" id="field-phone" placeholder="0xx-xxxxxxx" maxlength="11" inputmode="numeric">
+                <p id="phone-error" style="color:var(--danger); font-size:12.5px; margin:6px 0 0 0; display:none;">
+                  กรุณากรอกเบอร์โทรศัพท์ในรูปแบบ 0xx-xxxxxxx
+                </p>
               </div>
 
               <div class="form-field full">
@@ -1459,6 +1538,7 @@
                     <th>สถานะ</th>
                     <th>ขาดเหลือ</th>
                     <th>ผู้มารับ</th>
+                    <th>เบอร์โทรศัพท์</th>
                     <th>รูปภาพ</th>
                     <th>หมายเหตุ</th>
                     <th>จัดการ</th>
@@ -1542,6 +1622,23 @@
           </div>
         </section>
 
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= Modal: ยืนยันก่อนบันทึกข้อมูล ================= -->
+  <div class="modal-overlay hidden" id="modal-confirm-record">
+    <div class="modal-box" style="max-width:460px; max-height:85vh; overflow-y:auto;">
+      <h3><span class="material-icons-outlined">fact_check</span> ยืนยันข้อมูลก่อนบันทึก</h3>
+      <p class="hint">กรุณาตรวจสอบความถูกต้องของข้อมูลก่อนกดยืนยันบันทึก</p>
+      <div class="confirm-summary" id="confirm-summary-body"></div>
+      <div class="form-actions" style="margin-top:18px;">
+        <button class="btn btn-outline" id="btn-cancel-confirm-record">แก้ไขข้อมูล</button>
+        <button class="btn btn-primary" id="btn-confirm-record" style="width:auto;">
+          <span class="material-icons-outlined">check</span>
+          <span class="btn-label" id="btn-confirm-record-label">ยืนยันบันทึกข้อมูล</span>
+          <span class="spinner"></span>
+        </button>
       </div>
     </div>
   </div>
@@ -1635,6 +1732,8 @@
     let editingRecordId = null;      // null = โหมดเพิ่มใหม่ / มีค่า = โหมดแก้ไข
     let historyRecordsCache = {};    // เก็บ record ล่าสุดที่โหลดไว้ ใช้ตอนกดแก้ไข
     let lastHistoryRecords = [];     // เก็บผลลัพธ์การค้นหาประวัติล่าสุด ใช้ตอนส่งออก CSV
+    let selectedMedDetails = {};     // { [ชื่อยา]: { qty: number, unit: 'เม็ด'|'ชุด' } } สำหรับรายการที่ติ๊ก/เพิ่มเอง
+    let pendingSubmit = null;        // { formData, photo } ข้อมูลที่รอผู้ใช้กดยืนยันในการ์ดสรุป
 
     // รายการยากลุ่มโรค NCDs ที่พบได้บ่อยในบัญชียาโรงพยาบาลรัฐส่วนใหญ่
     // (เป็นรายการอ้างอิงทั่วไป โปรดปรับให้ตรงกับบัญชียาจริงของแต่ละหน่วยงาน)
@@ -1830,6 +1929,12 @@
       document.getElementById("btn-close-record-modal").addEventListener("click", closeEditModal_);
       document.getElementById("record-modal-backdrop").addEventListener("click", closeEditModal_);
 
+      document.getElementById("btn-cancel-confirm-record").addEventListener("click", closeConfirmRecordModal_);
+      document.getElementById("btn-confirm-record").addEventListener("click", onConfirmRecordSubmit_);
+      document.getElementById("modal-confirm-record").addEventListener("click", function (e) {
+        if (e.target.id === "modal-confirm-record") closeConfirmRecordModal_();
+      });
+
       document.getElementById("btn-attach-photo").addEventListener("click", function () {
         document.getElementById("field-photo-attach").click();
       });
@@ -1837,6 +1942,17 @@
       document.getElementById("field-photo-attach").addEventListener("change", onPhotoSelected_);
       document.getElementById("field-photo-camera").addEventListener("change", onPhotoSelected_);
       document.getElementById("btn-remove-photo").addEventListener("click", onRemovePhoto_);
+
+      document.getElementById("field-phone").addEventListener("input", function (e) {
+        // ใส่ขีด (-) อัตโนมัติหลังเลข 3 ตัวแรก เพื่อให้ตรงรูปแบบ 0xx-xxxxxxx
+        let digits = e.target.value.replace(/\D/g, "").slice(0, 10);
+        if (digits.length > 3) {
+          e.target.value = digits.slice(0, 3) + "-" + digits.slice(3);
+        } else {
+          e.target.value = digits;
+        }
+        document.getElementById("phone-error").style.display = "none";
+      });
 
       document.querySelectorAll('input[name="prefix"]').forEach(function (el) {
         el.addEventListener("change", updatePillStates_);
@@ -2126,8 +2242,11 @@
       const wrap = document.createElement("div");
       wrap.className = "record-item";
 
-      const thumbHtml = r.photoUrl
-        ? '<img class="record-thumb" src="' + escapeHtml_(r.photoUrl) + '" alt="รูปยา">'
+      const viewableThumbUrl = r.photoUrl ? toDriveViewableUrl_(r.photoUrl) : "";
+      const thumbHtml = viewableThumbUrl
+        ? '<img class="record-thumb" src="' + escapeHtml_(viewableThumbUrl) + '" alt="รูปยา" ' +
+            'data-placeholder-class="record-thumb-placeholder" data-placeholder-icon="medication" ' +
+            'onerror="handleImgLoadError_(this)">'
         : '<div class="record-thumb-placeholder"><span class="material-icons-outlined">medication</span></div>';
 
       const badgeClass = r.status === "ไม่ครบ" ? "badge-incomplete" : "badge-complete";
@@ -2198,7 +2317,10 @@
           label.innerHTML =
             '<input type="checkbox" class="med-checkbox" value="' + escapeHtml_(medName) + '">' +
             '<span>' + escapeHtml_(medName) + '</span>';
-          label.querySelector("input").addEventListener("change", updatePillStates_);
+          label.querySelector("input").addEventListener("change", function () {
+            updatePillStates_();
+            syncMedQtyList_();
+          });
           wrap.appendChild(label);
         });
 
@@ -2213,6 +2335,7 @@
       if (customMedItems.indexOf(value) === -1) {
         customMedItems.push(value);
         renderCustomMedChips_();
+        syncMedQtyList_();
       }
       input.value = "";
       input.focus();
@@ -2221,6 +2344,7 @@
     function removeCustomMedItem_(value) {
       customMedItems = customMedItems.filter(function (v) { return v !== value; });
       renderCustomMedChips_();
+      syncMedQtyList_();
     }
 
     function renderCustomMedChips_() {
@@ -2238,7 +2362,10 @@
       });
     }
 
-    function getSelectedMedItems_() {
+    /**
+     * รายชื่อยาที่ถูกเลือกอยู่ในปัจจุบัน (ติ๊ก checkbox + เพิ่มเอง) ตามลำดับที่แสดงผล
+     */
+    function getSelectedMedNames_() {
       const checked = Array.prototype.map.call(
         document.querySelectorAll(".med-checkbox:checked"),
         function (el) { return el.value; }
@@ -2247,12 +2374,91 @@
     }
 
     /**
+     * ทำให้ selectedMedDetails (จำนวน+หน่วยของแต่ละรายการ) ตรงกับรายการยาที่เลือกอยู่ปัจจุบัน
+     * - รายการที่เพิ่งถูกเลือก จะได้ค่าเริ่มต้น จำนวน = 1, หน่วย = "เม็ด" (priority เม็ดก่อนเสมอ)
+     * - รายการที่ถูกยกเลิกการเลือก จะถูกลบออกจาก selectedMedDetails
+     */
+    function syncMedQtyList_() {
+      const names = getSelectedMedNames_();
+      const nextDetails = {};
+      names.forEach(function (name) {
+        nextDetails[name] = selectedMedDetails[name] || { qty: 1, unit: "เม็ด" };
+      });
+      selectedMedDetails = nextDetails;
+      renderMedQtyList_(names);
+    }
+
+    function renderMedQtyList_(names) {
+      const section = document.getElementById("med-qty-section");
+      const list = document.getElementById("med-qty-list");
+      list.innerHTML = "";
+
+      if (!names || names.length === 0) {
+        section.classList.add("hidden");
+        return;
+      }
+      section.classList.remove("hidden");
+
+      names.forEach(function (name) {
+        const detail = selectedMedDetails[name] || { qty: 1, unit: "เม็ด" };
+        const row = document.createElement("div");
+        row.className = "med-qty-row";
+
+        const nameEl = document.createElement("span");
+        nameEl.className = "med-qty-name";
+        nameEl.textContent = name;
+
+        const qtyInput = document.createElement("input");
+        qtyInput.type = "number";
+        qtyInput.min = "1";
+        qtyInput.step = "1";
+        qtyInput.value = detail.qty;
+        qtyInput.setAttribute("aria-label", "จำนวน " + name);
+        qtyInput.addEventListener("input", function () {
+          const n = parseInt(qtyInput.value, 10);
+          selectedMedDetails[name].qty = (n > 0) ? n : 1;
+        });
+
+        // priority: "เม็ด" มาก่อน "ชุด" เสมอ ตามที่ระบุ
+        const unitSelect = document.createElement("select");
+        ["เม็ด", "ชุด"].forEach(function (unit) {
+          const opt = document.createElement("option");
+          opt.value = unit;
+          opt.textContent = unit;
+          if (unit === detail.unit) opt.selected = true;
+          unitSelect.appendChild(opt);
+        });
+        unitSelect.addEventListener("change", function () {
+          selectedMedDetails[name].unit = unitSelect.value;
+        });
+
+        row.appendChild(nameEl);
+        row.appendChild(qtyInput);
+        row.appendChild(unitSelect);
+        list.appendChild(row);
+      });
+    }
+
+    /**
+     * รายการยาที่เลือก พร้อมจำนวน/หน่วย รวมเป็น string เดียวสำหรับบันทึกลงฟอร์ม
+     * รูปแบบ: "ชื่อยา x จำนวน หน่วย, ชื่อยา2 x จำนวน หน่วย"
+     */
+    function getSelectedMedItems_() {
+      return getSelectedMedNames_().map(function (name) {
+        const detail = selectedMedDetails[name] || { qty: 1, unit: "เม็ด" };
+        return name + " x " + detail.qty + " " + detail.unit;
+      });
+    }
+
+    /**
      * นำ string รายการยาที่เคยบันทึกไว้ (คั่นด้วย comma) มา "ติ๊ก" checkbox
      * ที่ตรงกับรายการในลิสต์ ส่วนที่ไม่ตรงจะถูกเติมเป็น custom chip
+     * รองรับทั้งรูปแบบใหม่ "ชื่อยา x จำนวน หน่วย" และรูปแบบเดิม (แค่ชื่อยา ไม่มีจำนวน)
      */
     function applyMedItemsString_(medItemsString) {
       document.querySelectorAll(".med-checkbox").forEach(function (el) { el.checked = false; });
       customMedItems = [];
+      selectedMedDetails = {};
 
       const items = String(medItemsString || "")
         .split(",")
@@ -2264,21 +2470,78 @@
         function (el) { return el.value; }
       );
 
+      const qtyPattern = /^(.*)\sx\s(\d+)\s(เม็ด|ชุด)$/;
+
       items.forEach(function (item) {
-        if (knownValues.indexOf(item) !== -1) {
-          const checkbox = document.querySelector('.med-checkbox[value="' + cssEscape_(item) + '"]');
+        let name = item;
+        let qty = 1;
+        let unit = "เม็ด";
+
+        const match = item.match(qtyPattern);
+        if (match) {
+          name = match[1].trim();
+          qty = parseInt(match[2], 10) || 1;
+          unit = match[3];
+        }
+
+        if (knownValues.indexOf(name) !== -1) {
+          const checkbox = document.querySelector('.med-checkbox[value="' + cssEscape_(name) + '"]');
           if (checkbox) checkbox.checked = true;
         } else {
-          customMedItems.push(item);
+          customMedItems.push(name);
         }
+        selectedMedDetails[name] = { qty: qty, unit: unit };
       });
 
       renderCustomMedChips_();
       updatePillStates_();
+      renderMedQtyList_(getSelectedMedNames_());
     }
 
     function cssEscape_(value) {
       return String(value).replace(/["\\]/g, "\\$&");
+    }
+
+    /**
+     * แปลง URL รูปภาพจาก Google Drive ให้อยู่ในรูปแบบที่ฝังแสดงผลด้วย <img> ได้จริง
+     * แก้บั๊ก "รูปภาพไม่ขึ้น preview ในตารางประวัติการบันทึก":
+     * ลิงก์แบบเดิม "https://drive.google.com/uc?id=FILE_ID" (หรือ uc?export=view&id=,
+     * /file/d/FILE_ID/view ฯลฯ) ไม่สามารถใช้เป็น src ของ <img> ได้อย่างน่าเชื่อถืออีกต่อไป
+     * (Google มักตอบกลับเป็นหน้ายืนยัน/บล็อกการฝัง) จึงต้องดึง FILE_ID ออกมาแล้วสร้าง URL
+     * รูปแบบ "thumbnail" ซึ่งออกแบบมาสำหรับฝังรูปโดยเฉพาะ ใช้ได้ทั้งกับรูปที่เพิ่งบันทึกใหม่
+     * (ที่ backend คืนค่ามาเป็น thumbnail อยู่แล้ว) และรูปเก่าที่เคยบันทึกไว้ในรูปแบบเดิม
+     */
+    function toDriveViewableUrl_(url) {
+      const raw = String(url || "").trim();
+      if (!raw) return "";
+
+      let fileId = "";
+      let match = raw.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+      if (match) {
+        fileId = match[1];
+      } else {
+        match = raw.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        if (match) fileId = match[1];
+      }
+
+      if (!fileId) return raw; // ไม่ใช่ลิงก์ Google Drive ที่รู้จัก ใช้ค่าเดิมไปก่อน
+      return "https://drive.google.com/thumbnail?id=" + fileId + "&sz=w1600";
+    }
+
+    /**
+     * เรียกจาก onerror ของ <img> รูปยาในตารางประวัติ: ถ้าโหลดรูปไม่สำเร็จจริงๆ
+     * (เช่น ไฟล์ถูกลบ/ไม่มีสิทธิ์เข้าถึง) ให้เปลี่ยนไปแสดงไอคอนแทนแทนที่จะปล่อยเป็นรูปแตก
+     */
+    function handleHistoryImgError_(imgEl) {
+      const link = imgEl.closest("a");
+      const placeholder = document.createElement("div");
+      placeholder.className = "history-thumb-placeholder";
+      placeholder.innerHTML = '<span class="material-icons-outlined">broken_image</span>';
+      if (link && link.parentNode) {
+        link.parentNode.replaceChild(placeholder, link);
+      } else if (imgEl.parentNode) {
+        imgEl.parentNode.replaceChild(placeholder, imgEl);
+      }
     }
 
     // ---------------- ภาพถ่ายรายการยา ----------------
@@ -2328,6 +2591,13 @@
     }
 
     // ---------------- บันทึก / แก้ไข ----------------
+    const PHONE_PATTERN_CLIENT_ = /^0\d{2}-\d{7}$/;
+
+    /**
+     * เดิมฟังก์ชันนี้ตรวจสอบข้อมูลแล้วบันทึกทันที
+     * ตอนนี้เปลี่ยนเป็น: ตรวจสอบข้อมูล -> แสดงการ์ดสรุปให้ตรวจทานก่อน ->
+     * บันทึกจริงเมื่อผู้ใช้กด "ยืนยันบันทึกข้อมูล" ใน openConfirmRecordModal_() เท่านั้น
+     */
     function onSubmitRecord_(e) {
       e.preventDefault();
 
@@ -2339,9 +2609,11 @@
       const statusInput = document.querySelector('input[name="status"]:checked');
       const shortageDetail = document.getElementById("field-shortage-detail").value.trim();
       const receiverInputs = document.querySelectorAll('input[name="receiver"]:checked');
+      const phone = document.getElementById("field-phone").value.trim();
       const note = document.getElementById("field-note").value.trim();
 
       document.getElementById("med-selection-error").style.display = "none";
+      document.getElementById("phone-error").style.display = "none";
 
       if (!prefixInput) {
         showToast("กรุณาเลือกคำนำหน้าชื่อ", "error");
@@ -2356,6 +2628,15 @@
         showToast("กรุณาเลือกหรือระบุรายการยาอย่างน้อย 1 รายการ", "error");
         return;
       }
+      // ตรวจสอบว่าทุกรายการยาที่เลือกกรอกจำนวนเป็นตัวเลขมากกว่า 0 แล้ว
+      const invalidQty = getSelectedMedNames_().some(function (name) {
+        const detail = selectedMedDetails[name];
+        return !detail || !(detail.qty > 0);
+      });
+      if (invalidQty) {
+        showToast("กรุณาระบุจำนวนของแต่ละรายการยาที่เลือกให้ถูกต้อง", "error");
+        return;
+      }
       if (!statusInput) {
         showToast("กรุณาเลือกจำนวนที่ได้รับ (ครบ/ไม่ครบ)", "error");
         return;
@@ -2368,6 +2649,11 @@
         showToast("กรุณาเลือกผู้มารับอย่างน้อย 1 รายการ", "error");
         return;
       }
+      if (phone && !PHONE_PATTERN_CLIENT_.test(phone)) {
+        document.getElementById("phone-error").style.display = "block";
+        showToast("กรุณากรอกเบอร์โทรศัพท์ในรูปแบบ 0xx-xxxxxxx", "error");
+        return;
+      }
 
       const formData = {
         prefix: prefixInput.value,
@@ -2378,17 +2664,78 @@
         status: statusInput.value,
         shortageDetail: shortageDetail,
         receiverTypes: Array.prototype.map.call(receiverInputs, function (el) { return el.value; }),
+        phone: phone,
         note: note
       };
       if (editingRecordId && removeExistingPhoto && !selectedPhoto) {
         formData.removePhoto = true;
       }
 
-      const btn = document.getElementById("btn-submit-record");
-      setButtonLoading_(btn, true);
+      pendingSubmit = { formData: formData, photo: selectedPhoto };
+      openConfirmRecordModal_(formData);
+    }
+
+    /**
+     * แสดงการ์ดสรุปข้อมูลทั้งหมดให้ตรวจทานก่อนกดยืนยันบันทึกจริง
+     */
+    function openConfirmRecordModal_(formData) {
+      const body = document.getElementById("confirm-summary-body");
+      const photoSrc = selectedPhoto
+        ? ("data:" + selectedPhoto.mimeType + ";base64," + selectedPhoto.base64)
+        : (!removeExistingPhoto && existingPhotoUrl ? toDriveViewableUrl_(existingPhotoUrl) : "");
+
+      const rows = [
+        ["ชื่อ-สกุล", escapeHtml_(formData.prefix + formData.fullName)],
+        ["HN", escapeHtml_(formData.hn)],
+        ["รับ ไอเทมยา", escapeHtml_(formData.medItems)],
+        ["วันที่ค้าง", escapeHtml_(formatThaiDateShort_(formData.pendingDate))],
+        ["จำนวนที่ได้รับ", escapeHtml_(formData.status) + (formData.shortageDetail ? (" (" + escapeHtml_(formData.shortageDetail) + ")") : "")],
+        ["ผู้มารับ", escapeHtml_(formData.receiverTypes.join(", "))],
+        ["เบอร์โทรศัพท์", escapeHtml_(formData.phone || "-")],
+        ["หมายเหตุ", escapeHtml_(formData.note || "-")]
+      ];
+
+      let html = "<dl>";
+      rows.forEach(function (row) {
+        html += "<dt>" + row[0] + "</dt><dd>" + row[1] + "</dd>";
+      });
+      if (photoSrc) {
+        html += "<dt>ภาพถ่าย</dt><dd><img class=\"confirm-photo\" src=\"" + escapeHtml_(photoSrc) + "\" alt=\"ตัวอย่างรูปภาพ\"></dd>";
+      }
+      html += "</dl>";
+      body.innerHTML = html;
+
+      document.getElementById("btn-confirm-record-label").textContent =
+        editingRecordId ? "ยืนยันบันทึกการแก้ไข" : "ยืนยันบันทึกข้อมูล";
+
+      document.getElementById("modal-confirm-record").classList.remove("hidden");
+    }
+
+    function closeConfirmRecordModal_() {
+      document.getElementById("modal-confirm-record").classList.add("hidden");
+    }
+
+    /**
+     * บันทึกข้อมูลจริงหลังผู้ใช้กดยืนยันในการ์ดสรุป
+     */
+    function onConfirmRecordSubmit_() {
+      if (!pendingSubmit) {
+        closeConfirmRecordModal_();
+        return;
+      }
+      const formData = pendingSubmit.formData;
+      const photo = pendingSubmit.photo;
+
+      const confirmBtn = document.getElementById("btn-confirm-record");
+      const submitBtn = document.getElementById("btn-submit-record");
+      setButtonLoading_(confirmBtn, true);
+      setButtonLoading_(submitBtn, true);
 
       const onSuccess = function (res) {
-        setButtonLoading_(btn, false);
+        setButtonLoading_(confirmBtn, false);
+        setButtonLoading_(submitBtn, false);
+        closeConfirmRecordModal_();
+        pendingSubmit = null;
         showToast(res.message || "บันทึกข้อมูลสำเร็จ", "success");
         const wasEditing = !!editingRecordId;
         exitEditMode_();
@@ -2403,7 +2750,8 @@
         }
       };
       const onFailure = function (err) {
-        setButtonLoading_(btn, false);
+        setButtonLoading_(confirmBtn, false);
+        setButtonLoading_(submitBtn, false);
         showToast("บันทึกไม่สำเร็จ: " + errMsg_(err), "error");
       };
 
@@ -2411,12 +2759,12 @@
         google.script.run
           .withSuccessHandler(onSuccess)
           .withFailureHandler(onFailure)
-          .updateRecord(editingRecordId, formData, selectedPhoto);
+          .updateRecord(editingRecordId, formData, photo);
       } else {
         google.script.run
           .withSuccessHandler(onSuccess)
           .withFailureHandler(onFailure)
-          .saveRecord(formData, selectedPhoto);
+          .saveRecord(formData, photo);
       }
     }
 
@@ -2431,12 +2779,16 @@
       document.getElementById("field-photo-camera").value = "";
       document.getElementById("field-med-custom-input").value = "";
       document.getElementById("med-selection-error").style.display = "none";
+      document.getElementById("field-phone").value = "";
+      document.getElementById("phone-error").style.display = "none";
       selectedPhoto = null;
       existingPhotoUrl = "";
       removeExistingPhoto = false;
       customMedItems = [];
+      selectedMedDetails = {};
       renderCustomMedChips_();
       document.querySelectorAll(".med-checkbox").forEach(function (el) { el.checked = false; });
+      renderMedQtyList_([]);
       toggleShortageField_();
       updatePillStates_();
     }
@@ -2467,13 +2819,16 @@
       });
 
       document.getElementById("field-note").value = record.note || "";
+      document.getElementById("field-phone").value = record.phone || "";
+      document.getElementById("phone-error").style.display = "none";
 
       selectedPhoto = null;
       removeExistingPhoto = false;
       existingPhotoUrl = record.photoUrl || "";
       const preview = document.getElementById("photo-preview");
       if (existingPhotoUrl) {
-        preview.src = existingPhotoUrl;
+        preview.src = toDriveViewableUrl_(existingPhotoUrl);
+        preview.onerror = function () { preview.onerror = null; preview.src = existingPhotoUrl; };
         preview.style.display = "inline-block";
         document.getElementById("btn-remove-photo").classList.remove("hidden");
         document.getElementById("existing-photo-note").classList.remove("hidden");
@@ -2559,9 +2914,11 @@
 
         const tr = document.createElement("tr");
         const badgeClass = r.status === "ไม่ครบ" ? "badge-incomplete" : "badge-complete";
-        const photoCell = r.photoUrl
+        const viewablePhotoUrl = r.photoUrl ? toDriveViewableUrl_(r.photoUrl) : "";
+        const photoCell = viewablePhotoUrl
           ? '<a href="' + escapeHtml_(r.photoUrl) + '" target="_blank" rel="noopener">' +
-              '<img class="history-thumb" src="' + escapeHtml_(r.photoUrl) + '" alt="รูปยา" loading="lazy">' +
+              '<img class="history-thumb" src="' + escapeHtml_(viewablePhotoUrl) + '" alt="รูปยา" loading="lazy" ' +
+              'onerror="handleHistoryImgError_(this)">' +
             '</a>'
           : '<div class="history-thumb-placeholder"><span class="material-icons-outlined">image_not_supported</span></div>';
         const nameCell = escapeHtml_((r.prefix || "") + r.fullName);
@@ -2575,6 +2932,7 @@
           '<td><span class="badge ' + badgeClass + '">' + escapeHtml_(r.status) + '</span></td>' +
           '<td>' + escapeHtml_(r.shortageDetail || "-") + '</td>' +
           '<td>' + escapeHtml_(r.receiverType) + '</td>' +
+          '<td>' + escapeHtml_(r.phone || "-") + '</td>' +
           '<td>' + photoCell + '</td>' +
           '<td>' + escapeHtml_(r.note || "-") + '</td>' +
           '<td></td>';
@@ -2603,7 +2961,7 @@
 
       const headers = [
         "วันเวลาบันทึก", "คำนำหน้า", "ชื่อ-สกุล", "HN", "รายการยา",
-        "วันที่ค้าง", "สถานะ", "ขาดเหลือ", "ผู้มารับ", "หมายเหตุ"
+        "วันที่ค้าง", "สถานะ", "ขาดเหลือ", "ผู้มารับ", "เบอร์โทรศัพท์", "หมายเหตุ"
       ];
 
       const csvRows = [headers.map(csvCell_).join(",")];
@@ -2618,6 +2976,7 @@
           r.status || "",
           r.shortageDetail || "",
           r.receiverType || "",
+          r.phone || "",
           r.note || ""
         ].map(csvCell_).join(","));
       });
