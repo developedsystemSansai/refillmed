@@ -1515,26 +1515,45 @@
             </div>
           </div>
 
-          <div class="card">
-            <form id="record-form" autocomplete="off">
-              <div class="form-grid">
-                <div class="form-field">
-                  <label>คำนำหน้า <span class="req">*</span></label>
-                  <div class="choice-group" id="group-prefix">
-                    <label class="choice-pill">
-                      <input type="radio" name="prefix" value="นาย">
-                      <span>นาย</span>
-                    </label>
-                    <label class="choice-pill">
-                      <input type="radio" name="prefix" value="นางสาว">
-                      <span>นางสาว</span>
-                    </label>
-                    <label class="choice-pill">
-                      <input type="radio" name="prefix" value="นาง">
-                      <span>นาง</span>
-                    </label>
-                  </div>
-                </div>
+          <!-- คำนำหน้า (เดิม + ใหม่) -->
+<div class="field-group">
+  <label class="field-label">คำนำหน้า <span class="required">*</span></label>
+  <div class="choice-group">
+    <!-- กลุ่มผู้ใหญ่ -->
+    <label class="choice-pill">
+      <input type="radio" name="prefix" value="นาย">
+      <span>นาย</span>
+    </label>
+    <label class="choice-pill">
+      <input type="radio" name="prefix" value="นางสาว">
+      <span>นางสาว</span>
+    </label>
+    <label class="choice-pill">
+      <input type="radio" name="prefix" value="นาง">
+      <span>นาง</span>
+    </label>
+
+    <!-- กลุ่มเด็ก (เพิ่มใหม่) -->
+    <label class="choice-pill">
+      <input type="radio" name="prefix" value="เด็กชาย">
+      <span>เด็กชาย</span>
+    </label>
+    <label class="choice-pill">
+      <input type="radio" name="prefix" value="เด็กหญิง">
+      <span>เด็กหญิง</span>
+    </label>
+
+    <!-- ไม่ระบุ/ไม่ทราบ (เพิ่มใหม่) -->
+    <label class="choice-pill">
+      <input type="radio" name="prefix" value="ไม่ทราบ">
+      <span>ไม่ทราบ</span>
+    </label>
+    <label class="choice-pill">
+      <input type="radio" name="prefix" value="ไม่ระบุ">
+      <span>ไม่ระบุ</span>
+    </label>
+  </div>
+</div>
                 <div class="form-field">
                   <label>HN <span class="req">*</span></label>
                   <input type="text" id="field-hn" maxlength="50" required>
