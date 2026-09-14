@@ -2932,19 +2932,25 @@
         d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0")
       ) + " " + d.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" });
     }
-    // ================================================================
+// ================================================================
     // ระบบเปิดกล้อง WebCam บนหน้าเว็บ (รองรับทั้งมือถือและโน้ตบุ๊ก)
     // ================================================================
     let cameraStream = null;
 
+    // ฟังก์ชันนี้แหละที่ปุ่มจะเรียกใช้
     function startCamera_() {
       const video = document.getElementById("camera-stream");
+      if (!video) {
+        showToast("ไม่พบกรอบแสดงวิดีโอ กรุณาตรวจสอบโค้ด HTML ของ Modal กล้อง", "error");
+        return;
+      }
+      
       document.getElementById("modal-camera").classList.remove("hidden");
       
-      // ขออนุญาตใช้งานกล้อง (เน้นกล้องหลัง ถ้าไม่มีให้ใช้กล้องโน้ตบุ๊ก/กล้องหน้าแทน)
+      // ขออนุญาตใช้งานกล้อง
       navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
         .catch(function() {
-          // ถ้าเปิดกล้องหลังไม่สำเร็จ ให้ลองดึงกล้องพื้นฐานที่มีในเครื่อง
+          // ถ้าเปิดกล้องหลังไม่สำเร็จ (โน้ตบุ๊ก) ให้ลองเปิดกล้องเริ่มต้น
           return navigator.mediaDevices.getUserMedia({ video: true });
         })
         .then(function(stream) {
@@ -2952,7 +2958,7 @@
           video.srcObject = stream;
         })
         .catch(function(err) {
-          showToast("ไม่สามารถเปิดกล้องได้ โปรดอนุญาตการใช้กล้องในเบราว์เซอร์", "error");
+          showToast("ไม่สามารถเปิดกล้องได้ โปรดตรวจสอบการอนุญาตใช้งานกล้อง", "error");
           closeCamera_();
         });
     }
@@ -2965,7 +2971,7 @@
       }
     }
 
-    // ผูกคำสั่งปุ่ม "ยกเลิก" ในหน้าต่างกล้อง
+    // ตั้งค่าปุ่มในหน้าต่างกล้อง
     const btnCancelCam = document.getElementById("btn-cancel-camera");
     if (btnCancelCam) {
       btnCancelCam.addEventListener("click", function(e) {
@@ -2974,7 +2980,6 @@
       });
     }
 
-    // ผูกคำสั่งปุ่ม "กดถ่ายภาพ" ในหน้าต่างกล้อง
     const btnCaptureCam = document.getElementById("btn-capture-camera");
     if (btnCaptureCam) {
       btnCaptureCam.addEventListener("click", function(e) {
@@ -2982,19 +2987,15 @@
         const video = document.getElementById("camera-stream");
         const canvas = document.getElementById("camera-canvas");
         
-        // ตั้งขนาด Canvas ให้เท่ากับความละเอียดของภาพวิดีโอ
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         
-        // วาดภาพจาก Video ลง Canvas
         const context = canvas.getContext("2d");
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
         
-        // แปลงภาพเป็น Base64 (ปรับคุณภาพ 80% เพื่อลดขนาดไฟล์)
         const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
         const base64 = dataUrl.split(",")[1];
         
-        // นำรูปไปเตรียมบันทึกเข้าระบบ
         selectedPhoto = {
           base64: base64,
           mimeType: "image/jpeg",
@@ -3002,13 +3003,11 @@
         };
         removeExistingPhoto = false;
         
-        // แสดงรูปตัวอย่างในฟอร์ม
         const preview = document.getElementById("photo-preview");
         preview.src = dataUrl;
         preview.style.display = "inline-block";
         document.getElementById("btn-remove-photo").classList.remove("hidden");
         
-        // ปิดกล้องหลังถ่ายเสร็จ
         closeCamera_();
       });
     }
