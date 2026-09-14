@@ -1816,9 +1816,7 @@
       document.getElementById("btn-attach-photo").addEventListener("click", function () {
         document.getElementById("field-photo-attach").click();
       });
-      document.getElementById("btn-take-photo").addEventListener("click", function () {
-        document.getElementById("field-photo-camera").click();
-      });
+      document.getElementById("btn-take-photo").addEventListener("click", startCamera_);
       document.getElementById("field-photo-attach").addEventListener("change", onPhotoSelected_);
       document.getElementById("field-photo-camera").addEventListener("change", onPhotoSelected_);
       document.getElementById("btn-remove-photo").addEventListener("click", onRemovePhoto_);
@@ -2933,6 +2931,86 @@
       return formatThaiDateShort_(
         d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0")
       ) + " " + d.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" });
+    }
+    // ================================================================
+    // ระบบเปิดกล้อง WebCam บนหน้าเว็บ (รองรับทั้งมือถือและโน้ตบุ๊ก)
+    // ================================================================
+    let cameraStream = null;
+
+    function startCamera_() {
+      const video = document.getElementById("camera-stream");
+      document.getElementById("modal-camera").classList.remove("hidden");
+      
+      // ขออนุญาตใช้งานกล้อง (เน้นกล้องหลัง ถ้าไม่มีให้ใช้กล้องโน้ตบุ๊ก/กล้องหน้าแทน)
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+        .catch(function() {
+          // ถ้าเปิดกล้องหลังไม่สำเร็จ ให้ลองดึงกล้องพื้นฐานที่มีในเครื่อง
+          return navigator.mediaDevices.getUserMedia({ video: true });
+        })
+        .then(function(stream) {
+          cameraStream = stream;
+          video.srcObject = stream;
+        })
+        .catch(function(err) {
+          showToast("ไม่สามารถเปิดกล้องได้ โปรดอนุญาตการใช้กล้องในเบราว์เซอร์", "error");
+          closeCamera_();
+        });
+    }
+
+    function closeCamera_() {
+      document.getElementById("modal-camera").classList.add("hidden");
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(function(track) { track.stop(); });
+        cameraStream = null;
+      }
+    }
+
+    // ผูกคำสั่งปุ่ม "ยกเลิก" ในหน้าต่างกล้อง
+    const btnCancelCam = document.getElementById("btn-cancel-camera");
+    if (btnCancelCam) {
+      btnCancelCam.addEventListener("click", function(e) {
+        e.preventDefault();
+        closeCamera_();
+      });
+    }
+
+    // ผูกคำสั่งปุ่ม "กดถ่ายภาพ" ในหน้าต่างกล้อง
+    const btnCaptureCam = document.getElementById("btn-capture-camera");
+    if (btnCaptureCam) {
+      btnCaptureCam.addEventListener("click", function(e) {
+        e.preventDefault();
+        const video = document.getElementById("camera-stream");
+        const canvas = document.getElementById("camera-canvas");
+        
+        // ตั้งขนาด Canvas ให้เท่ากับความละเอียดของภาพวิดีโอ
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        
+        // วาดภาพจาก Video ลง Canvas
+        const context = canvas.getContext("2d");
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        // แปลงภาพเป็น Base64 (ปรับคุณภาพ 80% เพื่อลดขนาดไฟล์)
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
+        const base64 = dataUrl.split(",")[1];
+        
+        // นำรูปไปเตรียมบันทึกเข้าระบบ
+        selectedPhoto = {
+          base64: base64,
+          mimeType: "image/jpeg",
+          fileName: "webcam_" + Date.now() + ".jpg"
+        };
+        removeExistingPhoto = false;
+        
+        // แสดงรูปตัวอย่างในฟอร์ม
+        const preview = document.getElementById("photo-preview");
+        preview.src = dataUrl;
+        preview.style.display = "inline-block";
+        document.getElementById("btn-remove-photo").classList.remove("hidden");
+        
+        // ปิดกล้องหลังถ่ายเสร็จ
+        closeCamera_();
+      });
     }
   </script>
 </body>
