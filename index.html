@@ -1768,9 +1768,7 @@
       document.getElementById("btn-attach-photo").addEventListener("click", function () {
         document.getElementById("field-photo-attach").click();
       });
-      document.getElementById("btn-take-photo").addEventListener("click", function () {
-        document.getElementById("field-photo-camera").click();
-      });
+      document.getElementById("btn-take-photo").addEventListener("click", startCamera_);
       document.getElementById("field-photo-attach").addEventListener("change", onPhotoSelected_);
       document.getElementById("field-photo-camera").addEventListener("change", onPhotoSelected_);
       document.getElementById("btn-remove-photo").addEventListener("click", onRemovePhoto_);
@@ -2254,6 +2252,76 @@
       document.getElementById("field-photo-attach").value = "";
       document.getElementById("field-photo-camera").value = "";
     }
+    // ================================================================
+    // ระบบเปิดกล้อง WebCam บนหน้าเว็บ
+    // ================================================================
+    let cameraStream = null;
+
+    function startCamera_() {
+      const video = document.getElementById("camera-stream");
+      document.getElementById("modal-camera").classList.remove("hidden");
+      
+      // ขออนุญาตใช้งานกล้อง (เน้นกล้องหลังถ้าเป็นมือถือ, กล้องหน้าถ้าเป็นโน้ตบุ๊ก)
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+        .then(function(stream) {
+          cameraStream = stream;
+          video.srcObject = stream;
+        })
+        .catch(function(err) {
+          showToast("ไม่สามารถเปิดกล้องได้ โปรดอนุญาตการใช้กล้อง", "error");
+          closeCamera_();
+        });
+    }
+
+    function closeCamera_() {
+      document.getElementById("modal-camera").classList.add("hidden");
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(function(track) { track.stop(); });
+        cameraStream = null;
+      }
+    }
+
+    // ปุ่มยกเลิก
+    document.getElementById("btn-cancel-camera").addEventListener("click", function(e) {
+      e.preventDefault();
+      closeCamera_();
+    });
+
+    // ปุ่มกดถ่ายภาพ
+    document.getElementById("btn-capture-camera").addEventListener("click", function(e) {
+      e.preventDefault();
+      const video = document.getElementById("camera-stream");
+      const canvas = document.getElementById("camera-canvas");
+      
+      // ตั้งขนาด Canvas ให้เท่ากับความละเอียดของภาพวิดีโอ
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      
+      // วาดภาพจาก Video ลง Canvas
+      const context = canvas.getContext("2d");
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      // แปลงภาพเป็น Base64 (ปรับคุณภาพ 80% เพื่อลดขนาดไฟล์)
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
+      const base64 = dataUrl.split(",")[1];
+      
+      // นำรูปไปใส่ในตัวแปรระบบ (เหมือนตอนเราเลือกไฟล์จากโฟลเดอร์)
+      selectedPhoto = {
+        base64: base64,
+        mimeType: "image/jpeg",
+        fileName: "webcam_" + Date.now() + ".jpg"
+      };
+      removeExistingPhoto = false;
+      
+      // นำภาพมาแสดงผลในหน้าจอตัวอย่างรูป
+      const preview = document.getElementById("photo-preview");
+      preview.src = dataUrl;
+      preview.style.display = "inline-block";
+      document.getElementById("btn-remove-photo").classList.remove("hidden");
+      
+      // ปิดกล้องหลังถ่ายเสร็จ
+      closeCamera_();
+    });
 
     // ---------------- บันทึก / แก้ไข ----------------
     function onSubmitRecord_(e) {
