@@ -139,6 +139,97 @@
       margin: 0 0 28px 0;
     }
 
+    .landing-name-field {
+      text-align: left;
+      margin-bottom: 18px;
+    }
+
+    .landing-name-field label {
+      display: block;
+      font-size: 13.5px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .landing-name-field .name-input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .landing-name-field .material-icons-outlined {
+      position: absolute;
+      left: 13px;
+      font-size: 19px;
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    .landing-name-field input {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 13px 12px 42px;
+      font-size: 14.5px;
+      color: var(--text);
+      background: var(--background);
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .landing-name-field input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.12);
+    }
+
+    .landing-name-field .name-error {
+      display: none;
+      color: var(--danger);
+      font-size: 12.5px;
+      margin: 6px 0 0 0;
+      text-align: left;
+    }
+
+    .recorder-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12.5px;
+      color: rgba(255, 255, 255, 0.75);
+      padding: 14px 18px;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .recorder-badge .material-icons-outlined {
+      font-size: 17px;
+      color: rgba(255, 255, 255, 0.75);
+    }
+
+    .recorder-badge strong {
+      color: #fff;
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 110px;
+    }
+
+    .recorder-badge button {
+      margin-left: auto;
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.75);
+      font-size: 11.5px;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 0;
+      flex-shrink: 0;
+    }
+
+    .recorder-badge button:hover {
+      color: #fff;
+    }
+
     .btn {
       appearance: none;
       border: none;
@@ -773,6 +864,7 @@
 
     .form-field input[type="text"],
     .form-field input[type="date"],
+    .form-field input[type="tel"],
     .form-field textarea,
     .form-field input[type="password"] {
       border: 1px solid var(--border);
@@ -782,13 +874,60 @@
       color: var(--text);
       background: var(--surface);
       outline: none;
-      transition: border-color 0.15s ease;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
       width: 100%;
     }
 
     .form-field input:focus,
     .form-field textarea:focus {
       border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.12);
+    }
+
+    /* ---------------- ช่องกรอกเบอร์โทรศัพท์ (มีไอคอนนำหน้า) ---------------- */
+    .phone-input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .phone-input-wrap .material-icons-outlined {
+      position: absolute;
+      left: 13px;
+      font-size: 19px;
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    .phone-input-wrap input[type="tel"] {
+      padding-left: 42px !important;
+      letter-spacing: 0.4px;
+    }
+
+    .phone-input-wrap .btn-call-phone {
+      position: absolute;
+      right: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: var(--primary);
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .phone-input-wrap .btn-call-phone:hover {
+      background: rgba(var(--primary-rgb), 0.1);
+    }
+
+    .phone-input-wrap .btn-call-phone .material-icons-outlined {
+      position: static;
+      font-size: 18px;
+      color: inherit;
     }
 
     .form-field textarea {
@@ -1166,6 +1305,14 @@
       <h1 id="landing-sys-name">ข้อมูลจุดรับยาค้าง 15 - 25 กันยายน 2569</h1>
       <h2 id="landing-org-name">หน่วยงานสาธารณสุข</h2>
       <p class="welcome" id="landing-welcome">กำลังโหลดข้อมูล...</p>
+      <div class="landing-name-field">
+        <label for="input-recorder-name">ชื่อผู้บันทึก (ผู้ใช้งาน) <span class="req" style="color:var(--danger);">*</span></label>
+        <div class="name-input-wrap">
+          <span class="material-icons-outlined">person</span>
+          <input type="text" id="input-recorder-name" placeholder="กรอกชื่อ-สกุลของผู้บันทึกข้อมูล" maxlength="100" autocomplete="name">
+        </div>
+        <p class="name-error" id="recorder-name-error">กรุณากรอกชื่อผู้บันทึกก่อนเข้าใช้งาน</p>
+      </div>
       <button class="btn btn-primary" id="btn-enter-app">
         <span class="material-icons-outlined">login</span>
         <span class="btn-label">เข้าใช้งานระบบ</span>
@@ -1206,6 +1353,11 @@
         </div>
       </nav>
 
+      <div class="recorder-badge">
+        <span class="material-icons-outlined">person</span>
+        <strong id="sidebar-recorder-name">-</strong>
+        <button type="button" id="btn-change-recorder">เปลี่ยนผู้ใช้</button>
+      </div>
       <div class="sidebar-footer" id="sidebar-footer-msg">งานเภสัชกรรม</div>
     </aside>
 
@@ -1449,7 +1601,13 @@
 
               <div class="form-field full">
                 <label>เบอร์โทรศัพท์ (ไม่บังคับ)</label>
-                <input type="tel" id="field-phone" placeholder="0xx-xxxxxxx" maxlength="11" inputmode="numeric">
+                <div class="phone-input-wrap">
+                  <span class="material-icons-outlined">call</span>
+                  <input type="tel" id="field-phone" placeholder="0xx-xxxxxxx" maxlength="11" inputmode="numeric">
+                  <a href="#" class="btn-call-phone hidden" id="btn-call-phone" title="โทรออก" target="_blank" rel="noopener">
+                    <span class="material-icons-outlined">phone_forwarded</span>
+                  </a>
+                </div>
                 <p id="phone-error" style="color:var(--danger); font-size:12.5px; margin:6px 0 0 0; display:none;">
                   กรุณากรอกเบอร์โทรศัพท์ในรูปแบบ 0xx-xxxxxxx
                 </p>
@@ -1661,6 +1819,24 @@
       </div>
     </div>
   </div>
+  <!-- ================= Modal: ยืนยันการลบรายการ ================= -->
+  <div class="modal-overlay hidden" id="modal-delete-record">
+    <div class="modal-box">
+      <h3><span class="material-icons-outlined" style="color:var(--danger);">delete_outline</span> ยืนยันการลบรายการ</h3>
+      <p class="hint">
+        ต้องการลบรายการนี้ใช่หรือไม่? <strong id="delete-record-name"></strong><br>
+        การลบไม่สามารถกู้คืนได้
+      </p>
+      <div class="form-actions" style="margin-top:14px;">
+        <button class="btn btn-outline" id="btn-cancel-delete-record">ยกเลิก</button>
+        <button class="btn btn-danger" id="btn-confirm-delete-record" style="width:auto;">
+          <span class="material-icons-outlined">delete</span>
+          <span class="btn-label">ลบรายการ</span>
+          <span class="spinner"></span>
+        </button>
+      </div>
+    </div>
+  </div>
 <!-- ================= Modal: เปิดกล้อง WebCam ================= -->
   <div class="modal-overlay hidden" id="modal-camera">
     <div class="modal-box" style="text-align: center; max-width: 900px; width: 90%;">
@@ -1734,6 +1910,7 @@
     let lastHistoryRecords = [];     // เก็บผลลัพธ์การค้นหาประวัติล่าสุด ใช้ตอนส่งออก CSV
     let selectedMedDetails = {};     // { [ชื่อยา]: { qty: number, unit: 'เม็ด'|'ชุด' } } สำหรับรายการที่ติ๊ก/เพิ่มเอง
     let pendingSubmit = null;        // { formData, photo } ข้อมูลที่รอผู้ใช้กดยืนยันในการ์ดสรุป
+    let currentRecorderName = "";    // ชื่อผู้บันทึก (ผู้ใช้งาน) ที่กรอกไว้ตอนเข้าใช้งาน
 
     // รายการยากลุ่มโรค NCDs ที่พบได้บ่อยในบัญชียาโรงพยาบาลรัฐส่วนใหญ่
     // (เป็นรายการอ้างอิงทั่วไป โปรดปรับให้ตรงกับบัญชียาจริงของแต่ละหน่วยงาน)
@@ -1795,7 +1972,54 @@
       restoreSettingsSession_();
       bindStaticEvents_();
       startClock_();
+      restoreRecorderName_();
     });
+
+    // ---------------- ชื่อผู้บันทึก (ผู้ใช้งาน) ----------------
+    const RECORDER_NAME_STORAGE_KEY_ = "refillmed_recorder_name";
+
+    function restoreRecorderName_() {
+      let saved = "";
+      try {
+        saved = localStorage.getItem(RECORDER_NAME_STORAGE_KEY_) || "";
+      } catch (err) {
+        saved = "";
+      }
+      if (saved) {
+        document.getElementById("input-recorder-name").value = saved;
+      }
+    }
+
+    function onEnterAppClick_() {
+      const input = document.getElementById("input-recorder-name");
+      const errorEl = document.getElementById("recorder-name-error");
+      const name = input.value.trim();
+
+      if (!name) {
+        errorEl.style.display = "block";
+        input.focus();
+        return;
+      }
+      errorEl.style.display = "none";
+
+      currentRecorderName = name;
+      try {
+        localStorage.setItem(RECORDER_NAME_STORAGE_KEY_, name);
+      } catch (err) {
+        // ไม่มีสิทธิ์เข้าถึง localStorage (เช่น โหมดส่วนตัว) ไม่กระทบการใช้งานหลัก
+      }
+      document.getElementById("sidebar-recorder-name").textContent = name;
+
+      enterApp_();
+    }
+
+    function onChangeRecorderClick_() {
+      document.getElementById("page-app").classList.add("hidden");
+      document.getElementById("page-landing").classList.remove("hidden");
+      const input = document.getElementById("input-recorder-name");
+      input.focus();
+      input.select();
+    }
 
     function loadPublicSettings() {
       google.script.run
@@ -1887,7 +2111,17 @@
     // EVENT BINDINGS
     // ================================================================
     function bindStaticEvents_() {
-      document.getElementById("btn-enter-app").addEventListener("click", enterApp_);
+      document.getElementById("btn-enter-app").addEventListener("click", onEnterAppClick_);
+      document.getElementById("input-recorder-name").addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          onEnterAppClick_();
+        }
+      });
+      document.getElementById("input-recorder-name").addEventListener("input", function () {
+        document.getElementById("recorder-name-error").style.display = "none";
+      });
+      document.getElementById("btn-change-recorder").addEventListener("click", onChangeRecorderClick_);
 
       document.querySelectorAll(".sidebar-nav-item").forEach(function (item) {
         item.addEventListener("click", function () {
@@ -1952,7 +2186,19 @@
           e.target.value = digits;
         }
         document.getElementById("phone-error").style.display = "none";
+        updateCallPhoneLink_();
       });
+
+      function updateCallPhoneLink_() {
+        const value = document.getElementById("field-phone").value.trim();
+        const btn = document.getElementById("btn-call-phone");
+        if (/^0\d{2}-\d{7}$/.test(value)) {
+          btn.href = "tel:" + value.replace(/-/g, "");
+          btn.classList.remove("hidden");
+        } else {
+          btn.classList.add("hidden");
+        }
+      }
 
       document.querySelectorAll('input[name="prefix"]').forEach(function (el) {
         el.addEventListener("change", updatePillStates_);
@@ -1980,6 +2226,12 @@
         loadHistory_(this);
       });
       document.getElementById("btn-export-history").addEventListener("click", exportHistoryCsv_);
+
+      document.getElementById("btn-cancel-delete-record").addEventListener("click", closeDeleteRecordModal_);
+      document.getElementById("modal-delete-record").addEventListener("click", function (e) {
+        if (e.target.id === "modal-delete-record") closeDeleteRecordModal_();
+      });
+      document.getElementById("btn-confirm-delete-record").addEventListener("click", onConfirmDeleteRecord_);
 
       document.getElementById("btn-cancel-password").addEventListener("click", function () {
         document.getElementById("modal-password").classList.add("hidden");
@@ -2665,7 +2917,8 @@
         shortageDetail: shortageDetail,
         receiverTypes: Array.prototype.map.call(receiverInputs, function (el) { return el.value; }),
         phone: phone,
-        note: note
+        note: note,
+        recordedByName: currentRecorderName
       };
       if (editingRecordId && removeExistingPhoto && !selectedPhoto) {
         formData.removePhoto = true;
@@ -2781,6 +3034,7 @@
       document.getElementById("med-selection-error").style.display = "none";
       document.getElementById("field-phone").value = "";
       document.getElementById("phone-error").style.display = "none";
+      updateCallPhoneLink_();
       selectedPhoto = null;
       existingPhotoUrl = "";
       removeExistingPhoto = false;
@@ -2821,6 +3075,7 @@
       document.getElementById("field-note").value = record.note || "";
       document.getElementById("field-phone").value = record.phone || "";
       document.getElementById("phone-error").style.display = "none";
+      updateCallPhoneLink_();
 
       selectedPhoto = null;
       removeExistingPhoto = false;
@@ -2935,7 +3190,9 @@
           '<td>' + escapeHtml_(r.phone || "-") + '</td>' +
           '<td>' + photoCell + '</td>' +
           '<td>' + escapeHtml_(r.note || "-") + '</td>' +
-          '<td></td>';
+          '<td><div style="display:flex; gap:6px; flex-wrap:wrap;"></div></td>';
+
+        const actionsWrap = tr.lastElementChild.firstElementChild;
 
         const editBtn = document.createElement("button");
         editBtn.type = "button";
@@ -2946,7 +3203,18 @@
         editBtn.addEventListener("click", function () {
           enterEditMode_(historyRecordsCache[r.id]);
         });
-        tr.lastElementChild.appendChild(editBtn);
+        actionsWrap.appendChild(editBtn);
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.type = "button";
+        deleteBtn.className = "btn btn-danger";
+        deleteBtn.style.width = "auto";
+        deleteBtn.style.padding = "6px 12px";
+        deleteBtn.innerHTML = '<span class="material-icons-outlined" style="font-size:16px;">delete_outline</span><span class="btn-label">ลบ</span>';
+        deleteBtn.addEventListener("click", function () {
+          openDeleteRecordModal_(historyRecordsCache[r.id]);
+        });
+        actionsWrap.appendChild(deleteBtn);
 
         tbody.appendChild(tr);
       });
@@ -2993,6 +3261,45 @@
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
+    }
+
+    // ---------------- ลบรายการ ----------------
+    let recordPendingDelete = null;
+
+    function openDeleteRecordModal_(record) {
+      recordPendingDelete = record;
+      const label = (record.prefix || "") + (record.fullName || "") + " (HN " + (record.hn || "-") + ")";
+      document.getElementById("delete-record-name").textContent = label;
+      document.getElementById("modal-delete-record").classList.remove("hidden");
+    }
+
+    function closeDeleteRecordModal_() {
+      recordPendingDelete = null;
+      document.getElementById("modal-delete-record").classList.add("hidden");
+    }
+
+    function onConfirmDeleteRecord_() {
+      if (!recordPendingDelete) {
+        closeDeleteRecordModal_();
+        return;
+      }
+      const id = recordPendingDelete.id;
+      const btn = document.getElementById("btn-confirm-delete-record");
+      setButtonLoading_(btn, true);
+
+      google.script.run
+        .withSuccessHandler(function () {
+          setButtonLoading_(btn, false);
+          closeDeleteRecordModal_();
+          showToast("ลบรายการสำเร็จ", "success");
+          loadHistory_();
+          loadDashboard_();
+        })
+        .withFailureHandler(function (err) {
+          setButtonLoading_(btn, false);
+          showToast("ลบรายการไม่สำเร็จ: " + errMsg_(err), "error");
+        })
+        .deleteRecord(id);
     }
 
     function csvCell_(value) {
