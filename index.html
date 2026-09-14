@@ -2796,6 +2796,24 @@
       }
     }
 
+    /**
+     * เรียกจาก onerror ของ <img> รูปยาอื่นๆ ทั่วไปนอกตารางประวัติ (เช่น การ์ด "รายการล่าสุด" หน้า Dashboard)
+     * ใช้ data-placeholder-class / data-placeholder-icon ที่ตั้งไว้บนแท็ก <img> เพื่อสร้างไอคอนแทนรูปที่โหลดไม่สำเร็จ
+     */
+    function handleImgLoadError_(imgEl) {
+      const placeholderClass = imgEl.getAttribute("data-placeholder-class") || "history-thumb-placeholder";
+      const placeholderIcon = imgEl.getAttribute("data-placeholder-icon") || "broken_image";
+      const link = imgEl.closest("a");
+      const placeholder = document.createElement("div");
+      placeholder.className = placeholderClass;
+      placeholder.innerHTML = '<span class="material-icons-outlined">' + placeholderIcon + '</span>';
+      if (link && link.parentNode) {
+        link.parentNode.replaceChild(placeholder, link);
+      } else if (imgEl.parentNode) {
+        imgEl.parentNode.replaceChild(placeholder, imgEl);
+      }
+    }
+
     // ---------------- ภาพถ่ายรายการยา ----------------
     function onPhotoSelected_(e) {
       const file = e.target.files[0];
