@@ -998,6 +998,22 @@
       background: var(--surface);
     }
 
+    .med-qty-row input[type="text"].med-qty-dose {
+      width: 130px;
+      flex: 1 1 130px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 9px;
+      font-size: 13.5px;
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    .med-qty-row input[type="text"].med-qty-dose:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
     .confirm-summary dl {
       margin: 0;
       display: grid;
@@ -1908,7 +1924,7 @@
     let editingRecordId = null;      // null = โหมดเพิ่มใหม่ / มีค่า = โหมดแก้ไข
     let historyRecordsCache = {};    // เก็บ record ล่าสุดที่โหลดไว้ ใช้ตอนกดแก้ไข
     let lastHistoryRecords = [];     // เก็บผลลัพธ์การค้นหาประวัติล่าสุด ใช้ตอนส่งออก CSV
-    let selectedMedDetails = {};     // { [ชื่อยา]: { qty: number, unit: 'เม็ด'|'ชุด' } } สำหรับรายการที่ติ๊ก/เพิ่มเอง
+    let selectedMedDetails = {};     // { [ชื่อยา]: { qty: number, unit: 'เม็ด'|'ชุด', dose: string } } สำหรับรายการที่ติ๊ก/เพิ่มเอง
     let pendingSubmit = null;        // { formData, photo } ข้อมูลที่รอผู้ใช้กดยืนยันในการ์ดสรุป
     let currentRecorderName = "";    // ชื่อผู้บันทึก (ผู้ใช้งาน) ที่กรอกไว้ตอนเข้าใช้งาน
 
@@ -2634,7 +2650,7 @@
       const names = getSelectedMedNames_();
       const nextDetails = {};
       names.forEach(function (name) {
-        nextDetails[name] = selectedMedDetails[name] || { qty: 1, unit: "เม็ด" };
+        nextDetails[name] = selectedMedDetails[name] || { qty: 1, unit: "เม็ด", dose: "" };
       });
       selectedMedDetails = nextDetails;
       renderMedQtyList_(names);
@@ -2652,7 +2668,7 @@
       section.classList.remove("hidden");
 
       names.forEach(function (name) {
-        const detail = selectedMedDetails[name] || { qty: 1, unit: "เม็ด" };
+        const detail = selectedMedDetails[name] || { qty: 1, unit: "เม็ด", dose: "" };
         const row = document.createElement("div");
         row.className = "med-qty-row";
 
@@ -2684,28 +2700,42 @@
           selectedMedDetails[name].unit = unitSelect.value;
         });
 
+        const doseInput = document.createElement("input");
+        doseInput.type = "text";
+        doseInput.className = "med-qty-dose";
+        doseInput.maxLength = 50;
+        doseInput.placeholder = "ขนาด เช่น 500 มก. (ไม่บังคับ)";
+        doseInput.value = detail.dose || "";
+        doseInput.setAttribute("aria-label", "ขนาดยา " + name);
+        doseInput.addEventListener("input", function () {
+          selectedMedDetails[name].dose = doseInput.value;
+        });
+
         row.appendChild(nameEl);
         row.appendChild(qtyInput);
         row.appendChild(unitSelect);
+        row.appendChild(doseInput);
         list.appendChild(row);
       });
     }
 
     /**
-     * รายการยาที่เลือก พร้อมจำนวน/หน่วย รวมเป็น string เดียวสำหรับบันทึกลงฟอร์ม
-     * รูปแบบ: "ชื่อยา x จำนวน หน่วย, ชื่อยา2 x จำนวน หน่วย"
+     * รายการยาที่เลือก พร้อมจำนวน/หน่วย/ขนาด(ถ้ากรอก) รวมเป็น string เดียวสำหรับบันทึกลงฟอร์ม
+     * รูปแบบ: "ชื่อยา x จำนวน หน่วย" หรือ "ชื่อยา x จำนวน หน่วย | ขนาด: ..." ถ้ามีการกรอกขนาด
      */
     function getSelectedMedItems_() {
       return getSelectedMedNames_().map(function (name) {
-        const detail = selectedMedDetails[name] || { qty: 1, unit: "เม็ด" };
-        return name + " x " + detail.qty + " " + detail.unit;
+        const detail = selectedMedDetails[name] || { qty: 1, unit: "เม็ด", dose: "" };
+        const dose = (detail.dose || "").trim();
+        const base = name + " x " + detail.qty + " " + detail.unit;
+        return dose ? (base + " | ขนาด: " + dose) : base;
       });
     }
 
     /**
      * นำ string รายการยาที่เคยบันทึกไว้ (คั่นด้วย comma) มา "ติ๊ก" checkbox
      * ที่ตรงกับรายการในลิสต์ ส่วนที่ไม่ตรงจะถูกเติมเป็น custom chip
-     * รองรับทั้งรูปแบบใหม่ "ชื่อยา x จำนวน หน่วย" และรูปแบบเดิม (แค่ชื่อยา ไม่มีจำนวน)
+     * รองรับทั้งรูปแบบใหม่ "ชื่อยา x จำนวน หน่วย [| ขนาด: ...]" และรูปแบบเดิม (แค่ชื่อยา ไม่มีจำนวน)
      */
     function applyMedItemsString_(medItemsString) {
       document.querySelectorAll(".med-checkbox").forEach(function (el) { el.checked = false; });
@@ -2722,18 +2752,20 @@
         function (el) { return el.value; }
       );
 
-      const qtyPattern = /^(.*)\sx\s(\d+)\s(เม็ด|ชุด)$/;
+      const qtyPattern = /^(.*)\sx\s(\d+)\s(เม็ด|ชุด)(?:\s\|\sขนาด:\s(.*))?$/;
 
       items.forEach(function (item) {
         let name = item;
         let qty = 1;
         let unit = "เม็ด";
+        let dose = "";
 
         const match = item.match(qtyPattern);
         if (match) {
           name = match[1].trim();
           qty = parseInt(match[2], 10) || 1;
           unit = match[3];
+          dose = match[4] ? match[4].trim() : "";
         }
 
         if (knownValues.indexOf(name) !== -1) {
@@ -2742,7 +2774,7 @@
         } else {
           customMedItems.push(name);
         }
-        selectedMedDetails[name] = { qty: qty, unit: unit };
+        selectedMedDetails[name] = { qty: qty, unit: unit, dose: dose };
       });
 
       renderCustomMedChips_();
