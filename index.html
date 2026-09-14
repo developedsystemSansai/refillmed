@@ -1419,7 +1419,7 @@
             <div class="stat-card">
               <div class="stat-icon" style="color:var(--secondary); background:rgba(18,165,148,0.1);"><span class="material-icons-outlined">task_alt</span></div>
               <div class="stat-value" id="stat-resolved-same">-</div>
-              <div class="stat-label">สำเร็จทันที (ได้ยาครบในครั้งเดียว)</div>
+              <div class="stat-label">สำเร็จทันที (มาครั้งแรกแล้วได้ยาครบ)</div>
               <div class="stat-delta delta-up" id="stat-resolved-same-delta"></div>
             </div>
             <div class="stat-card">
@@ -1431,7 +1431,7 @@
             <div class="stat-card">
               <div class="stat-icon" style="color:#D97706; background:rgba(217,119,6,0.12);"><span class="material-icons-outlined">history</span></div>
               <div class="stat-value" id="stat-resolved-late">-</div>
-              <div class="stat-label">ปิดเคสภายหลัง (เคยขาด แล้วมารับจนครบ)</div>
+              <div class="stat-label">ปิดเคสภายหลัง (มาติดตามหลายครั้ง จนครบ)</div>
               <div class="stat-delta" id="stat-resolved-late-delta"></div>
             </div>
           </div>
@@ -1569,33 +1569,31 @@
                 </div>
               </div>
 
-              <div class="form-grid">
+              <div class="form-field">
+  <label>วันที่ค้าง (วันที่ไม่ได้ยา) <span class="req">*</span></label>
+  <input type="date" id="field-pendingdate" required>
+  <p style="font-size:12px; color:var(--muted); margin:6px 0 0 0;">
+    คือวันที่คนไข้มาครั้งแรกแล้วไม่ได้ยาครบ (วันที่เริ่มค้าง) <strong>ไม่ใช่วันที่มาบันทึกเพิ่มเติมวันนี้</strong>
+  </p>
+</div>
                 <div class="form-field">
-                  <label>วันที่ค้าง <span class="req">*</span></label>
-                  <input type="date" id="field-pendingdate" required>
-                  <p style="font-size:12px; color:var(--muted); margin:6px 0 0 0;">
-                    คือวันที่นัดมารับยา (วันที่ผู้ป่วยค้างรับยาตั้งแต่วันนั้น) ไม่ใช่วันที่มาบันทึกวันนี้
-                  </p>
-                </div>
-                <div class="form-field">
-                  <label>จำนวนที่ได้รับ <span class="req">*</span></label>
-                  <div class="choice-group" id="group-status">
-                    <label class="choice-pill">
-                      <input type="radio" name="status" value="ครบ">
-                      <span>ครบ</span>
-                    </label>
-                    <label class="choice-pill">
-                      <input type="radio" name="status" value="ไม่ครบ">
-                      <span>ไม่ครบ</span>
-                    </label>
-                  </div>
-                </div>
-              </div>
+  <label>จำนวนยาที่ได้รับ <strong>ในครั้งนี้</strong> <span class="req">*</span></label>
+  <div class="choice-group" id="group-status">
+    <label class="choice-pill">
+      <input type="radio" name="status" value="ครบ">
+      <span>ครบ (ปิดเคส)</span>
+    </label>
+    <label class="choice-pill">
+      <input type="radio" name="status" value="ไม่ครบ">
+      <span>ไม่ครบ (ต้องติดตาม)</span>
+    </label>
+  </div>
+</div>
 
               <div class="form-field full hidden" id="field-shortage-wrap">
-                <label>ขาดเหลืออะไร <span class="req">*</span></label>
-                <textarea id="field-shortage-detail" maxlength="500" placeholder="ระบุรายการยาหรือจำนวนที่ยังขาด"></textarea>
-              </div>
+  <label>ขาดเหลืออะไร (สำหรับการติดตามครั้งต่อไป) <span class="req">*</span></label>
+  <textarea id="field-shortage-detail" maxlength="500" placeholder="ระบุรายการยาหรือจำนวนที่ยังขาด ต้องมารับเพิ่มเติม"></textarea>
+</div>
 
               <div class="form-field full">
                 <label>ผู้มารับ <span class="req">*</span></label>
@@ -2676,15 +2674,15 @@
           selectedMedDetails[name].qty = (n > 0) ? n : 1;
         });
 
-        // priority: "เม็ด" มาก่อน "ชุด" เสมอ ตามที่ระบุ
-        const unitSelect = document.createElement("select");
-        ["เม็ด", "ชุด"].forEach(function (unit) {
-          const opt = document.createElement("option");
-          opt.value = unit;
-          opt.textContent = unit;
-          if (unit === detail.unit) opt.selected = true;
-          unitSelect.appendChild(opt);
-        });
+       // เพิ่มหน่วยยา: เม็ด, ซอง, ขวด, หลอด, แผง, ชุด
+const unitSelect = document.createElement("select");
+["เม็ด", "ซอง", "ขวด", "หลอด", "แผง", "ชุด"].forEach(function (unit) {
+  const opt = document.createElement("option");
+  opt.value = unit;
+  opt.textContent = unit;
+  if (unit === detail.unit) opt.selected = true;
+  unitSelect.appendChild(opt);
+});
         unitSelect.addEventListener("change", function () {
           selectedMedDetails[name].unit = unitSelect.value;
         });
@@ -2693,7 +2691,7 @@
         doseInput.type = "text";
         doseInput.className = "med-qty-dose";
         doseInput.maxLength = 50;
-        doseInput.placeholder = "ขนาด เช่น 500 มก. (ไม่บังคับ)";
+        doseInput.placeholder = "ขนาด เช่น 500 มก., 5 มล. (ไม่บังคับ)";
         doseInput.value = detail.dose || "";
         doseInput.setAttribute("aria-label", "ขนาดยา " + name);
         doseInput.addEventListener("input", function () {
@@ -2741,7 +2739,7 @@
         function (el) { return el.value; }
       );
 
-      const qtyPattern = /^(.*)\sx\s(\d+)\s(เม็ด|ชุด)(?:\s\|\sขนาด:\s(.*))?$/;
+      const qtyPattern = /^(.*)\sx\s(\d+)\s(เม็ด|ซอง|ขวด|หลอด|แผง|ชุด)(?:\s\|\sขนาด:\s(.*))?$/;
 
       items.forEach(function (item) {
         let name = item;
