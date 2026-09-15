@@ -1385,6 +1385,10 @@
           <span class="material-icons-outlined">history</span>
           <span>ประวัติการบันทึก</span>
         </div>
+        <div class="sidebar-nav-item" data-page="med-search">
+          <span class="material-icons-outlined">query_stats</span>
+          <span>ค้นยอดจ่ายยา</span>
+        </div>
         <div class="sidebar-nav-item" data-page="settings">
           <span class="material-icons-outlined">settings</span>
           <span>ตั้งค่าระบบ</span>
@@ -1482,13 +1486,25 @@
             <div id="week-breakdown-chart"></div>
           </div>
 
-          <div class="card" style="margin-bottom:16px;">
-            <div class="card-title">
-              <span class="material-icons-outlined" style="color:var(--primary);">medication</span>
-              ยาที่จ่ายไปมากที่สุด (Top 5) ในช่วงที่เลือก
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">
+                <span class="material-icons-outlined" style="color:var(--primary);">medication</span>
+                ยาที่จ่ายไปมากที่สุด (Top 5) ในช่วงที่เลือก
+              </div>
+              <p class="card-sub">แยกทีละชนิดยา (ไม่ปนกัน) · ตัวเลข = จำนวนรวมที่จ่ายไปจริง (เม็ด/หลอด/ขวด ตามหน่วยที่บันทึกไว้)</p>
+              <div id="medication-chart"></div>
             </div>
-            <p class="card-sub">แยกทีละชนิดยา (ไม่ปนกัน) · ตัวเลข = จำนวนรวมที่จ่ายไปจริง (เม็ด/หลอด/ขวด ตามหน่วยที่บันทึกไว้)</p>
-            <div id="medication-chart"></div>
+
+            <div class="card">
+              <div class="card-title">
+                <span class="material-icons-outlined" style="color:var(--secondary);">pie_chart</span>
+                สัดส่วนยาที่จ่าย (Pie chart)
+              </div>
+              <p class="card-sub" id="med-pie-sub">สัดส่วนจำนวนที่จ่ายของยาแต่ละชนิดในช่วงที่เลือก</p>
+              <div id="med-pie-chart" style="display:flex; justify-content:center;"></div>
+              <div class="legend-row" id="med-pie-legend" style="justify-content:center;"></div>
+            </div>
           </div>
 
 
@@ -1765,6 +1781,66 @@
           </div>
         </section>
 
+        <!-- ============ ค้นยอดจ่ายยา ============ -->
+        <section class="page-section" id="section-med-search">
+          <div class="section-header">
+            <h2>ค้นยอดจ่ายยา</h2>
+          </div>
+
+          <div class="card">
+            <p class="card-sub" style="margin-top:0;">
+              ค้นหาว่า "ยาตัวไหนจ่ายไปแล้วจำนวนเท่าไหร่" — ยอดรวมแยกทีละชนิดยาและแยกตามหน่วย
+              (เม็ด/หลอด/ขวด) เพื่อไม่ให้ยอดของหน่วยที่ต่างกันถูกบวกปนกัน
+              ตัวกรองช่วงวันที่อ้างอิงจาก "วันเวลาบันทึก" เช่นเดียวกับหน้า Dashboard
+            </p>
+
+            <div class="filter-bar">
+              <div class="form-field">
+                <label>ตั้งแต่วันที่</label>
+                <input type="date" id="med-filter-start">
+              </div>
+              <div class="form-field">
+                <label>ถึงวันที่</label>
+                <input type="date" id="med-filter-end">
+              </div>
+              <div class="form-field" style="flex:1;min-width:180px;">
+                <label>ชื่อยาที่ต้องการค้นหา</label>
+                <input type="text" id="med-filter-keyword" placeholder="พิมพ์ชื่อยา เช่น Metformin...">
+              </div>
+              <button class="btn btn-primary" id="btn-search-med-totals" style="width:auto;">
+                <span class="material-icons-outlined">search</span>
+                <span class="btn-label">ค้นหา</span>
+                <span class="spinner"></span>
+              </button>
+              <button class="btn btn-outline" id="btn-clear-med-filter" style="width:auto;">
+                <span class="material-icons-outlined">restart_alt</span>
+                <span class="btn-label">ล้างตัวกรอง</span>
+              </button>
+            </div>
+
+            <div id="med-totals-summary" class="card-sub" style="margin-bottom:8px;"></div>
+
+            <div class="table-wrap">
+              <table class="history-table">
+                <thead>
+                  <tr>
+                    <th style="width:56px;">อันดับ</th>
+                    <th>ชื่อยา</th>
+                    <th>จ่ายไปแล้วทั้งหมด</th>
+                    <th style="width:120px;">จำนวนรายการ</th>
+                    <th style="width:130px;">รายละเอียด</th>
+                  </tr>
+                </thead>
+                <tbody id="med-totals-tbody"></tbody>
+              </table>
+            </div>
+            <div id="med-totals-empty" class="empty-state hidden">
+              <div class="material-icons-outlined">inbox</div>
+              <div>ไม่พบข้อมูลการจ่ายยาตามเงื่อนไขที่ค้นหา</div>
+            </div>
+          </div>
+        </section>
+
         <!-- ============ ตั้งค่าระบบ (Protected) ============ -->
         <section class="page-section" id="section-settings">
           <div class="section-header">
@@ -1838,6 +1914,43 @@
   </div>
 
   <!-- ================= Modal: ยืนยันรหัสผู้ดูแล ================= -->
+  <!-- ================= Modal: รายละเอียดการจ่ายยาทีละตัว ================= -->
+  <div class="modal-overlay hidden" id="modal-med-detail">
+    <div class="modal-box" style="max-width:920px; width:94%; text-align:left;">
+      <h3 id="med-detail-title">รายละเอียดการจ่ายยา</h3>
+      <p class="hint" id="med-detail-sub" style="text-align:left;"></p>
+
+      <div class="table-wrap" style="max-height:60vh; overflow:auto;">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>วันเวลาบันทึก</th>
+              <th>คิว</th>
+              <th>ชื่อ-สกุล</th>
+              <th>HN</th>
+              <th>จำนวน</th>
+              <th>ขนาด/วิธีใช้</th>
+              <th>จำนวนที่ได้รับ</th>
+              <th>ผู้บันทึก</th>
+            </tr>
+          </thead>
+          <tbody id="med-detail-tbody"></tbody>
+        </table>
+      </div>
+      <div id="med-detail-empty" class="empty-state hidden">
+        <div class="material-icons-outlined">inbox</div>
+        <div>ไม่พบรายละเอียดการจ่ายยาของยาตัวนี้ในช่วงที่เลือก</div>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:14px;">
+        <button class="btn btn-outline" id="btn-close-med-detail" style="width:auto;">
+          <span class="material-icons-outlined">close</span>
+          <span class="btn-label">ปิด</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <div class="modal-overlay hidden" id="modal-password">
     <div class="modal-box">
       <h3><span class="material-icons-outlined">admin_panel_settings</span> ยืนยันตัวตนผู้ดูแล</h3>
@@ -2307,6 +2420,25 @@
         }
       });
 
+      document.getElementById("btn-search-med-totals").addEventListener("click", function () {
+        loadMedTotals_(this);
+      });
+      document.getElementById("btn-clear-med-filter").addEventListener("click", function () {
+        document.getElementById("med-filter-start").value = "";
+        document.getElementById("med-filter-end").value = "";
+        document.getElementById("med-filter-keyword").value = "";
+        loadMedTotals_();
+      });
+      // กรองชื่อยาทันทีขณะพิมพ์จากข้อมูลที่โหลดไว้แล้ว (ไม่ยิงไปอ่านชีตใหม่ทุกตัวอักษร)
+      document.getElementById("med-filter-keyword").addEventListener("input", renderMedTotalsTable_);
+      document.getElementById("med-filter-keyword").addEventListener("keydown", function (e) {
+        if (e.key === "Enter") renderMedTotalsTable_();
+      });
+      document.getElementById("btn-close-med-detail").addEventListener("click", closeMedDetail_);
+      document.getElementById("modal-med-detail").addEventListener("click", function (e) {
+        if (e.target === this) closeMedDetail_();
+      });
+
       document.getElementById("btn-search-history").addEventListener("click", function () {
         loadHistory_(this);
       });
@@ -2358,6 +2490,7 @@
 
       if (pageKey === "dashboard") loadDashboard_();
       if (pageKey === "history") loadHistory_();
+      if (pageKey === "med-search") loadMedTotals_();
     }
 
     function showPage_(pageKey) {
@@ -2374,6 +2507,7 @@
         dashboard: "Dashboard",
         "record-form": "บันทึกการรับยา",
         history: "ประวัติการบันทึก",
+        "med-search": "ค้นยอดจ่ายยา",
         settings: "ตั้งค่าระบบ"
       };
       document.getElementById("topbar-title").textContent = titles[pageKey] || "";
@@ -2421,6 +2555,18 @@
           showToast("โหลดกราฟยาที่จ่ายไปไม่สำเร็จ: " + errMsg_(err), "error");
         })
         .getMedicationQtyBreakdown(currentDashboardRange, 5);
+
+      // กราฟวงกลม "สัดส่วนยาที่จ่าย" — ใช้ข้อมูลคนละชุดกับกราฟแท่ง Top 5 เพราะต้องรู้
+      // ยอดรวมทั้งหมด (รวมยาที่อยู่นอก Top N) จึงจะคำนวณเปอร์เซ็นต์ได้ถูกต้อง
+      google.script.run
+        .withSuccessHandler(function (data) {
+          renderMedPieChart_(data);
+        })
+        .withFailureHandler(function (err) {
+          renderMedPieChart_(null);
+          showToast("โหลดกราฟวงกลมสัดส่วนยาไม่สำเร็จ: " + errMsg_(err), "error");
+        })
+        .getMedicationPieData(currentDashboardRange, 8);
     }
 
     function renderDashboard_(data) {
@@ -2578,6 +2724,239 @@
           '</div>'
         );
       }).join("");
+    }
+
+    // ---------------- กราฟวงกลม (Pie chart) สัดส่วนยาที่จ่าย ----------------
+    // วาดด้วย SVG ล้วน ไม่พึ่งไลบรารีภายนอก เพื่อให้ทำงานได้แม้เปิดจากเครือข่ายที่บล็อก CDN
+    const PIE_COLORS = [
+      "var(--primary)",
+      "var(--secondary)",
+      "#F59E0B",
+      "#8B5CF6",
+      "#EC4899",
+      "#0EA5E9",
+      "#65A30D",
+      "#F97316",
+      "#94A3B8"
+    ];
+
+    function renderMedPieChart_(data) {
+      const chartEl = document.getElementById("med-pie-chart");
+      const legendEl = document.getElementById("med-pie-legend");
+      const subEl = document.getElementById("med-pie-sub");
+      if (!chartEl || !legendEl) return;
+
+      const slices = (data && data.slices) ? data.slices : [];
+      if (slices.length === 0) {
+        chartEl.innerHTML = emptyStateHtml_("pie_chart", "ยังไม่มีข้อมูลการจ่ายยาในช่วงที่เลือก");
+        legendEl.innerHTML = "";
+        if (subEl) subEl.textContent = "สัดส่วนจำนวนที่จ่ายของยาแต่ละชนิดในช่วงที่เลือก";
+        return;
+      }
+
+      const total = (data && data.totalQty) ? data.totalQty : slices.reduce(function (sum, s) { return sum + s.qty; }, 0);
+      const cx = 110, cy = 110, r = 92;
+
+      let paths = "";
+      if (slices.length === 1) {
+        // สไลซ์เดียว = เต็มวง (ใช้ path arc ไม่ได้ เพราะจุดเริ่ม-จุดจบซ้อนกันพอดี)
+        paths = '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + PIE_COLORS[0] + '"/>';
+      } else {
+        let startAngle = -90;
+        slices.forEach(function (sl, i) {
+          const sweep = total ? (sl.qty / total) * 360 : 0;
+          const endAngle = startAngle + sweep;
+          const a0 = startAngle * Math.PI / 180;
+          const a1 = endAngle * Math.PI / 180;
+          const x0 = cx + r * Math.cos(a0), y0 = cy + r * Math.sin(a0);
+          const x1 = cx + r * Math.cos(a1), y1 = cy + r * Math.sin(a1);
+          const largeArc = sweep > 180 ? 1 : 0;
+          const color = PIE_COLORS[i % PIE_COLORS.length];
+          paths +=
+            '<path d="M ' + cx + ' ' + cy + ' L ' + x0.toFixed(2) + ' ' + y0.toFixed(2) +
+            ' A ' + r + ' ' + r + ' 0 ' + largeArc + ' 1 ' + x1.toFixed(2) + ' ' + y1.toFixed(2) + ' Z" ' +
+            'fill="' + color + '" stroke="var(--surface)" stroke-width="2">' +
+            '<title>' + escapeHtml_(sl.name) + ' — ' + sl.qty.toLocaleString("th-TH") + ' ' +
+            escapeHtml_(sl.unit || "หน่วย") + ' (' + sl.percent + '%)</title>' +
+            '</path>';
+          startAngle = endAngle;
+        });
+      }
+
+      chartEl.innerHTML =
+        '<svg width="220" height="220" viewBox="0 0 220 220" role="img" aria-label="สัดส่วนยาที่จ่าย">' +
+          paths +
+        '</svg>';
+
+      legendEl.innerHTML = slices.map(function (sl, i) {
+        const color = PIE_COLORS[i % PIE_COLORS.length];
+        return '<span><span class="legend-dot" style="background:' + color + ';"></span>' +
+          escapeHtml_(sl.name) + ' (' + sl.qty.toLocaleString("th-TH") + ' ' +
+          escapeHtml_(sl.unit || "หน่วย") + ' · ' + sl.percent + '%)</span>';
+      }).join("");
+
+      if (subEl) {
+        subEl.textContent =
+          "รวมทุกชนิด " + total.toLocaleString("th-TH") + " หน่วย จากยา " +
+          ((data && data.medCount) ? data.medCount : slices.length) + " ชนิด · " +
+          "หมายเหตุ: ยาแต่ละชนิดอาจใช้หน่วยต่างกัน (เม็ด/หลอด/ขวด) กราฟนี้เทียบจากจำนวนที่บันทึกไว้";
+      }
+    }
+
+    // ================================================================
+    // แท็บ "ค้นยอดจ่ายยา" — ยาตัวไหนจ่ายไปแล้วจำนวนเท่าไหร่
+    // ================================================================
+    // เก็บผลลัพธ์ล่าสุดจากเซิร์ฟเวอร์ไว้ในหน่วยความจำ เพื่อให้การกรองด้วย "ชื่อยา"
+    // ทำงานทันทีขณะพิมพ์โดยไม่ต้องยิงไปอ่านชีตใหม่ทุกตัวอักษร (ชีตอ่านช้ากว่ามาก)
+    // ส่วนตัวกรองช่วงวันที่ยังต้องส่งไปคำนวณที่ฝั่งเซิร์ฟเวอร์ตามเดิม
+    let medTotalsCache = [];
+
+    function currentMedFilters_() {
+      return {
+        startDate: document.getElementById("med-filter-start").value || "",
+        endDate: document.getElementById("med-filter-end").value || ""
+      };
+    }
+
+    function loadMedTotals_(btnEl) {
+      if (btnEl) setButtonLoading_(btnEl, true);
+      const summaryEl = document.getElementById("med-totals-summary");
+      summaryEl.textContent = "กำลังโหลดข้อมูล...";
+
+      google.script.run
+        .withSuccessHandler(function (items) {
+          if (btnEl) setButtonLoading_(btnEl, false);
+          medTotalsCache = items || [];
+          renderMedTotalsTable_();
+        })
+        .withFailureHandler(function (err) {
+          if (btnEl) setButtonLoading_(btnEl, false);
+          medTotalsCache = [];
+          renderMedTotalsTable_();
+          showToast("โหลดยอดจ่ายยาไม่สำเร็จ: " + errMsg_(err), "error");
+        })
+        .getAllMedicationTotals(currentMedFilters_());
+    }
+
+    function unitsText_(units) {
+      if (!units || units.length === 0) return "-";
+      return units.map(function (u) {
+        return u.qty.toLocaleString("th-TH") + " " + escapeHtml_(u.unit || "หน่วย");
+      }).join(" · ");
+    }
+
+    function renderMedTotalsTable_() {
+      const tbody = document.getElementById("med-totals-tbody");
+      const emptyEl = document.getElementById("med-totals-empty");
+      const summaryEl = document.getElementById("med-totals-summary");
+      const keyword = (document.getElementById("med-filter-keyword").value || "").trim().toLowerCase();
+
+      const rows = keyword
+        ? medTotalsCache.filter(function (m) { return String(m.name || "").toLowerCase().indexOf(keyword) !== -1; })
+        : medTotalsCache.slice();
+
+      if (rows.length === 0) {
+        tbody.innerHTML = "";
+        emptyEl.classList.remove("hidden");
+        summaryEl.textContent = medTotalsCache.length === 0
+          ? "ยังไม่มีข้อมูลการจ่ายยาในช่วงที่เลือก"
+          : ("ไม่พบยาที่ตรงกับคำค้น \"" + keyword + "\" (มีข้อมูลยาทั้งหมด " + medTotalsCache.length + " ชนิด)");
+        return;
+      }
+
+      emptyEl.classList.add("hidden");
+      summaryEl.textContent = keyword
+        ? ("พบ " + rows.length + " ชนิด จากยาทั้งหมด " + medTotalsCache.length + " ชนิดในช่วงที่เลือก")
+        : ("พบยาทั้งหมด " + rows.length + " ชนิดในช่วงที่เลือก (เรียงจากยอดจ่ายมากไปน้อย)");
+
+      tbody.innerHTML = rows.map(function (m, idx) {
+        return (
+          "<tr>" +
+            "<td>" + (idx + 1) + "</td>" +
+            '<td style="font-weight:600;">' + escapeHtml_(m.name) + "</td>" +
+            "<td>" + unitsText_(m.units) + "</td>" +
+            "<td>" + (m.recordCount || 0).toLocaleString("th-TH") + " รายการ</td>" +
+            '<td><button type="button" class="btn btn-outline btn-med-detail" data-med="' +
+              escapeHtml_(m.name) + '" style="width:auto; padding:6px 10px;">' +
+              '<span class="material-icons-outlined">visibility</span>' +
+              '<span class="btn-label">ดูรายละเอียด</span>' +
+            "</button></td>" +
+          "</tr>"
+        );
+      }).join("");
+
+      tbody.querySelectorAll(".btn-med-detail").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          openMedDetail_(btn.getAttribute("data-med"));
+        });
+      });
+    }
+
+    function openMedDetail_(medName) {
+      const modal = document.getElementById("modal-med-detail");
+      const tbody = document.getElementById("med-detail-tbody");
+      const emptyEl = document.getElementById("med-detail-empty");
+
+      document.getElementById("med-detail-title").textContent = "รายละเอียดการจ่ายยา: " + medName;
+      document.getElementById("med-detail-sub").textContent = "กำลังโหลดข้อมูล...";
+      tbody.innerHTML = "";
+      emptyEl.classList.add("hidden");
+      modal.classList.remove("hidden");
+
+      google.script.run
+        .withSuccessHandler(function (rows) {
+          renderMedDetail_(medName, rows || []);
+        })
+        .withFailureHandler(function (err) {
+          document.getElementById("med-detail-sub").textContent = "โหลดข้อมูลไม่สำเร็จ";
+          showToast("โหลดรายละเอียดการจ่ายยาไม่สำเร็จ: " + errMsg_(err), "error");
+        })
+        .getMedicationDispenseDetail(medName, currentMedFilters_());
+    }
+
+    function renderMedDetail_(medName, rows) {
+      const tbody = document.getElementById("med-detail-tbody");
+      const emptyEl = document.getElementById("med-detail-empty");
+      const subEl = document.getElementById("med-detail-sub");
+
+      if (rows.length === 0) {
+        tbody.innerHTML = "";
+        emptyEl.classList.remove("hidden");
+        subEl.textContent = "ไม่พบการจ่ายยาตัวนี้ในช่วงที่เลือก";
+        return;
+      }
+      emptyEl.classList.add("hidden");
+
+      // สรุปยอดรวมแยกตามหน่วย เพื่อไม่ให้ยอดของหน่วยที่ต่างกันถูกบวกปนกัน
+      const unitTotals = {};
+      rows.forEach(function (r) {
+        const u = r.unit || "หน่วย";
+        unitTotals[u] = (unitTotals[u] || 0) + (r.qty || 0);
+      });
+      const totalText = Object.keys(unitTotals).map(function (u) {
+        return unitTotals[u].toLocaleString("th-TH") + " " + u;
+      }).join(" · ");
+
+      subEl.textContent = "จ่ายไปแล้วรวม " + totalText + " จาก " + rows.length + " รายการ (เรียงจากล่าสุดไปเก่าสุด)";
+
+      tbody.innerHTML = rows.map(function (r) {
+        return (
+          "<tr>" +
+            "<td>" + formatThaiDateTime_(r.timestamp) + "</td>" +
+            "<td>" + escapeHtml_(r.queueNumber || "-") + "</td>" +
+            "<td>" + escapeHtml_(r.fullName || "-") + "</td>" +
+            "<td>" + escapeHtml_(r.hn || "-") + "</td>" +
+            '<td style="font-weight:600;">' + (r.qty || 0).toLocaleString("th-TH") + " " + escapeHtml_(r.unit || "หน่วย") + "</td>" +
+            "<td>" + escapeHtml_(r.dose || "-") + "</td>" +
+            '<td><span class="badge ' + statusBadgeClass_(r.status) + '">' + escapeHtml_(r.status || "ไม่ระบุ") + "</span></td>" +
+            "<td>" + escapeHtml_(r.recordedBy || "-") + "</td>" +
+          "</tr>"
+        );
+      }).join("");
+    }
+
+    function closeMedDetail_() {
+      document.getElementById("modal-med-detail").classList.add("hidden");
     }
 
     // ---------------- ตัวช่วยวาดกราฟแท่งแนวนอน (ไม่พึ่งไลบรารีภายนอก) ----------------
