@@ -1370,12 +1370,6 @@
               <div class="stat-label">ค้างติดตาม ณ ปัจจุบัน</div>
               <div class="stat-delta delta-down" id="stat-still-open-delta"></div>
             </div>
-            <div class="stat-card">
-              <div class="stat-icon" style="color:#D97706; background:rgba(217,119,6,0.12);"><span class="material-icons-outlined">history</span></div>
-              <div class="stat-value" id="stat-resolved-late">-</div>
-              <div class="stat-label">ปิดเคสภายหลัง (เคยขาด แล้วมารับจนครบ)</div>
-              <div class="stat-delta" id="stat-resolved-late-delta"></div>
-            </div>
           </div>
 
           <div class="grid-2">
@@ -1404,27 +1398,24 @@
             </div>
           </div>
 
-          <div class="grid-2">
-            <div class="card">
-              <div class="card-title">
-                <span class="material-icons-outlined" style="color:var(--primary);">medication</span>
-                แยกรายการยาที่รับ (ช่วงที่เลือก)
-              </div>
-              <p class="card-sub">แยกทีละชนิดยา ไม่ปนกัน · ตัวเลข = จำนวนรวมที่จ่ายไป (เม็ด/หลอด/ขวด)</p>
-              <input type="text" id="med-breakdown-filter" placeholder="ค้นหาชื่อยา..."
-                style="width:100%; box-sizing:border-box; border:1px solid var(--border); border-radius:10px; padding:9px 12px; font-size:13.5px; margin-bottom:12px;">
-              <div id="med-breakdown-chart"></div>
+          <div class="card" style="margin-bottom:16px;">
+            <div class="card-title">
+              <span class="material-icons-outlined" style="color:var(--secondary);">calendar_view_week</span>
+              วันที่ค้างยา แยกรายสัปดาห์
             </div>
-
-            <div class="card">
-              <div class="card-title">
-                <span class="material-icons-outlined" style="color:var(--secondary);">calendar_view_week</span>
-                วันที่ค้างยา แยกรายสัปดาห์
-              </div>
-              <p class="card-sub">จำนวนครั้งที่มารับยา จำแนกตามสัปดาห์ของวันที่ค้าง (จันทร์-อาทิตย์)</p>
-              <div id="week-breakdown-chart"></div>
-            </div>
+            <p class="card-sub">จำนวนครั้งที่มารับยา จำแนกตามสัปดาห์ของวันที่ค้าง (จันทร์-อาทิตย์)</p>
+            <div id="week-breakdown-chart"></div>
           </div>
+
+          <div class="card" style="margin-bottom:16px;">
+            <div class="card-title">
+              <span class="material-icons-outlined" style="color:var(--primary);">medication</span>
+              ยาที่จ่ายไปมากที่สุด (Top 5) ในช่วงที่เลือก
+            </div>
+            <p class="card-sub">แยกทีละชนิดยา (ไม่ปนกัน) · ตัวเลข = จำนวนรวมที่จ่ายไปจริง (เม็ด/หลอด/ขวด ตามหน่วยที่บันทึกไว้)</p>
+            <div id="medication-chart"></div>
+          </div>
+
 
           <div class="card" style="margin-bottom:16px;">
             <div class="card-title">
@@ -1501,6 +1492,18 @@
                     <label class="choice-pill">
                       <input type="radio" name="prefix" value="นาง">
                       <span>นาง</span>
+                    </label>
+                    <label class="choice-pill">
+                      <input type="radio" name="prefix" value="เด็กชาย">
+                      <span>เด็กชาย</span>
+                    </label>
+                    <label class="choice-pill">
+                      <input type="radio" name="prefix" value="เด็กหญิง">
+                      <span>เด็กหญิง</span>
+                    </label>
+                    <label class="choice-pill">
+                      <input type="radio" name="prefix" value="">
+                      <span>ไม่ระบุ</span>
                     </label>
                   </div>
                 </div>
@@ -2142,8 +2145,6 @@
         loadDashboard_();
       });
 
-      document.getElementById("med-breakdown-filter").addEventListener("input", applyMedBreakdownFilter_);
-
       document.getElementById("record-form").addEventListener("submit", onSubmitRecord_);
       document.getElementById("btn-clear-form").addEventListener("click", function () {
         if (editingRecordId) {
@@ -2307,13 +2308,22 @@
           showToast("โหลดข้อมูล Dashboard ไม่สำเร็จ: " + errMsg_(err), "error");
         })
         .getDashboardData(currentDashboardRange);
+
+      google.script.run
+        .withSuccessHandler(function (items) {
+          renderMedicationChart_(items);
+        })
+        .withFailureHandler(function (err) {
+          renderMedicationChart_(null);
+          showToast("โหลดกราฟยาที่จ่ายไปไม่สำเร็จ: " + errMsg_(err), "error");
+        })
+        .getMedicationQtyBreakdown(currentDashboardRange, 5);
     }
 
     function renderDashboard_(data) {
       renderDashboardStats_(data.stats);
       renderTrendChart_(data.trend);
       renderDonutChart_(data.stats);
-      renderMedBreakdownChart_(data.medBreakdown);
       renderWeekBreakdownChart_(data.weekBreakdown);
       renderFollowUpTable_(data.followUpList, data.stats);
 
@@ -2335,12 +2345,11 @@
     }
 
     function renderDashboardStats_(stats) {
-      stats = stats || { total: 0, resolvedSame: 0, resolvedLate: 0, stillOpen: 0, rate: 0, deltaVolumePercent: 0 };
+      stats = stats || { total: 0, resolvedSame: 0, stillOpen: 0, rate: 0, deltaVolumePercent: 0 };
 
       document.getElementById("stat-total-cases").textContent = stats.total.toLocaleString("th-TH");
       document.getElementById("stat-resolved-same").textContent = stats.resolvedSame.toLocaleString("th-TH");
       document.getElementById("stat-still-open").textContent = stats.stillOpen.toLocaleString("th-TH");
-      document.getElementById("stat-resolved-late").textContent = stats.resolvedLate.toLocaleString("th-TH");
 
       const deltaEl = document.getElementById("stat-total-cases-delta");
       deltaEl.textContent = formatDeltaPercent_(stats.deltaVolumePercent);
@@ -2353,9 +2362,6 @@
 
       const openPct = stats.total ? Math.round((stats.stillOpen / stats.total) * 1000) / 10 : 0;
       document.getElementById("stat-still-open-delta").textContent = openPct + "% ของทั้งหมด";
-
-      document.getElementById("stat-resolved-late-delta").textContent =
-        stats.resolvedLate > 0 ? "ปิดเคสได้ภายหลังติดตาม" : "ยังไม่มีเคสปิดภายหลังในช่วงนี้";
     }
 
     // ---------------- กราฟแนวโน้ม (SVG ล้วน ไม่พึ่งไลบรารีภายนอก) ----------------
@@ -2412,10 +2418,9 @@
 
     // ---------------- โดนัทสถานะเคสสะสม ----------------
     function renderDonutChart_(stats) {
-      stats = stats || { total: 0, resolvedSame: 0, resolvedLate: 0, stillOpen: 0 };
+      stats = stats || { total: 0, resolvedSame: 0, stillOpen: 0 };
       const segments = [
         { label: "สำเร็จทันที", value: stats.resolvedSame, color: "var(--secondary)" },
-        { label: "ปิดเคสภายหลัง", value: stats.resolvedLate, color: "#D97706" },
         { label: "ค้างติดตาม", value: stats.stillOpen, color: "var(--danger)" }
       ];
       const total = Math.max(stats.total, 1);
@@ -2442,37 +2447,34 @@
       }).join("");
     }
 
-    // ---------------- แยกรายการยา (แท่งแนวนอน) ----------------
-    let lastMedBreakdown = []; // เก็บไว้ใช้กรองด้วยช่องค้นหาโดยไม่ต้องโหลดข้อมูลใหม่
-
-    function renderMedBreakdownChart_(medBreakdown) {
-      lastMedBreakdown = medBreakdown || [];
-      applyMedBreakdownFilter_();
-    }
-
-    function applyMedBreakdownFilter_() {
-      const filterEl = document.getElementById("med-breakdown-filter");
-      const query = filterEl ? filterEl.value.trim().toLowerCase() : "";
-      const filtered = lastMedBreakdown.filter(function (m) {
-        if (!query) return true;
-        const haystack = (m.name + " " + (m.size || "") + " " + (m.unit || "")).toLowerCase();
-        return haystack.indexOf(query) !== -1;
-      });
-      const items = filtered.map(function (m) {
-        const sizeLabel = m.size ? (" " + m.size) : " ไม่ระบุขนาด";
-        const unitLabel = m.unit ? (" (" + m.unit + ")") : "";
-        return { name: m.name + sizeLabel + unitLabel, count: m.totalQty };
-      });
-      const emptyText = query
-        ? "ไม่พบยาที่ตรงกับคำค้นหา \"" + query + "\""
-        : "ยังไม่มีข้อมูลรายการยาในช่วงที่เลือก";
-      renderHorizontalBarList_("med-breakdown-chart", items, "var(--primary)", "medication", emptyText);
-    }
-
     // ---------------- วันที่ค้างยา แยกรายสัปดาห์ (แท่งแนวนอน) ----------------
     function renderWeekBreakdownChart_(weekBreakdown) {
       const items = (weekBreakdown || []).map(function (w) { return { name: "สัปดาห์ " + w.label, count: w.count }; });
       renderHorizontalBarList_("week-breakdown-chart", items, "var(--secondary)", "calendar_view_week", "ยังไม่มีข้อมูลในช่วงที่เลือก");
+    }
+
+    // ---------------- ยาที่จ่ายไปมากที่สุด (Top 5) แยกทีละชนิดยา (แท่งแนวนอน) ----------------
+    function renderMedicationChart_(items) {
+      const container = document.getElementById("medication-chart");
+      if (!items || items.length === 0) {
+        container.innerHTML = emptyStateHtml_("medication", "ยังไม่มีข้อมูลการจ่ายยาในช่วงที่เลือก");
+        return;
+      }
+      const maxQty = Math.max.apply(null, items.map(function (it) { return it.qty; }).concat([1]));
+      container.innerHTML = items.map(function (it) {
+        const pct = Math.max(4, Math.round((it.qty / maxQty) * 100));
+        return (
+          '<div style="margin-bottom:10px;">' +
+            '<div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:4px;">' +
+              '<span>' + escapeHtml_(it.name) + '</span>' +
+              '<span style="font-weight:700; color:var(--text);">' + it.qty.toLocaleString("th-TH") + ' ' + escapeHtml_(it.unit || "หน่วย") + '</span>' +
+            '</div>' +
+            '<div style="background:var(--background); border-radius:6px; height:10px; overflow:hidden;">' +
+              '<div style="width:' + pct + '%; height:100%; background:var(--primary); border-radius:6px;"></div>' +
+            '</div>' +
+          '</div>'
+        );
+      }).join("");
     }
 
     // ---------------- ตัวช่วยวาดกราฟแท่งแนวนอน (ไม่พึ่งไลบรารีภายนอก) ----------------
@@ -3198,8 +3200,41 @@
         });
         tr.lastElementChild.appendChild(editBtn);
 
+        const deleteBtn = document.createElement("button");
+        deleteBtn.type = "button";
+        deleteBtn.className = "btn btn-danger";
+        deleteBtn.style.width = "auto";
+        deleteBtn.style.padding = "6px 12px";
+        deleteBtn.style.marginLeft = "6px";
+        deleteBtn.innerHTML = '<span class="material-icons-outlined" style="font-size:16px;">delete</span><span class="btn-label">ลบ</span>';
+        deleteBtn.addEventListener("click", function () {
+          onDeleteHistoryRecord_(r, deleteBtn);
+        });
+        tr.lastElementChild.appendChild(deleteBtn);
+
         tbody.appendChild(tr);
       });
+    }
+
+    // ---------------- ลบรายการจากหน้าประวัติการบันทึก ----------------
+    function onDeleteHistoryRecord_(record, btnEl) {
+      const label = (record.prefix || "") + (record.fullName || "") + (record.hn ? " (HN: " + record.hn + ")" : "");
+      const confirmed = window.confirm(
+        "ยืนยันการลบรายการนี้?\n" + label + "\n\nการลบไม่สามารถกู้คืนได้"
+      );
+      if (!confirmed) return;
+
+      if (btnEl) btnEl.disabled = true;
+      google.script.run
+        .withSuccessHandler(function () {
+          showToast("ลบรายการสำเร็จ", "success");
+          loadHistory_();
+        })
+        .withFailureHandler(function (err) {
+          if (btnEl) btnEl.disabled = false;
+          showToast("ลบรายการไม่สำเร็จ: " + errMsg_(err), "error");
+        })
+        .deleteRecord(record.id);
     }
 
     // ---------------- ส่งออกประวัติเป็นไฟล์ CSV (เปิดใน Excel ได้ทันที) ----------------
