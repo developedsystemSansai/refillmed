@@ -1213,6 +1213,138 @@
     }
 
     /* ============================================================
+       Modal กล้อง — ฟีดแบ็กยืนยันการถ่ายรูปสำเร็จ
+       ============================================================ */
+    .camera-video-wrap {
+      position: relative;
+      margin-bottom: 12px;
+    }
+
+    .camera-video-wrap video {
+      margin-bottom: 0 !important;
+    }
+
+    /* กะพริบขอบเขียวรอบวิดีโอตอนกดชัตเตอร์ - ฟีดแบ็กทันที (ไว) */
+    .camera-video-wrap.flash::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 12px;
+      background: #fff;
+      opacity: 0;
+      pointer-events: none;
+      animation: cameraFlashPulse 0.25s ease-out;
+    }
+
+    @keyframes cameraFlashPulse {
+      0% { opacity: 0.55; }
+      100% { opacity: 0; }
+    }
+
+    /* ป้ายยืนยัน "ถ่ายรูปสำเร็จ" ลอยขึ้นกลางจอวิดีโอ - ฟีดแบ็กที่มองเห็นชัด (ช้ากว่าแฟลชนิดหน่อยให้อ่านทัน) */
+    .camera-success-badge {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.85);
+      background: rgba(16, 122, 66, 0.94);
+      color: #fff;
+      padding: 12px 22px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+      transition: opacity 0.18s ease, transform 0.18s ease;
+      z-index: 3;
+    }
+
+    .camera-success-badge.show {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .camera-success-badge .material-icons-outlined {
+      font-size: 22px;
+    }
+
+    /* แถบรูปย่อที่ถ่ายแล้วในเซสชันนี้ - ให้เห็นหลักฐานค้างจอตลอด ไม่ใช่แค่กะพริบผ่านตา */
+    .camera-shot-strip {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 4px 2px 10px 2px;
+      margin-bottom: 4px;
+      min-height: 66px;
+      scroll-behavior: smooth;
+    }
+
+    .camera-shot-strip-empty {
+      margin: 0;
+      padding: 10px 4px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .camera-shot-thumb {
+      position: relative;
+      width: 58px;
+      height: 58px;
+      flex: 0 0 auto;
+      animation: cameraShotPopIn 0.25s ease-out;
+    }
+
+    @keyframes cameraShotPopIn {
+      0% { transform: scale(0.4); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .camera-shot-thumb img {
+      width: 58px;
+      height: 58px;
+      border-radius: 10px;
+      object-fit: cover;
+      border: 2px solid #22c55e;
+      display: block;
+      background: #000;
+    }
+
+    .camera-shot-thumb .camera-shot-remove {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--danger);
+      color: #fff;
+      border: 2px solid var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .camera-shot-thumb .camera-shot-remove .material-icons-outlined {
+      font-size: 12px;
+    }
+
+    #btn-capture-camera.capturing {
+      transform: scale(0.9);
+      opacity: 0.85;
+    }
+
+    #btn-capture-camera {
+      transition: transform 0.12s ease, opacity 0.12s ease;
+    }
+
+    /* ============================================================
        ประวัติ
        ============================================================ */
     .filter-bar {
@@ -2142,9 +2274,19 @@
       <p id="camera-shot-count" style="margin:0 0 10px 0; color:var(--muted); font-size:13px;">ถ่ายได้หลายรูปต่อเนื่อง (1 คนอาจมีหลายซองยา) — กดปุ่ม "เสร็จสิ้น" เมื่อถ่ายครบแล้ว</p>
 
       <!-- พื้นที่แสดงภาพสดจากกล้อง -->
-      <video id="camera-stream" autoplay playsinline style="width: 100%; max-height: 700px; border-radius: 12px; background: #000; margin-bottom: 12px; object-fit: cover;"></video>
-      <canvas id="camera-canvas" class="hidden"></canvas>
-      
+      <div class="camera-video-wrap" id="camera-video-wrap">
+        <video id="camera-stream" autoplay playsinline style="width: 100%; max-height: 700px; border-radius: 12px; background: #000; object-fit: cover;"></video>
+        <canvas id="camera-canvas" class="hidden"></canvas>
+        <!-- ป้ายยืนยันลอยกลางวิดีโอทันทีที่ถ่ายสำเร็จ -->
+        <div class="camera-success-badge" id="camera-success-badge">
+          <span class="material-icons-outlined">check_circle</span>
+          <span>ถ่ายรูปสำเร็จ</span>
+        </div>
+      </div>
+
+      <!-- แถบรูปย่อของทุกภาพที่ถ่ายไปแล้วในเซสชันนี้ - หลักฐานที่มองเห็นได้ตลอดว่าถ่ายอะไรไปแล้วบ้าง ลบทิ้งทีละรูปได้ทันที -->
+      <div id="camera-shot-strip" class="camera-shot-strip"></div>
+
       <div class="form-actions" style="justify-content: center;">
         <button class="btn btn-outline" id="btn-cancel-camera">เสร็จสิ้น</button>
         <button class="btn btn-primary" id="btn-capture-camera" style="width:auto;">
@@ -4609,6 +4751,7 @@
 
       document.getElementById("modal-camera").classList.remove("hidden");
       updateCameraShotCount_();
+      renderCameraShotStrip_(); // แสดงรูปที่เคยถ่ายไว้แล้ว (ถ้ามี) ทันทีตอนเปิดกล้องอีกครั้ง
 
       // ขออนุญาตใช้งานกล้อง
       navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
@@ -4661,6 +4804,9 @@
       btnCaptureCam.addEventListener("click", function(e) {
         e.preventDefault();
 
+        // กันกดรัว/กดซ้ำตอนกำลังประมวลผลรูปก่อนหน้า (debounce) — ป้องกันถ่ายซ้อนกันโดยไม่ตั้งใจ
+        if (btnCaptureCam.disabled) return;
+
         if (totalPhotoCount_() >= MAX_PHOTOS_CLIENT) {
           showToast("แนบรูปได้สูงสุด " + MAX_PHOTOS_CLIENT + " รูปต่อ 1 รายการแล้ว", "warning");
           return;
@@ -4684,27 +4830,109 @@
           base64: base64,
           mimeType: "image/jpeg",
           fileName: "webcam_" + Date.now() + ".jpg",
-          previewUrl: dataUrl
+          previewUrl: dataUrl,
+          _cameraShot: true,
+          _shotId: "cam_" + Date.now() + "_" + Math.random().toString(36).slice(2)
         });
 
         updateCameraShotCount_();
         renderPhotoThumbs_();
-        flashCameraCapture_();
+        renderCameraShotStrip_();
+        confirmCaptureSuccess_();
+
+        // กันปุ่มกดซ้ำสั้น ๆ ระหว่างที่ฟีดแบ็กกำลังเล่นอยู่ + ให้ปุ่มมีอาการ "ยุบตัว" ตอบสนองการกด
+        btnCaptureCam.disabled = true;
+        btnCaptureCam.classList.add("capturing");
+        setTimeout(function () {
+          btnCaptureCam.disabled = false;
+          btnCaptureCam.classList.remove("capturing");
+        }, 400);
 
         if (totalPhotoCount_() >= MAX_PHOTOS_CLIENT) {
           showToast("แนบรูปได้สูงสุด " + MAX_PHOTOS_CLIENT + " รูปต่อ 1 รายการแล้ว กด \"เสร็จสิ้น\" เพื่อปิดกล้อง", "warning");
         }
         // หมายเหตุ: ไม่ปิดกล้องหลังถ่ายแต่ละรูป — ผู้ใช้กดปุ่ม "เสร็จสิ้น" (btn-cancel-camera) เอง
         // เมื่อถ่ายครบทุกซองยาแล้ว เพื่อให้ถ่ายต่อเนื่องหลายรูปได้โดยไม่ต้องเปิดกล้องใหม่ทุกครั้ง
+        // (ทางเลือกเดิมคือเด้งกลับไปหน้ากรอกทุกครั้งที่ถ่าย 1 รูป แต่จะทำให้การถ่ายหลายซองยา
+        // ต้องกดเปิดกล้องใหม่ทุกรอบ — จึงเลือกให้กล้องค้างไว้ แล้วเสริมฟีดแบ็กให้ชัดแทน)
       });
     }
 
-    /** เอฟเฟกต์กะพริบสั้น ๆ บนวิดีโอให้รู้สึกว่าถ่ายภาพสำเร็จแล้ว */
-    function flashCameraCapture_() {
-      const video = document.getElementById("camera-stream");
-      if (!video) return;
-      video.style.opacity = "0.3";
-      setTimeout(function () { video.style.opacity = "1"; }, 120);
+    /**
+     * ฟีดแบ็กยืนยันว่า "ถ่ายรูปสำเร็จ" ทันทีที่กดชัตเตอร์ — ออกแบบเป็น 3 ชั้นซ้อนกัน
+     * เพื่อให้ผู้ใช้มั่นใจแม้จะกดถ่ายเร็ว ๆ ต่อเนื่องหลายรูปติดกัน:
+     *   1) แฟลชขาววาบที่ขอบวิดีโอ (ตอบสนองทันที เห็นจากหางตา)
+     *   2) ป้าย "ถ่ายรูปสำเร็จ" ลอยกลางจอสั้น ๆ (ยืนยันชัดเจนตรงจุดที่สายตามอง)
+     *   3) รูปย่อเด้งเข้าแถบด้านล่างวิดีโอค้างอยู่ตลอด (หลักฐานถาวรว่าถ่ายไปแล้วกี่รูป ลบได้ทันทีถ้าไม่ต้องการ)
+     * และสั่นเบา ๆ บนมือถือที่รองรับ เพื่อเสริมฟีดแบ็กแบบสัมผัสด้วย
+     */
+    function confirmCaptureSuccess_() {
+      const wrap = document.getElementById("camera-video-wrap");
+      const badge = document.getElementById("camera-success-badge");
+
+      if (wrap) {
+        wrap.classList.remove("flash");
+        // force reflow เพื่อให้เล่นแอนิเมชันซ้ำได้ทุกครั้งแม้ถ่ายรัว ๆ
+        void wrap.offsetWidth;
+        wrap.classList.add("flash");
+      }
+
+      if (badge) {
+        badge.classList.add("show");
+        clearTimeout(badge._hideTimer);
+        badge._hideTimer = setTimeout(function () {
+          badge.classList.remove("show");
+        }, 550);
+      }
+
+      if (window.navigator && typeof window.navigator.vibrate === "function") {
+        try { window.navigator.vibrate(40); } catch (e) { /* บางเบราว์เซอร์ไม่รองรับ ข้ามไปเงียบ ๆ */ }
+      }
+    }
+
+    /**
+     * เรนเดอร์แถบรูปย่อของภาพที่ถ่ายด้วยกล้องในเซสชันนี้ ใต้จอวิดีโอ
+     * ให้ผู้ใช้เห็นตลอดว่าถ่ายอะไรไปแล้วบ้าง กี่รูป และลบทิ้งเป็นรายรูปได้ทันที
+     * โดยไม่ต้องปิดกล้องออกไปดูที่หน้ากรอกก่อน
+     */
+    function renderCameraShotStrip_() {
+      const strip = document.getElementById("camera-shot-strip");
+      if (!strip) return;
+
+      const shots = selectedPhotos.filter(function (p) { return p && p._cameraShot; });
+
+      if (shots.length === 0) {
+        strip.innerHTML = '<p class="camera-shot-strip-empty">ยังไม่มีรูปที่ถ่ายในรอบนี้ — ถ่ายรูปแรกได้เลย</p>';
+        return;
+      }
+
+      strip.innerHTML = shots.map(function (p) {
+        return '<div class="camera-shot-thumb">' +
+          '<img src="' + p.previewUrl + '" alt="รูปที่ถ่าย">' +
+          '<button type="button" class="camera-shot-remove" data-shot-id="' + p._shotId + '" title="ลบรูปนี้">' +
+            '<span class="material-icons-outlined">close</span>' +
+          '</button>' +
+        '</div>';
+      }).join("");
+
+      strip.querySelectorAll(".camera-shot-remove").forEach(function (btn) {
+        btn.addEventListener("click", function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          const shotId = btn.getAttribute("data-shot-id");
+          const idx = selectedPhotos.findIndex(function (p) { return p && p._shotId === shotId; });
+          if (idx > -1) {
+            selectedPhotos.splice(idx, 1);
+            renderCameraShotStrip_();
+            renderPhotoThumbs_();
+            updateCameraShotCount_();
+            showToast("ลบรูปนี้ออกแล้ว", "info");
+          }
+        });
+      });
+
+      // เลื่อนแถบไปสุดขวาอัตโนมัติ ให้เห็นรูปล่าสุดที่เพิ่งถ่ายเสมอ
+      strip.scrollLeft = strip.scrollWidth;
     }
   </script>
 </body>
