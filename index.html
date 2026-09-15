@@ -2536,9 +2536,17 @@
       const wrap = document.createElement("div");
       wrap.className = "record-item";
 
-      const thumbHtml = r.photoUrl
-        ? '<img class="record-thumb" src="' + escapeHtml_(r.photoUrl) + '" alt="รูปยา">'
-        : '<div class="record-thumb-placeholder"><span class="material-icons-outlined">medication</span></div>';
+      let thumbHtml;
+      if (r.photoUrl) {
+        const urls = driveImageUrls_(r.photoUrl);
+        thumbHtml =
+          '<a href="' + escapeHtml_(urls.full) + '" target="_blank" rel="noopener">' +
+            '<img class="record-thumb" src="' + escapeHtml_(urls.thumb) + '" alt="รูปยา" loading="lazy" ' +
+            'onerror="this.onerror=null;this.src=&quot;' + escapeHtml_(urls.full) + '&quot;;">' +
+          '</a>';
+      } else {
+        thumbHtml = '<div class="record-thumb-placeholder"><span class="material-icons-outlined">medication</span></div>';
+      }
 
       const badgeClass = statusBadgeClass_(r.status);
 
@@ -3082,7 +3090,12 @@
       existingPhotoUrl = record.photoUrl || "";
       const preview = document.getElementById("photo-preview");
       if (existingPhotoUrl) {
-        preview.src = existingPhotoUrl;
+        const editPhotoUrls = driveImageUrls_(existingPhotoUrl);
+        preview.onerror = function () {
+          preview.onerror = null;
+          preview.src = editPhotoUrls.full;
+        };
+        preview.src = editPhotoUrls.thumb;
         preview.style.display = "inline-block";
         document.getElementById("btn-remove-photo").classList.remove("hidden");
         document.getElementById("existing-photo-note").classList.remove("hidden");
@@ -3168,9 +3181,11 @@
 
         const tr = document.createElement("tr");
         const badgeClass = statusBadgeClass_(r.status);
-        const photoCell = r.photoUrl
-          ? '<a href="' + escapeHtml_(r.photoUrl) + '" target="_blank" rel="noopener">' +
-              '<img class="history-thumb" src="' + escapeHtml_(r.photoUrl) + '" alt="รูปยา" loading="lazy">' +
+        const photoUrls = r.photoUrl ? driveImageUrls_(r.photoUrl) : null;
+        const photoCell = photoUrls
+          ? '<a href="' + escapeHtml_(photoUrls.full) + '" target="_blank" rel="noopener">' +
+              '<img class="history-thumb" src="' + escapeHtml_(photoUrls.thumb) + '" alt="รูปยา" loading="lazy" ' +
+              'onerror="this.onerror=null;this.src=&quot;' + escapeHtml_(photoUrls.full) + '&quot;;">' +
             '</a>'
           : '<div class="history-thumb-placeholder"><span class="material-icons-outlined">image_not_supported</span></div>';
         const nameCell = escapeHtml_((r.prefix || "") + r.fullName);
@@ -3567,6 +3582,25 @@
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
+    }
+
+    // ---------------- แปลง URL รูปภาพจาก Google Drive ให้แสดงพรีวิวได้จริง ----------------
+    // ปัญหาที่พบ: URL รูปแบบเดิม "https://drive.google.com/uc?id=..." บางครั้งไม่ยอม
+    // แสดงผลใน <img> โดยตรง (ขึ้นอยู่กับนโยบายแชร์/ชนิดไฟล์) จึงต้องดึง "รหัสไฟล์" (id)
+    // ออกมาแล้วสร้างลิงก์ 2 แบบ: thumb = ลิงก์ thumbnail ของ Drive (ใช้แสดงพรีวิวเล็กๆ
+    // ในตาราง/รายการ เชื่อถือได้กว่า) และ full = ลิงก์เปิดดูรูปเต็มขนาดตอนกดเข้าไปดู
+    // ถ้า URL ที่บันทึกไว้ไม่ใช่ลิงก์ Google Drive (เช่นเป็นลิงก์รูปจากที่อื่น) จะคืนค่า
+    // URL เดิมกลับไปทั้งคู่โดยไม่แตะต้อง เพื่อไม่ให้กระทบข้อมูลเก่ารูปแบบอื่น
+    function driveImageUrls_(url) {
+      const raw = String(url || "").trim();
+      if (!raw) return { thumb: "", full: "" };
+      const m = /[?&]id=([a-zA-Z0-9_-]+)/.exec(raw) || /\/d\/([a-zA-Z0-9_-]+)/.exec(raw);
+      if (!m) return { thumb: raw, full: raw };
+      const id = m[1];
+      return {
+        thumb: "https://drive.google.com/thumbnail?id=" + id + "&sz=w400",
+        full: "https://drive.google.com/uc?export=view&id=" + id
+      };
     }
 
     function trendDayLabel_(isoDate) {
