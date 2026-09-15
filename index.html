@@ -1003,13 +1003,61 @@
       flex-wrap: wrap;
     }
 
-    .photo-preview {
+    .photo-thumb-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .photo-thumb-item {
+      position: relative;
+      width: 76px;
+      height: 76px;
+      flex: 0 0 auto;
+    }
+
+    .photo-thumb-item img {
       width: 76px;
       height: 76px;
       border-radius: 12px;
       object-fit: cover;
       border: 1px solid var(--border);
-      display: none;
+      display: block;
+      background: var(--background);
+    }
+
+    .photo-thumb-item .photo-thumb-remove {
+      position: absolute;
+      top: -7px;
+      right: -7px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--danger);
+      color: #fff;
+      border: 2px solid var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .photo-thumb-item .photo-thumb-remove .material-icons-outlined {
+      font-size: 14px;
+    }
+
+    .photo-thumb-item .photo-thumb-new-badge {
+      position: absolute;
+      bottom: -6px;
+      left: -6px;
+      background: var(--primary);
+      color: #fff;
+      font-size: 9px;
+      line-height: 1;
+      padding: 3px 5px;
+      border-radius: 6px;
     }
 
     .form-actions {
@@ -1033,6 +1081,33 @@
     .filter-bar .form-field {
       margin-bottom: 0;
       min-width: 150px;
+    }
+
+    .linear-progress {
+      width: 100%;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+      margin: 0 0 16px 0;
+      position: relative;
+    }
+
+    .linear-progress-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 40%;
+      background: var(--primary);
+      border-radius: 2px;
+      animation: linearProgressMove 1.1s ease-in-out infinite;
+    }
+
+    @keyframes linearProgressMove {
+      0%   { left: -40%; width: 40%; }
+      50%  { left: 30%;  width: 45%; }
+      100% { left: 100%; width: 40%; }
     }
 
     .table-wrap {
@@ -1588,7 +1663,7 @@
               </div>
 
               <div class="form-field full">
-                <label>ภาพถ่ายรายการยา (ถ้ามี)</label>
+                <label>ภาพถ่ายรายการยา (ถ้ามี) — แนบได้หลายรูป (ผู้ป่วย 1 คนอาจมีหลายซองยา)</label>
                 <div class="photo-input-wrap">
                   <button type="button" class="btn btn-outline" id="btn-attach-photo" style="width:auto;">
                     <span class="material-icons-outlined">attach_file</span>
@@ -1598,15 +1673,15 @@
                     <span class="material-icons-outlined">photo_camera</span>
                     <span class="btn-label">ถ่ายรูป</span>
                   </button>
-                  <input type="file" id="field-photo-attach" accept="image/*" class="hidden">
-                  <input type="file" id="field-photo-camera" accept="image/*" capture="environment" class="hidden">
-                  <img id="photo-preview" class="photo-preview" alt="ตัวอย่างรูปภาพ">
-                  <button type="button" class="btn btn-outline hidden" id="btn-remove-photo" style="width:auto;">
-                    <span class="material-icons-outlined">close</span>
-                  </button>
+                  <input type="file" id="field-photo-attach" accept="image/*" multiple class="hidden">
+                  <input type="file" id="field-photo-camera" accept="image/*" capture="environment" multiple class="hidden">
                 </div>
+                <div id="photo-thumb-grid" class="photo-thumb-grid"></div>
                 <p id="existing-photo-note" class="hidden" style="font-size:12px; color:var(--muted); margin:6px 0 0 0;">
-                  รูปปัจจุบันของรายการนี้แสดงอยู่ด้านบน หากไม่แนบรูปใหม่ ระบบจะคงรูปเดิมไว้
+                  รูปด้านบนคือรูปของรายการนี้ (รูปเดิม + รูปที่เพิ่งเพิ่ม) กดปุ่ม × ที่มุมรูปเพื่อลบรูปที่ไม่ต้องการออก
+                </p>
+                <p style="font-size:12px; color:var(--muted); margin:6px 0 0 0;">
+                  แนบได้สูงสุด <span id="photo-max-label">10</span> รูปต่อ 1 รายการ · ไฟล์ละไม่เกิน 8MB
                 </p>
               </div>
 
@@ -1656,6 +1731,10 @@
                 <span class="material-icons-outlined">download</span>
                 <span class="btn-label">ส่งออก Excel (CSV)</span>
               </button>
+            </div>
+
+            <div class="linear-progress hidden" id="history-download-progress">
+              <div class="linear-progress-bar"></div>
             </div>
 
             <div class="table-wrap">
@@ -1776,17 +1855,35 @@
       </div>
     </div>
   </div>
+<!-- ================= Modal: สรุปข้อมูลก่อนบันทึก ================= -->
+  <div class="modal-overlay hidden" id="modal-confirm-save">
+    <div class="modal-box" style="max-width:560px; text-align:left;">
+      <h3><span class="material-icons-outlined">fact_check</span> ตรวจสอบข้อมูลก่อนบันทึก</h3>
+      <p class="hint">กรุณาตรวจสอบข้อมูลด้านล่างให้ถูกต้องก่อนกดยืนยันบันทึก</p>
+      <div id="confirm-save-warning" class="hidden" style="display:flex; gap:8px; align-items:flex-start; background:#FEF3C7; color:#92400E; border:1px solid #FDE68A; border-radius:10px; padding:10px 12px; margin-bottom:14px; font-size:13px; line-height:1.5;"></div>
+      <div id="confirm-save-summary" style="max-height:50vh; overflow-y:auto; margin-bottom:8px;"></div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-outline" id="btn-confirm-save-back">ย้อนกลับแก้ไข</button>
+        <button type="button" class="btn btn-primary" id="btn-confirm-save-yes" style="width:auto;">
+          <span class="material-icons-outlined">check_circle</span>
+          <span class="btn-label">ยืนยันบันทึก</span>
+          <span class="spinner"></span>
+        </button>
+      </div>
+    </div>
+  </div>
 <!-- ================= Modal: เปิดกล้อง WebCam ================= -->
   <div class="modal-overlay hidden" id="modal-camera">
     <div class="modal-box" style="text-align: center; max-width: 900px; width: 90%;">
       <h3><span class="material-icons-outlined">photo_camera</span> ถ่ายรูปรายการยา</h3>
-      
+      <p id="camera-shot-count" style="margin:0 0 10px 0; color:var(--muted); font-size:13px;">ถ่ายได้หลายรูปต่อเนื่อง (1 คนอาจมีหลายซองยา) — กดปุ่ม "เสร็จสิ้น" เมื่อถ่ายครบแล้ว</p>
+
       <!-- พื้นที่แสดงภาพสดจากกล้อง -->
       <video id="camera-stream" autoplay playsinline style="width: 100%; max-height: 700px; border-radius: 12px; background: #000; margin-bottom: 12px; object-fit: cover;"></video>
       <canvas id="camera-canvas" class="hidden"></canvas>
       
       <div class="form-actions" style="justify-content: center;">
-        <button class="btn btn-outline" id="btn-cancel-camera">ยกเลิก</button>
+        <button class="btn btn-outline" id="btn-cancel-camera">เสร็จสิ้น</button>
         <button class="btn btn-primary" id="btn-capture-camera" style="width:auto;">
           <span class="material-icons-outlined">camera</span>
           <span class="btn-label">กดถ่ายภาพ</span>
@@ -1840,14 +1937,15 @@
     let currentDashboardRange = 3; // 1 / 3 / 7 วัน
     let settingsToken = null;
     let settingsTokenExpiry = 0;
-    let selectedPhoto = null;        // { base64, mimeType, fileName }
-    let existingPhotoUrl = "";       // รูปเดิมของรายการที่กำลังแก้ไข
-    let removeExistingPhoto = false;
+    let selectedPhotos = [];         // รูปใหม่ที่เพิ่ง เลือก/ถ่าย [{ base64, mimeType, fileName }]
+    let existingPhotoUrls = [];      // รูปเดิมของรายการที่กำลังแก้ไข (ที่ยังไม่ถูกลบออก)
+    const MAX_PHOTOS_CLIENT = 10;    // จำกัดจำนวนรูปสูงสุดต่อ 1 รายการ (ต้องตรงกับฝั่ง Code.gs)
     let selectedMeds = [];           // รายการยาที่เลือกไว้ [{name, qty, size, fixedSize}]
     let medPool = [];                // รายชื่อยา+ขนาดทั้งหมดจากบัญชียา (MED_CATEGORIES) สำหรับค้นหา
     let editingRecordId = null;      // null = โหมดเพิ่มใหม่ / มีค่า = โหมดแก้ไข
     let historyRecordsCache = {};    // เก็บ record ล่าสุดที่โหลดไว้ ใช้ตอนกดแก้ไข
     let lastHistoryRecords = [];     // เก็บผลลัพธ์การค้นหาประวัติล่าสุด ใช้ตอนส่งออก CSV
+    let pendingSaveFormData_ = null; // ข้อมูลฟอร์มที่รอผู้ใช้กด "ยืนยันบันทึก" ในหน้าสรุป
 
     // บัญชียาของโรงพยาบาล พร้อม "ขนาด" (ความแรง/รูปแบบ) กำกับแต่ละตัว — สร้างขึ้นจากการ
     // วิเคราะห์ประวัติการจ่ายยาจริงของหน่วยงาน (ไฟล์ "ข้อมูลจุดรับยาค้าง") แล้วรวมชื่อยา
@@ -2164,7 +2262,6 @@
       document.getElementById("btn-take-photo").addEventListener("click", startCamera_);
       document.getElementById("field-photo-attach").addEventListener("change", onPhotoSelected_);
       document.getElementById("field-photo-camera").addEventListener("change", onPhotoSelected_);
-      document.getElementById("btn-remove-photo").addEventListener("click", onRemovePhoto_);
 
       document.querySelectorAll('input[name="prefix"]').forEach(function (el) {
         el.addEventListener("change", updatePillStates_);
@@ -2179,9 +2276,15 @@
         el.addEventListener("change", updatePillStates_);
       });
 
-      document.getElementById("field-hn").addEventListener("blur", checkDuplicateAndWarn_);
-      document.getElementById("field-fullname").addEventListener("blur", checkDuplicateAndWarn_);
+      // เช็คข้อมูลซ้ำแบบเรียลไทม์ขณะพิมพ์ (debounce ในตัวฟังก์ชัน) แทนที่จะรอ blur
+      // เพื่อให้เจ้าหน้าที่เห็นคำเตือนทันทีที่กำลังกรอกข้อมูลที่อาจซ้ำ
+      document.getElementById("field-queue").addEventListener("input", checkDuplicateAndWarn_);
+      document.getElementById("field-hn").addEventListener("input", checkDuplicateAndWarn_);
+      document.getElementById("field-fullname").addEventListener("input", checkDuplicateAndWarn_);
       document.getElementById("field-pendingdate").addEventListener("change", checkPendingDateAndWarn_);
+
+      document.getElementById("btn-confirm-save-back").addEventListener("click", closeConfirmSaveModal_);
+      document.getElementById("btn-confirm-save-yes").addEventListener("click", performConfirmedSave_);
 
       buildMedPool_();
 
@@ -2537,12 +2640,17 @@
       wrap.className = "record-item";
 
       let thumbHtml;
-      if (r.photoUrl) {
-        const urls = driveImageUrls_(r.photoUrl);
+      const photoList = splitPhotoUrlsClient_(r.photoUrl);
+      if (photoList.length > 0) {
+        const urls = driveImageUrls_(photoList[0]);
+        const moreBadge = photoList.length > 1
+          ? '<span class="photo-thumb-new-badge" style="background:var(--text);">+' + (photoList.length - 1) + '</span>'
+          : '';
         thumbHtml =
-          '<a href="' + escapeHtml_(urls.full) + '" target="_blank" rel="noopener">' +
+          '<a href="' + escapeHtml_(urls.full) + '" target="_blank" rel="noopener" style="position:relative; display:inline-block;">' +
             '<img class="record-thumb" src="' + escapeHtml_(urls.thumb) + '" alt="รูปยา" loading="lazy" ' +
             'onerror="this.onerror=null;this.src=&quot;' + escapeHtml_(urls.full) + '&quot;;">' +
+            moreBadge +
           '</a>';
       } else {
         thumbHtml = '<div class="record-thumb-placeholder"><span class="material-icons-outlined">medication</span></div>';
@@ -2841,50 +2949,119 @@
       return String(value).replace(/["\\]/g, "\\$&");
     }
 
-    // ---------------- ภาพถ่ายรายการยา ----------------
+    // ---------------- ภาพถ่ายรายการยา (รองรับหลายรูปต่อ 1 รายการ) ----------------
+
+    /** จำนวนรูปทั้งหมดที่ "จะถูกบันทึก" ถ้ากดบันทึกตอนนี้ (รูปเดิมที่เหลือ + รูปใหม่ที่เพิ่ม) */
+    function totalPhotoCount_() {
+      return existingPhotoUrls.length + selectedPhotos.length;
+    }
+
     function onPhotoSelected_(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      if (file.size > 8 * 1024 * 1024) {
-        showToast("ไฟล์รูปภาพมีขนาดใหญ่เกินไป (สูงสุด 8MB)", "error");
-        e.target.value = "";
-        return;
-      }
+      const files = Array.prototype.slice.call(e.target.files || []);
+      if (files.length === 0) return;
 
-      const reader = new FileReader();
-      reader.onload = function () {
-        const result = reader.result; // data:image/jpeg;base64,xxxx
-        const base64 = result.split(",")[1];
-        selectedPhoto = {
-          base64: base64,
-          mimeType: file.type || "image/jpeg",
-          fileName: file.name || "photo.jpg"
-        };
-        removeExistingPhoto = false;
-        const preview = document.getElementById("photo-preview");
-        preview.src = result;
-        preview.style.display = "inline-block";
-        document.getElementById("btn-remove-photo").classList.remove("hidden");
-      };
-      reader.readAsDataURL(file);
-
-      // ล้างค่า input อีกฝั่งเพื่อไม่ให้สับสนว่าเลือกไฟล์จากช่องไหน
       const otherInput = e.target.id === "field-photo-attach"
         ? document.getElementById("field-photo-camera")
         : document.getElementById("field-photo-attach");
+
+      let skippedForLimit = false;
+      const readPromises = [];
+
+      files.forEach(function (file) {
+        if (totalPhotoCount_() + readPromises.length >= MAX_PHOTOS_CLIENT) {
+          skippedForLimit = true;
+          return;
+        }
+        if (file.size > 8 * 1024 * 1024) {
+          showToast("ไฟล์ \"" + file.name + "\" มีขนาดใหญ่เกินไป (สูงสุด 8MB) — ข้ามไฟล์นี้", "error");
+          return;
+        }
+        readPromises.push(new Promise(function (resolve) {
+          const reader = new FileReader();
+          reader.onload = function () {
+            resolve({
+              base64: reader.result.split(",")[1],
+              mimeType: file.type || "image/jpeg",
+              fileName: file.name || "photo.jpg",
+              previewUrl: reader.result
+            });
+          };
+          reader.onerror = function () { resolve(null); };
+          reader.readAsDataURL(file);
+        }));
+      });
+
+      Promise.all(readPromises).then(function (results) {
+        results.filter(Boolean).forEach(function (p) { selectedPhotos.push(p); });
+        if (skippedForLimit) {
+          showToast("แนบรูปได้สูงสุด " + MAX_PHOTOS_CLIENT + " รูปต่อ 1 รายการ บางไฟล์จึงไม่ถูกเพิ่ม", "warning");
+        }
+        renderPhotoThumbs_();
+      });
+
+      // ล้างค่า input ทั้งสองฝั่งเพื่อให้เลือกไฟล์ซ้ำอีกครั้งได้ (change event ต้องยิงใหม่ทุกครั้ง)
+      e.target.value = "";
       otherInput.value = "";
     }
 
-    function onRemovePhoto_() {
-      selectedPhoto = null;
-      removeExistingPhoto = true;
-      existingPhotoUrl = "";
-      document.getElementById("photo-preview").style.display = "none";
-      document.getElementById("photo-preview").src = "";
-      document.getElementById("btn-remove-photo").classList.add("hidden");
-      document.getElementById("existing-photo-note").classList.add("hidden");
-      document.getElementById("field-photo-attach").value = "";
-      document.getElementById("field-photo-camera").value = "";
+    /** ลบรูปใหม่ (ที่ยังไม่บันทึก) ออกจากรายการที่เลือกไว้ ตาม index */
+    function onRemoveNewPhoto_(index) {
+      selectedPhotos.splice(index, 1);
+      renderPhotoThumbs_();
+    }
+
+    /** ลบรูปเดิม (ที่เคยบันทึกไว้แล้ว) ออกจากรายการที่จะคงไว้ ตาม index — ใช้ตอนแก้ไขรายการ */
+    function onRemoveExistingPhoto_(index) {
+      existingPhotoUrls.splice(index, 1);
+      renderPhotoThumbs_();
+    }
+
+    /** วาดตารางรูปย่อทั้งหมด (รูปเดิมที่เหลือ + รูปใหม่ที่เพิ่ง เลือก/ถ่าย) พร้อมปุ่มลบทีละรูป */
+    function renderPhotoThumbs_() {
+      const grid = document.getElementById("photo-thumb-grid");
+      const note = document.getElementById("existing-photo-note");
+      let html = "";
+
+      existingPhotoUrls.forEach(function (url, idx) {
+        const urls = driveImageUrls_(url);
+        html +=
+          '<div class="photo-thumb-item">' +
+            '<img src="' + escapeHtml_(urls.thumb) + '" alt="รูปยา" loading="lazy" ' +
+              'onerror="this.onerror=null;this.src=&quot;' + escapeHtml_(urls.full) + '&quot;;">' +
+            '<button type="button" class="photo-thumb-remove" data-kind="existing" data-idx="' + idx + '" title="ลบรูปนี้">' +
+              '<span class="material-icons-outlined">close</span>' +
+            '</button>' +
+          '</div>';
+      });
+
+      selectedPhotos.forEach(function (p, idx) {
+        html +=
+          '<div class="photo-thumb-item">' +
+            '<img src="' + p.previewUrl + '" alt="รูปยาใหม่">' +
+            '<span class="photo-thumb-new-badge">ใหม่</span>' +
+            '<button type="button" class="photo-thumb-remove" data-kind="new" data-idx="' + idx + '" title="ลบรูปนี้">' +
+              '<span class="material-icons-outlined">close</span>' +
+            '</button>' +
+          '</div>';
+      });
+
+      grid.innerHTML = html;
+      grid.querySelectorAll(".photo-thumb-remove").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          const idx = parseInt(btn.getAttribute("data-idx"), 10);
+          if (btn.getAttribute("data-kind") === "existing") {
+            onRemoveExistingPhoto_(idx);
+          } else {
+            onRemoveNewPhoto_(idx);
+          }
+        });
+      });
+
+      if (totalPhotoCount_() > 0) {
+        note.classList.remove("hidden");
+      } else {
+        note.classList.add("hidden");
+      }
     }
 
     // ---------------- แจ้งเตือนแบบไม่บล็อก (advisory เท่านั้น ไม่ได้บังคับให้แก้) ----------------
@@ -2892,30 +3069,35 @@
     let duplicateCheckTimer_ = null;
 
     /**
-     * เตือนว่า "กำลังจะบันทึกชื่อซ้ำ" — เรียกตอนผู้ใช้พิมพ์ HN หรือชื่อ-สกุลเสร็จ (blur)
-     * เป็นแค่การแจ้งเตือน ไม่ได้ห้ามบันทึก เพราะบางครั้งผู้ป่วยคนเดิมมารับยาเพิ่มเติม
-     * สำหรับเคสเดิมจริงๆ ก็ถือเป็นการบันทึกซ้ำที่ถูกต้อง เจ้าหน้าที่ต้องเป็นคนตัดสินใจเอง
+     * เตือนว่า "กำลังจะบันทึกข้อมูลซ้ำ" — เรียกทันทีขณะผู้ใช้พิมพ์หมายเลขคิว/HN/ชื่อ-สกุล
+     * (debounce 400ms กันยิง request ถี่เกินไป) เป็นแค่การแจ้งเตือน ไม่ได้ห้ามบันทึก เพราะ
+     * บางครั้งผู้ป่วยคนเดิมมารับยาเพิ่มเติมสำหรับเคสเดิมจริงๆ ก็ถือเป็นการบันทึกซ้ำที่ถูกต้อง
+     * เจ้าหน้าที่ต้องเป็นคนตัดสินใจเอง
      */
     function checkDuplicateAndWarn_() {
       clearTimeout(duplicateCheckTimer_);
       duplicateCheckTimer_ = setTimeout(function () {
+        const queueNumber = document.getElementById("field-queue").value.trim();
         const hn = document.getElementById("field-hn").value.trim();
         const fullName = document.getElementById("field-fullname").value.trim();
-        if (!hn && !fullName) return;
+        if (!hn && !fullName && !queueNumber) return;
 
         google.script.run
           .withSuccessHandler(function (res) {
             if (!res || !res.isDuplicate) return;
             const latest = res.matches && res.matches[0];
             const dateNote = latest && latest.pendingDate ? (" ล่าสุดวันที่ค้าง " + formatThaiDateShort_(latest.pendingDate)) : "";
+            const fieldsNote = (res.matchedFields && res.matchedFields.length)
+              ? (" (ตรงกันที่: " + res.matchedFields.join(", ") + ")")
+              : "";
             showToast(
-              "⚠️ กำลังบันทึกชื่อซ้ำ: พบข้อมูล \"" + (fullName || hn) + "\" ในระบบแล้ว " +
-              res.count + " รายการ" + dateNote + " — กรุณาตรวจสอบก่อนบันทึกว่าไม่ได้ซ้ำโดยไม่ตั้งใจ",
+              "⚠️ กำลังบันทึกข้อมูลซ้ำ: พบข้อมูล \"" + (fullName || hn || queueNumber) + "\" ในระบบแล้ว " +
+              res.count + " ครั้ง" + fieldsNote + dateNote + " — กรุณาตรวจสอบก่อนบันทึกว่าไม่ได้ซ้ำโดยไม่ตั้งใจ",
               "warning"
             );
           })
           .withFailureHandler(function () { /* เช็คซ้ำไม่สำเร็จ ไม่ใช่ปัญหาร้ายแรง จึงไม่แจ้ง error รบกวนผู้ใช้ */ })
-          .checkDuplicateName(hn, fullName, editingRecordId || "");
+          .checkDuplicateName(queueNumber, hn, fullName, editingRecordId || "");
       }, 400);
     }
 
@@ -2981,9 +3163,6 @@
         return;
       }
 
-      // แจ้งเตือนแบบไม่บล็อก: เตือนอีกครั้งก่อนบันทึกจริง เผื่อผู้ใช้ไม่ได้สังเกตตอนเลือกวันที่
-      checkPendingDateAndWarn_();
-
       const formData = {
         queueNumber: queueNumber,
         prefix: prefixInput.value,
@@ -2996,15 +3175,75 @@
         receiverTypes: Array.prototype.map.call(receiverInputs, function (el) { return el.value; }),
         note: note
       };
-      if (editingRecordId && removeExistingPhoto && !selectedPhoto) {
-        formData.removePhoto = true;
+      if (editingRecordId) {
+        formData.existingPhotoUrls = existingPhotoUrls.slice();
       }
 
-      const btn = document.getElementById("btn-submit-record");
+      // แทนที่จะบันทึกทันที ให้เปิดหน้าสรุปข้อมูลก่อนเสมอ พร้อมคำเตือนถ้าวันที่ค้าง
+      // เป็นวันเดียวกับวันที่กำลังบันทึก (เผื่อผู้ใช้ลืมเปลี่ยนวันที่) แล้วค่อยรอผู้ใช้
+      // กดยืนยันบันทึกอีกครั้งในหน้าสรุป
+      openConfirmSaveModal_(formData);
+    }
+
+    // ---------------- หน้าสรุปข้อมูลก่อนบันทึก (ยืนยันก่อนบันทึกจริง) ----------------
+    function openConfirmSaveModal_(formData) {
+      pendingSaveFormData_ = formData;
+      renderConfirmSummary_(formData);
+      document.getElementById("modal-confirm-save").classList.remove("hidden");
+    }
+
+    function closeConfirmSaveModal_() {
+      document.getElementById("modal-confirm-save").classList.add("hidden");
+      pendingSaveFormData_ = null;
+    }
+
+    function renderConfirmSummary_(formData) {
+      const todayIso = formatDateThaiISO_(new Date());
+      const warnEl = document.getElementById("confirm-save-warning");
+      if (formData.pendingDate === todayIso) {
+        warnEl.classList.remove("hidden");
+        warnEl.innerHTML =
+          '<span class="material-icons-outlined" style="font-size:20px;">warning_amber</span>' +
+          '<span>วันที่ค้างที่กรอกคือ "วันนี้" ซึ่งเป็นวันที่กำลังบันทึกข้อมูลพอดี — ' +
+          'โปรดตรวจสอบว่าใช่วันที่ผู้ป่วยเริ่มค้างยาจริง ไม่ใช่แค่ลืมเปลี่ยนวันที่จากค่าเริ่มต้น</span>';
+      } else {
+        warnEl.classList.add("hidden");
+        warnEl.innerHTML = "";
+      }
+
+      const photoCount = totalPhotoCount_();
+      const rows = [
+        ["หมายเลขคิว", formData.queueNumber || "-"],
+        ["ชื่อ-สกุล", (formData.prefix || "") + formData.fullName],
+        ["HN", formData.hn],
+        ["รายการยา", formData.medItems],
+        ["วันที่ค้าง", formatThaiDateShort_(formData.pendingDate)],
+        ["จำนวนที่ได้รับ", formData.status + (formData.status === "ไม่ครบ" && formData.shortageDetail ? (" (ขาด: " + formData.shortageDetail + ")") : "")],
+        ["ผู้มารับ", formData.receiverTypes.join(", ") || "-"],
+        ["หมายเหตุ", formData.note || "-"],
+        ["รูปภาพแนบ", photoCount ? (photoCount + " รูป") : "ไม่มี"]
+      ];
+
+      document.getElementById("confirm-save-summary").innerHTML = rows.map(function (r) {
+        return (
+          '<div style="display:flex; justify-content:space-between; gap:14px; padding:8px 0; border-bottom:1px solid var(--border); font-size:13.5px;">' +
+            '<span style="color:var(--muted); flex:0 0 110px;">' + escapeHtml_(r[0]) + '</span>' +
+            '<span style="flex:1; text-align:right; word-break:break-word; white-space:pre-line;">' + escapeHtml_(String(r[1])) + '</span>' +
+          '</div>'
+        );
+      }).join("");
+    }
+
+    function performConfirmedSave_() {
+      if (!pendingSaveFormData_) return;
+      const formData = pendingSaveFormData_;
+
+      const btn = document.getElementById("btn-confirm-save-yes");
       setButtonLoading_(btn, true);
 
       const onSuccess = function (res) {
         setButtonLoading_(btn, false);
+        closeConfirmSaveModal_();
         showToast(res.message || "บันทึกข้อมูลสำเร็จ", "success");
         const wasEditing = !!editingRecordId;
         exitEditMode_();
@@ -3023,34 +3262,36 @@
         showToast("บันทึกไม่สำเร็จ: " + errMsg_(err), "error");
       };
 
+      // ส่งเฉพาะข้อมูล base64/mimeType/fileName ของรูปใหม่ (ตัด previewUrl ที่ใช้แสดงผล
+      // ฝั่งไคลเอนต์เท่านั้นออกก่อนส่ง เพื่อไม่ให้ payload ใหญ่เกินจำเป็น)
+      const photosPayload = selectedPhotos.map(function (p) {
+        return { base64: p.base64, mimeType: p.mimeType, fileName: p.fileName };
+      });
+
       if (editingRecordId) {
         google.script.run
           .withSuccessHandler(onSuccess)
           .withFailureHandler(onFailure)
-          .updateRecord(editingRecordId, formData, selectedPhoto);
+          .updateRecord(editingRecordId, formData, photosPayload);
       } else {
         google.script.run
           .withSuccessHandler(onSuccess)
           .withFailureHandler(onFailure)
-          .saveRecord(formData, selectedPhoto);
+          .saveRecord(formData, photosPayload);
       }
     }
 
     function clearRecordForm_() {
       document.getElementById("record-form").reset();
       document.getElementById("field-pendingdate").valueAsDate = new Date();
-      document.getElementById("photo-preview").style.display = "none";
-      document.getElementById("photo-preview").src = "";
-      document.getElementById("btn-remove-photo").classList.add("hidden");
-      document.getElementById("existing-photo-note").classList.add("hidden");
       document.getElementById("field-photo-attach").value = "";
       document.getElementById("field-photo-camera").value = "";
       document.getElementById("field-med-search").value = "";
       hideMedSuggestDropdown_();
       document.getElementById("med-selection-error").style.display = "none";
-      selectedPhoto = null;
-      existingPhotoUrl = "";
-      removeExistingPhoto = false;
+      selectedPhotos = [];
+      existingPhotoUrls = [];
+      renderPhotoThumbs_();
       selectedMeds = [];
       renderSelectedMedList_();
       toggleShortageField_();
@@ -3085,25 +3326,9 @@
 
       document.getElementById("field-note").value = record.note || "";
 
-      selectedPhoto = null;
-      removeExistingPhoto = false;
-      existingPhotoUrl = record.photoUrl || "";
-      const preview = document.getElementById("photo-preview");
-      if (existingPhotoUrl) {
-        const editPhotoUrls = driveImageUrls_(existingPhotoUrl);
-        preview.onerror = function () {
-          preview.onerror = null;
-          preview.src = editPhotoUrls.full;
-        };
-        preview.src = editPhotoUrls.thumb;
-        preview.style.display = "inline-block";
-        document.getElementById("btn-remove-photo").classList.remove("hidden");
-        document.getElementById("existing-photo-note").classList.remove("hidden");
-      } else {
-        preview.style.display = "none";
-        document.getElementById("btn-remove-photo").classList.add("hidden");
-        document.getElementById("existing-photo-note").classList.add("hidden");
-      }
+      selectedPhotos = [];
+      existingPhotoUrls = record.photoUrl ? splitPhotoUrlsClient_(record.photoUrl) : [];
+      renderPhotoThumbs_();
 
       updatePillStates_();
       // แก้ไขในหน้าประวัติเลย: เปิดฟอร์มเป็นหน้าต่าง modal ทับหน้าประวัติ
@@ -3142,8 +3367,16 @@
     // ================================================================
     // ประวัติการบันทึก
     // ================================================================
+    function showDownloadProgress_() {
+      document.getElementById("history-download-progress").classList.remove("hidden");
+    }
+    function hideDownloadProgress_() {
+      document.getElementById("history-download-progress").classList.add("hidden");
+    }
+
     function loadHistory_(btnEl) {
       if (btnEl) setButtonLoading_(btnEl, true);
+      showDownloadProgress_();
 
       const filters = {
         startDate: document.getElementById("filter-start-date").value,
@@ -3154,10 +3387,12 @@
       google.script.run
         .withSuccessHandler(function (records) {
           if (btnEl) setButtonLoading_(btnEl, false);
+          hideDownloadProgress_();
           renderHistory_(records);
         })
         .withFailureHandler(function (err) {
           if (btnEl) setButtonLoading_(btnEl, false);
+          hideDownloadProgress_();
           showToast("ค้นหาประวัติไม่สำเร็จ: " + errMsg_(err), "error");
         })
         .getRecordHistory(filters);
@@ -3181,13 +3416,7 @@
 
         const tr = document.createElement("tr");
         const badgeClass = statusBadgeClass_(r.status);
-        const photoUrls = r.photoUrl ? driveImageUrls_(r.photoUrl) : null;
-        const photoCell = photoUrls
-          ? '<a href="' + escapeHtml_(photoUrls.full) + '" target="_blank" rel="noopener">' +
-              '<img class="history-thumb" src="' + escapeHtml_(photoUrls.thumb) + '" alt="รูปยา" loading="lazy" ' +
-              'onerror="this.onerror=null;this.src=&quot;' + escapeHtml_(photoUrls.full) + '&quot;;">' +
-            '</a>'
-          : '<div class="history-thumb-placeholder"><span class="material-icons-outlined">image_not_supported</span></div>';
+        const photoCell = buildPhotoThumbStripHtml_(r.photoUrl, "history-thumb", "history-thumb-placeholder");
         const nameCell = escapeHtml_((r.prefix || "") + r.fullName);
 
         tr.innerHTML =
@@ -3603,6 +3832,37 @@
       };
     }
 
+    /**
+     * แยกค่าคอลัมน์ "รูปภาพแนบ (URL)" ที่ได้จากฝั่งเซิร์ฟเวอร์ (อาจมีหลายรูปคั่นด้วยขึ้น
+     * บรรทัดใหม่) ออกเป็นอาร์เรย์ของ URL แต่ละรูป — คู่กับ splitPhotoUrls_() ฝั่ง Code.gs
+     */
+    function splitPhotoUrlsClient_(photoUrlField) {
+      return String(photoUrlField || "")
+        .split(/\r?\n/)
+        .map(function (s) { return s.trim(); })
+        .filter(Boolean);
+    }
+
+    /**
+     * สร้าง HTML แถบรูปย่อขนาดเล็กหลายรูป (ใช้ในตารางประวัติ) — แสดงรูปแรกเป็นหลัก
+     * และถ้ามีมากกว่า 1 รูป จะแสดงรูปถัดไปต่อกันเป็นแถว ทุกรูปกดเพื่อเปิดดูขนาดเต็มได้
+     */
+    function buildPhotoThumbStripHtml_(photoUrlField, thumbClass, placeholderClass) {
+      const urlList = splitPhotoUrlsClient_(photoUrlField);
+      if (urlList.length === 0) {
+        return '<div class="' + placeholderClass + '"><span class="material-icons-outlined">image_not_supported</span></div>';
+      }
+      return '<div style="display:flex; gap:4px; flex-wrap:wrap; max-width:150px;">' +
+        urlList.map(function (u) {
+          const urls = driveImageUrls_(u);
+          return '<a href="' + escapeHtml_(urls.full) + '" target="_blank" rel="noopener">' +
+              '<img class="' + thumbClass + '" src="' + escapeHtml_(urls.thumb) + '" alt="รูปยา" loading="lazy" ' +
+              'onerror="this.onerror=null;this.src=&quot;' + escapeHtml_(urls.full) + '&quot;;">' +
+            '</a>';
+        }).join("") +
+      '</div>';
+    }
+
     function trendDayLabel_(isoDate) {
       // ป้ายกำกับสั้นสำหรับแกน X ของกราฟแนวโน้ม เช่น "20 ก.ย." (ไม่ใส่ปี)
       if (!isoDate) return "-";
@@ -3642,9 +3902,10 @@
         showToast("ไม่พบกรอบแสดงวิดีโอ กรุณาตรวจสอบโค้ด HTML ของ Modal กล้อง", "error");
         return;
       }
-      
+
       document.getElementById("modal-camera").classList.remove("hidden");
-      
+      updateCameraShotCount_();
+
       // ขออนุญาตใช้งานกล้อง
       navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
         .catch(function() {
@@ -3661,12 +3922,25 @@
         });
     }
 
+    /** ปิดกล้องและหยุดสตรีมวิดีโอ — ไม่ลบรูปที่ถ่ายไปแล้วระหว่างเซสชันนี้ */
     function closeCamera_() {
       document.getElementById("modal-camera").classList.add("hidden");
       if (cameraStream) {
         cameraStream.getTracks().forEach(function(track) { track.stop(); });
         cameraStream = null;
       }
+      // เรนเดอร์รูปย่อใหม่อีกครั้งเผื่อมีการถ่ายรูปเพิ่มระหว่างเปิดกล้อง
+      renderPhotoThumbs_();
+    }
+
+    /** อัปเดตข้อความจำนวนรูปที่ถ่ายไปแล้วเหนือกรอบวิดีโอ */
+    function updateCameraShotCount_() {
+      const el = document.getElementById("camera-shot-count");
+      if (!el) return;
+      const total = totalPhotoCount_();
+      el.textContent = total > 0
+        ? ("ถ่ายแล้ว " + total + "/" + MAX_PHOTOS_CLIENT + " รูป — ถ่ายต่อได้เรื่อย ๆ แล้วกดปุ่ม \"เสร็จสิ้น\" เมื่อครบ")
+        : "ถ่ายได้หลายรูปต่อเนื่อง (1 คนอาจมีหลายซองยา) — กดปุ่ม \"เสร็จสิ้น\" เมื่อถ่ายครบแล้ว";
     }
 
     // ตั้งค่าปุ่มในหน้าต่างกล้อง
@@ -3682,32 +3956,51 @@
     if (btnCaptureCam) {
       btnCaptureCam.addEventListener("click", function(e) {
         e.preventDefault();
+
+        if (totalPhotoCount_() >= MAX_PHOTOS_CLIENT) {
+          showToast("แนบรูปได้สูงสุด " + MAX_PHOTOS_CLIENT + " รูปต่อ 1 รายการแล้ว", "warning");
+          return;
+        }
+
         const video = document.getElementById("camera-stream");
         const canvas = document.getElementById("camera-canvas");
-        
+
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
-        
+
         const context = canvas.getContext("2d");
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        
-        const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
+
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
         const base64 = dataUrl.split(",")[1];
-        
-        selectedPhoto = {
+
+        // เพิ่มรูปที่ถ่ายเข้าไปในรายการรูปใหม่ (ไม่แทนที่รูปเดิม) — กล้องยังคงเปิดอยู่
+        // เพื่อให้ถ่ายต่อได้หลายรูปในเซสชันเดียว ตามที่ผู้ป่วย 1 คนอาจมีหลายซองยา
+        selectedPhotos.push({
           base64: base64,
           mimeType: "image/jpeg",
-          fileName: "webcam_" + Date.now() + ".jpg"
-        };
-        removeExistingPhoto = false;
-        
-        const preview = document.getElementById("photo-preview");
-        preview.src = dataUrl;
-        preview.style.display = "inline-block";
-        document.getElementById("btn-remove-photo").classList.remove("hidden");
-        
-        closeCamera_();
+          fileName: "webcam_" + Date.now() + ".jpg",
+          previewUrl: dataUrl
+        });
+
+        updateCameraShotCount_();
+        renderPhotoThumbs_();
+        flashCameraCapture_();
+
+        if (totalPhotoCount_() >= MAX_PHOTOS_CLIENT) {
+          showToast("แนบรูปได้สูงสุด " + MAX_PHOTOS_CLIENT + " รูปต่อ 1 รายการแล้ว กด \"เสร็จสิ้น\" เพื่อปิดกล้อง", "warning");
+        }
+        // หมายเหตุ: ไม่ปิดกล้องหลังถ่ายแต่ละรูป — ผู้ใช้กดปุ่ม "เสร็จสิ้น" (btn-cancel-camera) เอง
+        // เมื่อถ่ายครบทุกซองยาแล้ว เพื่อให้ถ่ายต่อเนื่องหลายรูปได้โดยไม่ต้องเปิดกล้องใหม่ทุกครั้ง
       });
+    }
+
+    /** เอฟเฟกต์กะพริบสั้น ๆ บนวิดีโอให้รู้สึกว่าถ่ายภาพสำเร็จแล้ว */
+    function flashCameraCapture_() {
+      const video = document.getElementById("camera-stream");
+      if (!video) return;
+      video.style.opacity = "0.3";
+      setTimeout(function () { video.style.opacity = "1"; }, 120);
     }
   </script>
 </body>
