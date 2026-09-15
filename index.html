@@ -139,97 +139,6 @@
       margin: 0 0 28px 0;
     }
 
-    .landing-name-field {
-      text-align: left;
-      margin-bottom: 18px;
-    }
-
-    .landing-name-field label {
-      display: block;
-      font-size: 13.5px;
-      font-weight: 600;
-      margin-bottom: 6px;
-    }
-
-    .landing-name-field .name-input-wrap {
-      position: relative;
-      display: flex;
-      align-items: center;
-    }
-
-    .landing-name-field .material-icons-outlined {
-      position: absolute;
-      left: 13px;
-      font-size: 19px;
-      color: var(--muted);
-      pointer-events: none;
-    }
-
-    .landing-name-field input {
-      width: 100%;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px 13px 12px 42px;
-      font-size: 14.5px;
-      color: var(--text);
-      background: var(--background);
-      outline: none;
-      transition: border-color 0.15s ease, box-shadow 0.15s ease;
-    }
-
-    .landing-name-field input:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.12);
-    }
-
-    .landing-name-field .name-error {
-      display: none;
-      color: var(--danger);
-      font-size: 12.5px;
-      margin: 6px 0 0 0;
-      text-align: left;
-    }
-
-    .recorder-badge {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 12.5px;
-      color: rgba(255, 255, 255, 0.75);
-      padding: 14px 18px;
-      border-top: 1px solid rgba(255, 255, 255, 0.12);
-    }
-
-    .recorder-badge .material-icons-outlined {
-      font-size: 17px;
-      color: rgba(255, 255, 255, 0.75);
-    }
-
-    .recorder-badge strong {
-      color: #fff;
-      font-weight: 600;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      max-width: 110px;
-    }
-
-    .recorder-badge button {
-      margin-left: auto;
-      background: none;
-      border: none;
-      color: rgba(255, 255, 255, 0.75);
-      font-size: 11.5px;
-      cursor: pointer;
-      text-decoration: underline;
-      padding: 0;
-      flex-shrink: 0;
-    }
-
-    .recorder-badge button:hover {
-      color: #fff;
-    }
-
     .btn {
       appearance: none;
       border: none;
@@ -720,6 +629,11 @@
       color: #D97706;
     }
 
+    .badge-neutral {
+      background: rgba(107, 114, 128, 0.12);
+      color: #6B7280;
+    }
+
     /* ============================================================
        Dashboard เชิงบริหาร: ตัวกรองช่วงเวลา / KPI / กราฟแนวโน้ม / โดนัท
        ============================================================ */
@@ -864,7 +778,6 @@
 
     .form-field input[type="text"],
     .form-field input[type="date"],
-    .form-field input[type="tel"],
     .form-field textarea,
     .form-field input[type="password"] {
       border: 1px solid var(--border);
@@ -874,60 +787,13 @@
       color: var(--text);
       background: var(--surface);
       outline: none;
-      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      transition: border-color 0.15s ease;
       width: 100%;
     }
 
     .form-field input:focus,
     .form-field textarea:focus {
       border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.12);
-    }
-
-    /* ---------------- ช่องกรอกเบอร์โทรศัพท์ (มีไอคอนนำหน้า) ---------------- */
-    .phone-input-wrap {
-      position: relative;
-      display: flex;
-      align-items: center;
-    }
-
-    .phone-input-wrap .material-icons-outlined {
-      position: absolute;
-      left: 13px;
-      font-size: 19px;
-      color: var(--muted);
-      pointer-events: none;
-    }
-
-    .phone-input-wrap input[type="tel"] {
-      padding-left: 42px !important;
-      letter-spacing: 0.4px;
-    }
-
-    .phone-input-wrap .btn-call-phone {
-      position: absolute;
-      right: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      border: none;
-      background: transparent;
-      color: var(--primary);
-      cursor: pointer;
-      transition: background 0.15s ease;
-    }
-
-    .phone-input-wrap .btn-call-phone:hover {
-      background: rgba(var(--primary-rgb), 0.1);
-    }
-
-    .phone-input-wrap .btn-call-phone .material-icons-outlined {
-      position: static;
-      font-size: 18px;
-      color: inherit;
     }
 
     .form-field textarea {
@@ -963,83 +829,171 @@
       background: rgba(var(--primary-rgb), 0.06);
     }
 
-    .med-qty-row {
+    /* ---------------- รายการยา: dropdown ค้นหา + รายการที่เลือก ---------------- */
+    .med-search-wrap {
+      position: relative;
+    }
+
+    .med-search-icon {
+      position: absolute;
+      left: 13px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 19px;
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    .med-search-input {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 13px 11px 40px;
+      font-size: 14px;
+      color: var(--text);
+      background: var(--surface);
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+
+    .med-search-input:focus {
+      border-color: var(--primary);
+    }
+
+    .med-suggest-dropdown {
+      position: absolute;
+      z-index: 20;
+      top: calc(100% + 6px);
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      max-height: 260px;
+      overflow-y: auto;
+      padding: 6px;
+    }
+
+    .med-suggest-dropdown.hidden {
+      display: none;
+    }
+
+    .med-suggest-item {
+      padding: 9px 11px;
+      font-size: 13.5px;
+      color: var(--text);
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .med-suggest-item:hover,
+    .med-suggest-item.active {
+      background: rgba(var(--primary-rgb), 0.08);
+    }
+
+    .med-suggest-item.med-suggest-add {
+      color: var(--primary);
+      font-weight: 600;
+      border-top: 1px dashed var(--border);
+      margin-top: 4px;
+      padding-top: 10px;
+    }
+
+    .med-selected-list {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .med-selected-row {
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 10px;
       flex-wrap: wrap;
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 9px 12px;
-      margin-bottom: 8px;
-      background: var(--surface);
+      padding: 10px 12px;
+      background: var(--background);
     }
 
-    .med-qty-row .med-qty-name {
+    .med-selected-name {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text);
       flex: 1 1 160px;
-      font-size: 13.5px;
-      font-weight: 500;
-      min-width: 140px;
+      min-width: 120px;
     }
 
-    .med-qty-row input[type="number"] {
-      width: 80px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 7px 9px;
-      font-size: 13.5px;
+    .med-selected-inputs {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1 1 auto;
+      flex-wrap: wrap;
     }
 
-    .med-qty-row select {
+    .med-qty-input {
+      width: 84px;
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 7px 9px;
-      font-size: 13.5px;
-      background: var(--surface);
-    }
-
-    .med-qty-row input[type="text"].med-qty-dose {
-      width: 130px;
-      flex: 1 1 130px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 7px 9px;
+      padding: 8px 10px;
       font-size: 13.5px;
       background: var(--surface);
       color: var(--text);
     }
 
-    .med-qty-row input[type="text"].med-qty-dose:focus {
+    .med-size-input {
+      width: 140px;
+      flex: 1 1 120px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 13.5px;
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    .med-qty-input:focus,
+    .med-size-input:focus {
       outline: none;
       border-color: var(--primary);
     }
 
-    .confirm-summary dl {
-      margin: 0;
-      display: grid;
-      grid-template-columns: 130px 1fr;
-      row-gap: 10px;
-      column-gap: 10px;
-    }
-
-    .confirm-summary dt {
+    .med-size-badge {
+      display: flex;
+      align-items: center;
+      gap: 4px;
       font-size: 12.5px;
+      font-weight: 600;
+      color: var(--secondary);
+      background: rgba(18, 165, 148, 0.1);
+      border: 1px solid rgba(18, 165, 148, 0.3);
+      border-radius: 8px;
+      padding: 8px 10px;
+      white-space: nowrap;
+    }
+
+    .med-remove-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
       color: var(--muted);
-      font-weight: 500;
+      cursor: pointer;
+      flex: 0 0 auto;
     }
 
-    .confirm-summary dd {
-      margin: 0;
-      font-size: 14px;
-      word-break: break-word;
-    }
-
-    .confirm-summary img.confirm-photo {
-      max-width: 160px;
-      max-height: 160px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      display: block;
+    .med-remove-btn:hover {
+      background: rgba(220, 38, 38, 0.1);
+      color: var(--danger);
     }
 
     .photo-input-wrap {
@@ -1276,6 +1230,7 @@
 
     .toast.success { background: #0F5132; }
     .toast.error { background: #7F1D1D; }
+    .toast.warning { background: #92400E; }
 
     @keyframes toastIn {
       from { opacity: 0; transform: translateY(10px); }
@@ -1321,14 +1276,6 @@
       <h1 id="landing-sys-name">ข้อมูลจุดรับยาค้าง 15 - 25 กันยายน 2569</h1>
       <h2 id="landing-org-name">หน่วยงานสาธารณสุข</h2>
       <p class="welcome" id="landing-welcome">กำลังโหลดข้อมูล...</p>
-      <div class="landing-name-field">
-        <label for="input-recorder-name">ชื่อผู้บันทึก (ผู้ใช้งาน) <span class="req" style="color:var(--danger);">*</span></label>
-        <div class="name-input-wrap">
-          <span class="material-icons-outlined">person</span>
-          <input type="text" id="input-recorder-name" placeholder="กรอกชื่อ-สกุลของผู้บันทึกข้อมูล" maxlength="100" autocomplete="name">
-        </div>
-        <p class="name-error" id="recorder-name-error">กรุณากรอกชื่อผู้บันทึกก่อนเข้าใช้งาน</p>
-      </div>
       <button class="btn btn-primary" id="btn-enter-app">
         <span class="material-icons-outlined">login</span>
         <span class="btn-label">เข้าใช้งานระบบ</span>
@@ -1369,11 +1316,6 @@
         </div>
       </nav>
 
-      <div class="recorder-badge">
-        <span class="material-icons-outlined">person</span>
-        <strong id="sidebar-recorder-name">-</strong>
-        <button type="button" id="btn-change-recorder">เปลี่ยนผู้ใช้</button>
-      </div>
       <div class="sidebar-footer" id="sidebar-footer-msg">งานเภสัชกรรม</div>
     </aside>
 
@@ -1419,7 +1361,7 @@
             <div class="stat-card">
               <div class="stat-icon" style="color:var(--secondary); background:rgba(18,165,148,0.1);"><span class="material-icons-outlined">task_alt</span></div>
               <div class="stat-value" id="stat-resolved-same">-</div>
-              <div class="stat-label">สำเร็จทันที (มาครั้งแรกแล้วได้ยาครบ)</div>
+              <div class="stat-label">สำเร็จทันที (ได้ยาครบในครั้งเดียว)</div>
               <div class="stat-delta delta-up" id="stat-resolved-same-delta"></div>
             </div>
             <div class="stat-card">
@@ -1431,7 +1373,7 @@
             <div class="stat-card">
               <div class="stat-icon" style="color:#D97706; background:rgba(217,119,6,0.12);"><span class="material-icons-outlined">history</span></div>
               <div class="stat-value" id="stat-resolved-late">-</div>
-              <div class="stat-label">ปิดเคสภายหลัง (มาติดตามหลายครั้ง จนครบ)</div>
+              <div class="stat-label">ปิดเคสภายหลัง (เคยขาด แล้วมารับจนครบ)</div>
               <div class="stat-delta" id="stat-resolved-late-delta"></div>
             </div>
           </div>
@@ -1459,6 +1401,28 @@
               <p class="card-sub">สัดส่วนผลลัพธ์ของทุกเคสในช่วงที่เลือก</p>
               <div id="donut-chart" style="display:flex; justify-content:center;"></div>
               <div class="legend-row" id="donut-legend" style="justify-content:center;"></div>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">
+                <span class="material-icons-outlined" style="color:var(--primary);">medication</span>
+                แยกรายการยาที่รับ (ช่วงที่เลือก)
+              </div>
+              <p class="card-sub">แยกทีละชนิดยา ไม่ปนกัน · ตัวเลข = จำนวนรวมที่จ่ายไป (เม็ด/หลอด/ขวด)</p>
+              <input type="text" id="med-breakdown-filter" placeholder="ค้นหาชื่อยา..."
+                style="width:100%; box-sizing:border-box; border:1px solid var(--border); border-radius:10px; padding:9px 12px; font-size:13.5px; margin-bottom:12px;">
+              <div id="med-breakdown-chart"></div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">
+                <span class="material-icons-outlined" style="color:var(--secondary);">calendar_view_week</span>
+                วันที่ค้างยา แยกรายสัปดาห์
+              </div>
+              <p class="card-sub">จำนวนครั้งที่มารับยา จำแนกตามสัปดาห์ของวันที่ค้าง (จันทร์-อาทิตย์)</p>
+              <div id="week-breakdown-chart"></div>
             </div>
           </div>
 
@@ -1493,190 +1457,172 @@
             <div id="recent-list"></div>
           </div>
         </section>
-<!-- ============ บันทึกการรับยา ============ -->
-<div class="record-modal-backdrop" id="record-modal-backdrop"></div>
-<section class="page-section" id="section-record-form">
-  <div class="section-header">
-    <h2>บันทึกการรับยาค้าง</h2>
-    <button type="button" class="btn btn-outline hidden" id="btn-close-record-modal" style="width:auto;">
-      <span class="material-icons-outlined">close</span>
-      <span class="btn-label">ปิด</span>
-    </button>
-  </div>
-  <div class="card" id="edit-mode-banner" style="display:none; margin-bottom:14px; background: rgba(var(--primary-rgb),0.08); border: 1px solid var(--primary);">
-    <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
-      <div style="display:flex; align-items:center; gap:8px; font-size:13.5px; font-weight:600; color:var(--primary);">
-        <span class="material-icons-outlined">edit</span>
-        <span>กำลังแก้ไขรายการ: <span id="edit-mode-id"></span></span>
-      </div>
-      <button type="button" class="btn btn-outline" id="btn-cancel-edit" style="width:auto;">ยกเลิกการแก้ไข</button>
-    </div>
-  </div>
-  <div class="card">
-    <form id="record-form" autocomplete="off">
 
-      <!-- แถวที่ 1: คำนำหน้า + HN -->
-      <div class="form-grid">
-        <div class="form-field">
-          <label>คำนำหน้า <span class="req">*</span></label>
-          <div class="choice-group" id="group-prefix">
-            <label class="choice-pill">
-              <input type="radio" name="prefix" value="นาย"><span>นาย</span>
-            </label>
-            <label class="choice-pill">
-              <input type="radio" name="prefix" value="นางสาว"><span>นางสาว</span>
-            </label>
-            <label class="choice-pill">
-              <input type="radio" name="prefix" value="นาง"><span>นาง</span>
-            </label>
-            <label class="choice-pill">
-              <input type="radio" name="prefix" value="เด็กชาย"><span>เด็กชาย</span>
-            </label>
-            <label class="choice-pill">
-              <input type="radio" name="prefix" value="เด็กหญิง"><span>เด็กหญิง</span>
-            </label>
-            <label class="choice-pill">
-              <input type="radio" name="prefix" value="ไม่ทราบ"><span>ไม่ทราบ</span>
-            </label>
-            <label class="choice-pill">
-              <input type="radio" name="prefix" value="ไม่ระบุ"><span>ไม่ระบุ</span>
-            </label>
+        <!-- ============ บันทึกการรับยา ============ -->
+        <div class="record-modal-backdrop" id="record-modal-backdrop"></div>
+        <section class="page-section" id="section-record-form">
+          <div class="section-header">
+            <h2>บันทึกการรับยาค้าง</h2>
+            <button type="button" class="btn btn-outline hidden" id="btn-close-record-modal" style="width:auto;">
+              <span class="material-icons-outlined">close</span>
+              <span class="btn-label">ปิด</span>
+            </button>
           </div>
-        </div>
-        <div class="form-field">
-          <label>HN <span class="req">*</span></label>
-          <input type="text" id="field-hn" maxlength="50" required>
-        </div>
-      </div>
 
-      <!-- ชื่อ-สกุล (เต็มแถว) -->
-      <div class="form-field full">
-        <label>ชื่อ-สกุล <span class="req">*</span></label>
-        <input type="text" id="field-fullname" maxlength="200" required>
-      </div>
-
-      <!-- รายการยา (เต็มแถว) -->
-      <div class="form-field full">
-        <label>รับ ไอเทมยา <span class="req">*</span></label>
-        <div class="card" style="padding:12px; max-height:280px; overflow-y:auto; background:var(--background); border-style:dashed;" id="med-checklist-container"></div>
-        <div style="display:flex; gap:8px; margin-top:10px;">
-          <input type="text" id="field-med-custom-input" placeholder="พิมพ์ชื่อยาอื่นๆ ที่ไม่มีในรายการ แล้วกด Enter" style="flex:1; border:1px solid var(--border); border-radius:10px; padding:11px 13px; font-size:14px;">
-          <button type="button" class="btn btn-secondary" id="btn-add-custom-med" style="width:auto;">
-            <span class="material-icons-outlined">add</span>
-          </button>
-        </div>
-        <div class="choice-group" id="custom-med-chips" style="margin-top:10px;"></div>
-        <p id="med-selection-error" style="color:var(--danger); font-size:12.5px; margin:8px 0 0 0; display:none;">
-          กรุณาเลือกหรือระบุรายการยาอย่างน้อย 1 รายการ
-        </p>
-        <div id="med-qty-section" class="hidden" style="margin-top:14px;">
-          <label style="display:block; margin-bottom:8px;">ระบุจำนวนของแต่ละรายการที่เลือก <span class="req">*</span></label>
-          <div id="med-qty-list"></div>
-        </div>
-      </div>
-
-      <!-- แถว: วันที่ค้าง + จำนวนที่ได้รับ -->
-      <div class="form-grid">
-        <div class="form-field">
-          <label>วันที่ค้าง (วันที่ไม่ได้ยา) <span class="req">*</span></label>
-          <input type="date" id="field-pendingdate" required>
-          <p style="font-size:12px; color:var(--muted); margin:6px 0 0 0;">
-            คือวันที่คนไข้มาครั้งแรกแล้วไม่ได้ยาครบ (วันที่เริ่มค้าง) <strong>ไม่ใช่วันที่มาบันทึกเพิ่มเติมวันนี้</strong>
-          </p>
-        </div>
-        <div class="form-field">
-          <label>จำนวนยาที่ได้รับ <strong>ในครั้งนี้</strong> <span class="req">*</span></label>
-          <div class="choice-group" id="group-status">
-            <label class="choice-pill">
-              <input type="radio" name="status" value="ครบ"><span>ครบ (ปิดเคส)</span>
-            </label>
-            <label class="choice-pill">
-              <input type="radio" name="status" value="ไม่ครบ"><span>ไม่ครบ (ต้องติดตาม)</span>
-            </label>
+          <div class="card" id="edit-mode-banner" style="display:none; margin-bottom:14px; background: rgba(var(--primary-rgb),0.08); border: 1px solid var(--primary);">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+              <div style="display:flex; align-items:center; gap:8px; font-size:13.5px; font-weight:600; color:var(--primary);">
+                <span class="material-icons-outlined">edit</span>
+                <span>กำลังแก้ไขรายการ: <span id="edit-mode-id"></span></span>
+              </div>
+              <button type="button" class="btn btn-outline" id="btn-cancel-edit" style="width:auto;">ยกเลิกการแก้ไข</button>
+            </div>
           </div>
-        </div>
-      </div>
 
-      <!-- ขาดเหลืออะไร (แสดงเมื่อเลือก "ไม่ครบ") -->
-      <div class="form-field full hidden" id="field-shortage-wrap">
-        <label>ขาดเหลืออะไร (สำหรับการติดตามครั้งต่อไป) <span class="req">*</span></label>
-        <textarea id="field-shortage-detail" maxlength="500" placeholder="ระบุรายการยาหรือจำนวนที่ยังขาด ต้องมารับเพิ่มเติม"></textarea>
-      </div>
+          <div class="card">
+            <form id="record-form" autocomplete="off">
+              <div class="form-field full">
+                <label>หมายเลขคิว</label>
+                <input type="text" id="field-queue" maxlength="20" placeholder="เช่น A012">
+              </div>
 
-      <!-- ผู้มารับ -->
-      <div class="form-field full">
-        <label>ผู้มารับ <span class="req">*</span></label>
-        <div class="choice-group" id="group-receiver">
-          <label class="choice-pill">
-            <input type="checkbox" name="receiver" value="คนไข้"><span>คนไข้</span>
-          </label>
-          <label class="choice-pill">
-            <input type="checkbox" name="receiver" value="ญาติ"><span>ญาติ</span>
-          </label>
-          <label class="choice-pill">
-            <input type="checkbox" name="receiver" value="ตัวแทนรับยา"><span>ตัวแทนรับยา</span>
-          </label>
-        </div>
-      </div>
+              <div class="form-grid">
+                <div class="form-field">
+                  <label>คำนำหน้า <span class="req">*</span></label>
+                  <div class="choice-group" id="group-prefix">
+                    <label class="choice-pill">
+                      <input type="radio" name="prefix" value="นาย">
+                      <span>นาย</span>
+                    </label>
+                    <label class="choice-pill">
+                      <input type="radio" name="prefix" value="นางสาว">
+                      <span>นางสาว</span>
+                    </label>
+                    <label class="choice-pill">
+                      <input type="radio" name="prefix" value="นาง">
+                      <span>นาง</span>
+                    </label>
+                  </div>
+                </div>
+                <div class="form-field">
+                  <label>HN <span class="req">*</span></label>
+                  <input type="text" id="field-hn" maxlength="50" required>
+                </div>
+              </div>
 
-      <!-- เบอร์โทรศัพท์ -->
-      <div class="form-field full">
-        <label>เบอร์โทรศัพท์ (ไม่บังคับ)</label>
-        <div class="phone-input-wrap">
-          <span class="material-icons-outlined">call</span>
-          <input type="tel" id="field-phone" placeholder="0xx-xxxxxxx" maxlength="11" inputmode="numeric">
-          <a href="#" class="btn-call-phone hidden" id="btn-call-phone" title="โทรออก" target="_blank" rel="noopener">
-            <span class="material-icons-outlined">phone_forwarded</span>
-          </a>
-        </div>
-        <p id="phone-error" style="color:var(--danger); font-size:12.5px; margin:6px 0 0 0; display:none;">
-          กรุณากรอกเบอร์โทรศัพท์ในรูปแบบ 0xx-xxxxxxx
-        </p>
-      </div>
+              <div class="form-grid">
+                <div class="form-field full">
+                  <label>ชื่อ-สกุล <span class="req">*</span></label>
+                  <input type="text" id="field-fullname" maxlength="200" required>
+                </div>
+              </div>
 
-      <!-- ภาพถ่าย -->
-      <div class="form-field full">
-        <label>ภาพถ่ายรายการยา (ถ้ามี)</label>
-        <div class="photo-input-wrap">
-          <button type="button" class="btn btn-outline" id="btn-attach-photo" style="width:auto;">
-            <span class="material-icons-outlined">attach_file</span>
-            <span class="btn-label">แนบรูปจากคลังภาพ</span>
-          </button>
-          <button type="button" class="btn btn-outline" id="btn-take-photo" style="width:auto;">
-            <span class="material-icons-outlined">photo_camera</span>
-            <span class="btn-label">ถ่ายรูป</span>
-          </button>
-          <input type="file" id="field-photo-attach" accept="image/*" class="hidden">
-          <input type="file" id="field-photo-camera" accept="image/*" capture="environment" class="hidden">
-          <img id="photo-preview" class="photo-preview" alt="ตัวอย่างรูปภาพ">
-          <button type="button" class="btn btn-outline hidden" id="btn-remove-photo" style="width:auto;">
-            <span class="material-icons-outlined">close</span>
-          </button>
-        </div>
-        <p id="existing-photo-note" class="hidden" style="font-size:12px; color:var(--muted); margin:6px 0 0 0;">
-          รูปปัจจุบันของรายการนี้แสดงอยู่ด้านบน หากไม่แนบรูปใหม่ ระบบจะคงรูปเดิมไว้
-        </p>
-      </div>
+              <div class="form-field full">
+                <label>รับ ไอเทมยา <span class="req">*</span></label>
 
-      <!-- หมายเหตุ -->
-      <div class="form-field full">
-        <label>หมายเหตุ</label>
-        <textarea id="field-note" maxlength="1000" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)"></textarea>
-      </div>
+                <div class="med-search-wrap" id="med-search-wrap">
+                  <span class="material-icons-outlined med-search-icon">search</span>
+                  <input type="text" id="field-med-search" class="med-search-input" placeholder="พิมพ์ชื่อยา หรือคำใกล้เคียง เช่น เบาหวาน, ความดัน..." autocomplete="off">
+                  <div class="med-suggest-dropdown hidden" id="med-suggest-dropdown"></div>
+                </div>
 
-      <!-- ปุ่ม action -->
-      <div class="form-actions">
-        <button type="button" class="btn btn-outline" id="btn-clear-form">ล้างข้อมูล</button>
-        <button type="submit" class="btn btn-primary" id="btn-submit-record" style="width:auto;">
-          <span class="material-icons-outlined">save</span>
-          <span class="btn-label" id="btn-submit-record-label">บันทึกข้อมูล</span>
-          <span class="spinner"></span>
-        </button>
-      </div>
+                <div class="med-selected-list" id="med-selected-list"></div>
 
-    </form>
-  </div>
-</section>
+                <p id="med-selection-error" style="color:var(--danger); font-size:12.5px; margin:8px 0 0 0; display:none;">
+                  กรุณาเลือกหรือระบุรายการยาอย่างน้อย 1 รายการ
+                </p>
+              </div>
+
+              <div class="form-grid">
+                <div class="form-field">
+                  <label>วันที่ค้าง <span class="req">*</span></label>
+                  <input type="date" id="field-pendingdate" required>
+                  <p style="color:var(--muted); font-size:11.5px; margin:6px 0 0 0; line-height:1.5;">
+                    <span class="material-icons-outlined" style="font-size:13px; vertical-align:-2px;">info</span>
+                    คือวันที่ผู้ป่วย "เริ่มค้างยา" (วันนัดที่ไม่ได้มารับ) ไม่ใช่วันที่ที่กำลังบันทึกข้อมูลนี้ — ระบบตั้งค่าเริ่มต้นเป็นวันนี้ไว้ให้เท่านั้น กรุณาเปลี่ยนให้ตรงกับวันที่ค้างจริง
+                  </p>
+                </div>
+                <div class="form-field">
+                  <label>จำนวนที่ได้รับ <span class="req">*</span></label>
+                  <div class="choice-group" id="group-status">
+                    <label class="choice-pill">
+                      <input type="radio" name="status" value="ครบ">
+                      <span>ครบ</span>
+                    </label>
+                    <label class="choice-pill">
+                      <input type="radio" name="status" value="ไม่ครบ">
+                      <span>ไม่ครบ</span>
+                    </label>
+                    <label class="choice-pill">
+                      <input type="radio" name="status" value="ไม่ระบุ" checked>
+                      <span>ไม่ระบุ</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-field full hidden" id="field-shortage-wrap">
+                <label>ขาดเหลืออะไร <span class="req">*</span></label>
+                <textarea id="field-shortage-detail" maxlength="500" placeholder="ระบุรายการยาหรือจำนวนที่ยังขาด"></textarea>
+              </div>
+
+              <div class="form-field full">
+                <label>ผู้มารับ <span class="req">*</span></label>
+                <div class="choice-group" id="group-receiver">
+                  <label class="choice-pill">
+                    <input type="checkbox" name="receiver" value="คนไข้">
+                    <span>คนไข้</span>
+                  </label>
+                  <label class="choice-pill">
+                    <input type="checkbox" name="receiver" value="ญาติ">
+                    <span>ญาติ</span>
+                  </label>
+                  <label class="choice-pill">
+                    <input type="checkbox" name="receiver" value="ตัวแทนรับยา">
+                    <span>ตัวแทนรับยา</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-field full">
+                <label>ภาพถ่ายรายการยา (ถ้ามี)</label>
+                <div class="photo-input-wrap">
+                  <button type="button" class="btn btn-outline" id="btn-attach-photo" style="width:auto;">
+                    <span class="material-icons-outlined">attach_file</span>
+                    <span class="btn-label">แนบรูปจากคลังภาพ</span>
+                  </button>
+                  <button type="button" class="btn btn-outline" id="btn-take-photo" style="width:auto;">
+                    <span class="material-icons-outlined">photo_camera</span>
+                    <span class="btn-label">ถ่ายรูป</span>
+                  </button>
+                  <input type="file" id="field-photo-attach" accept="image/*" class="hidden">
+                  <input type="file" id="field-photo-camera" accept="image/*" capture="environment" class="hidden">
+                  <img id="photo-preview" class="photo-preview" alt="ตัวอย่างรูปภาพ">
+                  <button type="button" class="btn btn-outline hidden" id="btn-remove-photo" style="width:auto;">
+                    <span class="material-icons-outlined">close</span>
+                  </button>
+                </div>
+                <p id="existing-photo-note" class="hidden" style="font-size:12px; color:var(--muted); margin:6px 0 0 0;">
+                  รูปปัจจุบันของรายการนี้แสดงอยู่ด้านบน หากไม่แนบรูปใหม่ ระบบจะคงรูปเดิมไว้
+                </p>
+              </div>
+
+              <div class="form-field full">
+                <label>หมายเหตุ</label>
+                <textarea id="field-note" maxlength="1000" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)"></textarea>
+              </div>
+
+              <div class="form-actions">
+                <button type="button" class="btn btn-outline" id="btn-clear-form">ล้างข้อมูล</button>
+                <button type="submit" class="btn btn-primary" id="btn-submit-record" style="width:auto;">
+                  <span class="material-icons-outlined">save</span>
+                  <span class="btn-label" id="btn-submit-record-label">บันทึกข้อมูล</span>
+                  <span class="spinner"></span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </section>
 
         <!-- ============ ประวัติการบันทึก ============ -->
         <section class="page-section" id="section-history">
@@ -1714,6 +1660,7 @@
                 <thead>
                   <tr>
                     <th>วันเวลาบันทึก</th>
+                    <th>คิว</th>
                     <th>ชื่อ-สกุล</th>
                     <th>HN</th>
                     <th>รายการยา</th>
@@ -1721,7 +1668,6 @@
                     <th>สถานะ</th>
                     <th>ขาดเหลือ</th>
                     <th>ผู้มารับ</th>
-                    <th>เบอร์โทรศัพท์</th>
                     <th>รูปภาพ</th>
                     <th>หมายเหตุ</th>
                     <th>จัดการ</th>
@@ -1809,23 +1755,6 @@
     </div>
   </div>
 
-  <!-- ================= Modal: ยืนยันก่อนบันทึกข้อมูล ================= -->
-  <div class="modal-overlay hidden" id="modal-confirm-record">
-    <div class="modal-box" style="max-width:460px; max-height:85vh; overflow-y:auto;">
-      <h3><span class="material-icons-outlined">fact_check</span> ยืนยันข้อมูลก่อนบันทึก</h3>
-      <p class="hint">กรุณาตรวจสอบความถูกต้องของข้อมูลก่อนกดยืนยันบันทึก</p>
-      <div class="confirm-summary" id="confirm-summary-body"></div>
-      <div class="form-actions" style="margin-top:18px;">
-        <button class="btn btn-outline" id="btn-cancel-confirm-record">แก้ไขข้อมูล</button>
-        <button class="btn btn-primary" id="btn-confirm-record" style="width:auto;">
-          <span class="material-icons-outlined">check</span>
-          <span class="btn-label" id="btn-confirm-record-label">ยืนยันบันทึกข้อมูล</span>
-          <span class="spinner"></span>
-        </button>
-      </div>
-    </div>
-  </div>
-
   <!-- ================= Modal: ยืนยันรหัสผู้ดูแล ================= -->
   <div class="modal-overlay hidden" id="modal-password">
     <div class="modal-box">
@@ -1839,24 +1768,6 @@
         <button class="btn btn-outline" id="btn-cancel-password">ยกเลิก</button>
         <button class="btn btn-primary" id="btn-confirm-password" style="width:auto;">
           <span class="btn-label">เข้าสู่ระบบ</span>
-          <span class="spinner"></span>
-        </button>
-      </div>
-    </div>
-  </div>
-  <!-- ================= Modal: ยืนยันการลบรายการ ================= -->
-  <div class="modal-overlay hidden" id="modal-delete-record">
-    <div class="modal-box">
-      <h3><span class="material-icons-outlined" style="color:var(--danger);">delete_outline</span> ยืนยันการลบรายการ</h3>
-      <p class="hint">
-        ต้องการลบรายการนี้ใช่หรือไม่? <strong id="delete-record-name"></strong><br>
-        การลบไม่สามารถกู้คืนได้
-      </p>
-      <div class="form-actions" style="margin-top:14px;">
-        <button class="btn btn-outline" id="btn-cancel-delete-record">ยกเลิก</button>
-        <button class="btn btn-danger" id="btn-confirm-delete-record" style="width:auto;">
-          <span class="material-icons-outlined">delete</span>
-          <span class="btn-label">ลบรายการ</span>
           <span class="spinner"></span>
         </button>
       </div>
@@ -1929,44 +1840,157 @@
     let selectedPhoto = null;        // { base64, mimeType, fileName }
     let existingPhotoUrl = "";       // รูปเดิมของรายการที่กำลังแก้ไข
     let removeExistingPhoto = false;
-    let customMedItems = [];         // รายการยาที่ผู้ใช้พิมพ์เพิ่มเอง
+    let selectedMeds = [];           // รายการยาที่เลือกไว้ [{name, qty, size, fixedSize}]
+    let medPool = [];                // รายชื่อยา+ขนาดทั้งหมดจากบัญชียา (MED_CATEGORIES) สำหรับค้นหา
     let editingRecordId = null;      // null = โหมดเพิ่มใหม่ / มีค่า = โหมดแก้ไข
     let historyRecordsCache = {};    // เก็บ record ล่าสุดที่โหลดไว้ ใช้ตอนกดแก้ไข
     let lastHistoryRecords = [];     // เก็บผลลัพธ์การค้นหาประวัติล่าสุด ใช้ตอนส่งออก CSV
-    let selectedMedDetails = {};     // { [ชื่อยา]: { qty: number, unit: 'เม็ด'|'ชุด', dose: string } } สำหรับรายการที่ติ๊ก/เพิ่มเอง
-    let pendingSubmit = null;        // { formData, photo } ข้อมูลที่รอผู้ใช้กดยืนยันในการ์ดสรุป
-    let currentRecorderName = "";    // ชื่อผู้บันทึก (ผู้ใช้งาน) ที่กรอกไว้ตอนเข้าใช้งาน
 
-    // รายการยากลุ่มโรค NCDs ที่พบได้บ่อยในบัญชียาโรงพยาบาลรัฐส่วนใหญ่
-    // (เป็นรายการอ้างอิงทั่วไป โปรดปรับให้ตรงกับบัญชียาจริงของแต่ละหน่วยงาน)
+    // บัญชียาของโรงพยาบาล พร้อม "ขนาด" (ความแรง/รูปแบบ) กำกับแต่ละตัว — สร้างขึ้นจากการ
+    // วิเคราะห์ประวัติการจ่ายยาจริงของหน่วยงาน (ไฟล์ "ข้อมูลจุดรับยาค้าง") แล้วรวมชื่อยา
+    // ที่พิมพ์ไม่ตรงกัน/สะกดต่างกันให้เป็นชื่อมาตรฐานเดียว พร้อมเลือกขนาดที่พบบ่อยที่สุด
+    // เป็นค่าเริ่มต้น เมื่อเลือกยาจากรายการนี้ ระบบจะเติม "ขนาด" ให้อัตโนมัติ ไม่ต้องคีย์เอง
+    // หากพบว่าขนาดของยาตัวใดคลาดเคลื่อนจากบัญชียาจริงของหน่วยงาน สามารถแก้ไขได้ที่นี่
     const MED_CATEGORIES = [
       {
         group: "เบาหวาน (Diabetes)",
-        items: ["Metformin", "Glibenclamide", "Gliclazide", "Glipizide", "Pioglitazone", "Acarbose", "Insulin NPH", "Insulin Regular"]
+        items: [
+          { name: "Metformin", size: "500 mg" },
+          { name: "Gliclazide", size: "5 mg" },
+          { name: "Glipizide", size: "5 mg" },
+          { name: "Pioglitazone", size: "30 mg" },
+          { name: "Insulin Glargine", size: "100 IU/mL", unit: "หลอด" },
+          { name: "Insulin Penfill", size: "100 IU/mL, 3 mL/ขวด", unit: "ขวด" }
+        ]
       },
       {
         group: "ความดันโลหิตสูง (Hypertension)",
-        items: ["Amlodipine", "Enalapril", "Losartan", "Hydrochlorothiazide (HCTZ)", "Atenolol", "Propranolol", "Methyldopa", "Nifedipine SR"]
+        items: [
+          { name: "Amlodipine", size: "5 mg" },
+          { name: "Enalapril", size: "5 mg" },
+          { name: "Losartan", size: "50 mg" },
+          { name: "Hydrochlorothiazide (HCTZ)", size: "25 mg" },
+          { name: "Atenolol", size: "50 mg" },
+          { name: "Propranolol", size: "10 mg" },
+          { name: "Manidipine", size: "20 mg" },
+          { name: "Doxazosin", size: "2 mg" },
+          { name: "Doxazosin 4 mg", size: "4 mg" },
+          { name: "Hydralazine", size: "25 mg" },
+          { name: "Carvedilol", size: "12.5 mg" }
+        ]
       },
       {
         group: "ไขมันในเลือดสูง (Dyslipidemia)",
-        items: ["Simvastatin", "Atorvastatin", "Gemfibrozil", "Fenofibrate"]
+        items: [
+          { name: "Simvastatin", size: "20 mg" },
+          { name: "Atorvastatin", size: "40 mg" },
+          { name: "Gemfibrozil", size: "300 mg" },
+          { name: "Fenofibrate", size: "300 mg" },
+          { name: "Ezetimibe", size: "10 mg" }
+        ]
       },
       {
         group: "หัวใจและหลอดเลือด (Cardiovascular)",
-        items: ["Aspirin", "Clopidogrel", "Isosorbide Dinitrate (ISDN)", "Digoxin", "Warfarin", "Furosemide", "Spironolactone"]
+        items: [
+          { name: "Aspirin", size: "81 mg" },
+          { name: "Clopidogrel", size: "75 mg" },
+          { name: "Isosorbide Mononitrate", size: "20 mg" },
+          { name: "Digoxin", size: "0.25 mg" },
+          { name: "Warfarin", size: "3 mg" },
+          { name: "Spironolactone", size: "25 mg" }
+        ]
       },
       {
         group: "หืด/ปอดอุดกั้นเรื้อรัง (Asthma/COPD)",
-        items: ["Salbutamol (MDI/Inhaler)", "Theophylline", "Budesonide Inhaler"]
+        items: [
+          { name: "Tiotropium DPI", size: "18 mcg", unit: "ชุด" },
+          { name: "Symbicort (Budesonide/Formoterol) Inhaler", size: "160/4.5 mcg", unit: "หลอด" }
+        ]
       },
       {
         group: "ไทรอยด์ (Thyroid)",
-        items: ["Levothyroxine"]
+        items: [
+          { name: "Levothyroxine (Thyroxine sodium)", size: "50 mcg" },
+          { name: "Levothyroxine (Thyroxine sodium) 100 mcg", size: "100 mcg" }
+        ]
+      },
+      {
+        group: "ยาต้านไวรัส (Antiretroviral / HIV)",
+        items: [
+          { name: "Tenofovir Alafenamide (TAF)", size: "25 mg" }
+        ]
       },
       {
         group: "เกาต์ (Gout)",
-        items: ["Allopurinol", "Colchicine"]
+        items: [
+          { name: "Allopurinol", size: "100 mg" },
+          { name: "Colchicine", size: "0.6 mg" },
+          { name: "Febuxostat", size: "80 mg" }
+        ]
+      },
+      {
+        group: "กระดูก/แคลเซียม (Bone & Calcium)",
+        items: [
+          { name: "Calcium carbonate", size: "1.5 g" },
+          { name: "Alfacalcidol", size: "0.25 mcg" },
+          { name: "Alendronate+Cholecalciferol", size: "70 mg/5600 IU" }
+        ]
+      },
+      {
+        group: "ระบบประสาท/จิตเวช (Neuro/Psych)",
+        items: [
+          { name: "Gabapentin", size: "100 mg" },
+          { name: "Gabapentin 300 mg", size: "300 mg" },
+          { name: "Lorazepam", size: "0.5 mg" },
+          { name: "Clonazepam", size: "0.5 mg" },
+          { name: "Sertraline", size: "50 mg" },
+          { name: "Fluoxetine", size: "20 mg" },
+          { name: "Risperidone", size: "2 mg" },
+          { name: "Baclofen", size: "10 mg" },
+          { name: "Trospium Chloride", size: "20 mg" },
+          { name: "Tramadol", size: "50 mg" }
+        ]
+      },
+      {
+        group: "ระบบทางเดินอาหาร (GI)",
+        items: [
+          { name: "Omeprazole", size: "20 mg" },
+          { name: "Lactulose", size: "10 g/15 mL", unit: "ขวด" },
+          { name: "Simethicone", size: "80 mg" }
+        ]
+      },
+      {
+        group: "โลหิตจาง/วิตามิน (Anemia & Vitamins)",
+        items: [
+          { name: "Folic acid", size: "5 mg" },
+          { name: "Ferrous fumarate", size: "200 mg" },
+          { name: "Cyanocobalamin (Vitamin B12)", size: "500 mcg" },
+          { name: "Vitamin B1-6-12", size: "" },
+          { name: "Triferdine", size: "" },
+          { name: "Zinc Sulfate", size: "110 mg" }
+        ]
+      },
+      {
+        group: "ยาตา (Eye Drops)",
+        items: [
+          { name: "Latanoprost Eye Drop", size: "0.005%", unit: "ขวด" },
+          { name: "Brimonidine (Alphagan) Eye Drop", size: "0.2%", unit: "ขวด" },
+          { name: "Timolol+Brinzolamide Eye Drop", size: "0.5%/1%, 5 mL", unit: "ขวด" }
+        ]
+      },
+      {
+        group: "อื่นๆ (Others)",
+        items: [
+          { name: "Sodium Bicarbonate", size: "300 mg" },
+          { name: "Sodium Valproate", size: "200 mg" },
+          { name: "Ibuprofen", size: "200 mg" },
+          { name: "Daflon", size: "500 mg" },
+          { name: "Montelukast", size: "10 mg" },
+          { name: "Cetirizine", size: "10 mg" },
+          { name: "Finasteride", size: "5 mg" },
+          { name: "Analgesic Balm", size: "", unit: "หลอด" },
+          { name: "Triamcinolone Acetonide Cream", size: "0.1%, 15 g", unit: "หลอด" }
+        ]
       }
     ];
 
@@ -1997,54 +2021,7 @@
       restoreSettingsSession_();
       bindStaticEvents_();
       startClock_();
-      restoreRecorderName_();
     });
-
-    // ---------------- ชื่อผู้บันทึก (ผู้ใช้งาน) ----------------
-    const RECORDER_NAME_STORAGE_KEY_ = "refillmed_recorder_name";
-
-    function restoreRecorderName_() {
-      let saved = "";
-      try {
-        saved = localStorage.getItem(RECORDER_NAME_STORAGE_KEY_) || "";
-      } catch (err) {
-        saved = "";
-      }
-      if (saved) {
-        document.getElementById("input-recorder-name").value = saved;
-      }
-    }
-
-    function onEnterAppClick_() {
-      const input = document.getElementById("input-recorder-name");
-      const errorEl = document.getElementById("recorder-name-error");
-      const name = input.value.trim();
-
-      if (!name) {
-        errorEl.style.display = "block";
-        input.focus();
-        return;
-      }
-      errorEl.style.display = "none";
-
-      currentRecorderName = name;
-      try {
-        localStorage.setItem(RECORDER_NAME_STORAGE_KEY_, name);
-      } catch (err) {
-        // ไม่มีสิทธิ์เข้าถึง localStorage (เช่น โหมดส่วนตัว) ไม่กระทบการใช้งานหลัก
-      }
-      document.getElementById("sidebar-recorder-name").textContent = name;
-
-      enterApp_();
-    }
-
-    function onChangeRecorderClick_() {
-      document.getElementById("page-app").classList.add("hidden");
-      document.getElementById("page-landing").classList.remove("hidden");
-      const input = document.getElementById("input-recorder-name");
-      input.focus();
-      input.select();
-    }
 
     function loadPublicSettings() {
       google.script.run
@@ -2084,7 +2061,7 @@
       if (settings.COLOR_PRIMARY) {
         const rgb = hexToRgb_(settings.COLOR_PRIMARY);
         if (rgb) {
-          root.style.setProperty("--primary-rgb", rgb.r + "," + rgb.g + "," + rgb.b);
+          root.style.setProperty("--primary-rgb", rgb.r + ", " + rgb.g + ", " + rgb.b);
         }
       }
 
@@ -2136,17 +2113,7 @@
     // EVENT BINDINGS
     // ================================================================
     function bindStaticEvents_() {
-      document.getElementById("btn-enter-app").addEventListener("click", onEnterAppClick_);
-      document.getElementById("input-recorder-name").addEventListener("keydown", function (e) {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          onEnterAppClick_();
-        }
-      });
-      document.getElementById("input-recorder-name").addEventListener("input", function () {
-        document.getElementById("recorder-name-error").style.display = "none";
-      });
-      document.getElementById("btn-change-recorder").addEventListener("click", onChangeRecorderClick_);
+      document.getElementById("btn-enter-app").addEventListener("click", enterApp_);
 
       document.querySelectorAll(".sidebar-nav-item").forEach(function (item) {
         item.addEventListener("click", function () {
@@ -2175,6 +2142,8 @@
         loadDashboard_();
       });
 
+      document.getElementById("med-breakdown-filter").addEventListener("input", applyMedBreakdownFilter_);
+
       document.getElementById("record-form").addEventListener("submit", onSubmitRecord_);
       document.getElementById("btn-clear-form").addEventListener("click", function () {
         if (editingRecordId) {
@@ -2188,12 +2157,6 @@
       document.getElementById("btn-close-record-modal").addEventListener("click", closeEditModal_);
       document.getElementById("record-modal-backdrop").addEventListener("click", closeEditModal_);
 
-      document.getElementById("btn-cancel-confirm-record").addEventListener("click", closeConfirmRecordModal_);
-      document.getElementById("btn-confirm-record").addEventListener("click", onConfirmRecordSubmit_);
-      document.getElementById("modal-confirm-record").addEventListener("click", function (e) {
-        if (e.target.id === "modal-confirm-record") closeConfirmRecordModal_();
-      });
-
       document.getElementById("btn-attach-photo").addEventListener("click", function () {
         document.getElementById("field-photo-attach").click();
       });
@@ -2201,18 +2164,6 @@
       document.getElementById("field-photo-attach").addEventListener("change", onPhotoSelected_);
       document.getElementById("field-photo-camera").addEventListener("change", onPhotoSelected_);
       document.getElementById("btn-remove-photo").addEventListener("click", onRemovePhoto_);
-
-      document.getElementById("field-phone").addEventListener("input", function (e) {
-        // ใส่ขีด (-) อัตโนมัติหลังเลข 3 ตัวแรก เพื่อให้ตรงรูปแบบ 0xx-xxxxxxx
-        let digits = e.target.value.replace(/\D/g, "").slice(0, 10);
-        if (digits.length > 3) {
-          e.target.value = digits.slice(0, 3) + "-" + digits.slice(3);
-        } else {
-          e.target.value = digits;
-        }
-        document.getElementById("phone-error").style.display = "none";
-        updateCallPhoneLink_();
-      });
 
       document.querySelectorAll('input[name="prefix"]').forEach(function (el) {
         el.addEventListener("change", updatePillStates_);
@@ -2227,12 +2178,28 @@
         el.addEventListener("change", updatePillStates_);
       });
 
-      buildMedChecklist_();
-      document.getElementById("btn-add-custom-med").addEventListener("click", addCustomMedItem_);
-      document.getElementById("field-med-custom-input").addEventListener("keydown", function (e) {
+      document.getElementById("field-hn").addEventListener("blur", checkDuplicateAndWarn_);
+      document.getElementById("field-fullname").addEventListener("blur", checkDuplicateAndWarn_);
+      document.getElementById("field-pendingdate").addEventListener("change", checkPendingDateAndWarn_);
+
+      buildMedPool_();
+
+      const medSearchInput = document.getElementById("field-med-search");
+      medSearchInput.addEventListener("input", renderMedSuggestDropdown_);
+      medSearchInput.addEventListener("focus", renderMedSuggestDropdown_);
+      medSearchInput.addEventListener("keydown", function (e) {
         if (e.key === "Enter") {
           e.preventDefault();
-          addCustomMedItem_();
+          const first = document.querySelector("#med-suggest-dropdown .med-suggest-item");
+          addSelectedMed_(first ? first.dataset.medName : this.value);
+        } else if (e.key === "Escape") {
+          hideMedSuggestDropdown_();
+        }
+      });
+      document.addEventListener("click", function (e) {
+        const wrap = document.getElementById("med-search-wrap");
+        if (wrap && !wrap.contains(e.target)) {
+          hideMedSuggestDropdown_();
         }
       });
 
@@ -2240,12 +2207,6 @@
         loadHistory_(this);
       });
       document.getElementById("btn-export-history").addEventListener("click", exportHistoryCsv_);
-
-      document.getElementById("btn-cancel-delete-record").addEventListener("click", closeDeleteRecordModal_);
-      document.getElementById("modal-delete-record").addEventListener("click", function (e) {
-        if (e.target.id === "modal-delete-record") closeDeleteRecordModal_();
-      });
-      document.getElementById("btn-confirm-delete-record").addEventListener("click", onConfirmDeleteRecord_);
 
       document.getElementById("btn-cancel-password").addEventListener("click", function () {
         document.getElementById("modal-password").classList.add("hidden");
@@ -2352,6 +2313,8 @@
       renderDashboardStats_(data.stats);
       renderTrendChart_(data.trend);
       renderDonutChart_(data.stats);
+      renderMedBreakdownChart_(data.medBreakdown);
+      renderWeekBreakdownChart_(data.weekBreakdown);
       renderFollowUpTable_(data.followUpList, data.stats);
 
       const recentEl = document.getElementById("recent-list");
@@ -2479,6 +2442,63 @@
       }).join("");
     }
 
+    // ---------------- แยกรายการยา (แท่งแนวนอน) ----------------
+    let lastMedBreakdown = []; // เก็บไว้ใช้กรองด้วยช่องค้นหาโดยไม่ต้องโหลดข้อมูลใหม่
+
+    function renderMedBreakdownChart_(medBreakdown) {
+      lastMedBreakdown = medBreakdown || [];
+      applyMedBreakdownFilter_();
+    }
+
+    function applyMedBreakdownFilter_() {
+      const filterEl = document.getElementById("med-breakdown-filter");
+      const query = filterEl ? filterEl.value.trim().toLowerCase() : "";
+      const filtered = lastMedBreakdown.filter(function (m) {
+        if (!query) return true;
+        const haystack = (m.name + " " + (m.size || "") + " " + (m.unit || "")).toLowerCase();
+        return haystack.indexOf(query) !== -1;
+      });
+      const items = filtered.map(function (m) {
+        const sizeLabel = m.size ? (" " + m.size) : " ไม่ระบุขนาด";
+        const unitLabel = m.unit ? (" (" + m.unit + ")") : "";
+        return { name: m.name + sizeLabel + unitLabel, count: m.totalQty };
+      });
+      const emptyText = query
+        ? "ไม่พบยาที่ตรงกับคำค้นหา \"" + query + "\""
+        : "ยังไม่มีข้อมูลรายการยาในช่วงที่เลือก";
+      renderHorizontalBarList_("med-breakdown-chart", items, "var(--primary)", "medication", emptyText);
+    }
+
+    // ---------------- วันที่ค้างยา แยกรายสัปดาห์ (แท่งแนวนอน) ----------------
+    function renderWeekBreakdownChart_(weekBreakdown) {
+      const items = (weekBreakdown || []).map(function (w) { return { name: "สัปดาห์ " + w.label, count: w.count }; });
+      renderHorizontalBarList_("week-breakdown-chart", items, "var(--secondary)", "calendar_view_week", "ยังไม่มีข้อมูลในช่วงที่เลือก");
+    }
+
+    // ---------------- ตัวช่วยวาดกราฟแท่งแนวนอน (ไม่พึ่งไลบรารีภายนอก) ----------------
+    function renderHorizontalBarList_(containerId, items, color, emptyIcon, emptyText) {
+      const container = document.getElementById(containerId);
+      if (!items || items.length === 0) {
+        container.innerHTML = emptyStateHtml_(emptyIcon, emptyText);
+        return;
+      }
+      const maxCount = Math.max.apply(null, items.map(function (it) { return it.count; }).concat([1]));
+      container.innerHTML = items.map(function (it) {
+        const pct = Math.max(4, Math.round((it.count / maxCount) * 100));
+        return (
+          '<div style="margin-bottom:10px;">' +
+            '<div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:4px;">' +
+              '<span>' + escapeHtml_(it.name) + '</span>' +
+              '<span style="font-weight:700; color:var(--text);">' + it.count.toLocaleString("th-TH") + '</span>' +
+            '</div>' +
+            '<div style="background:var(--background); border-radius:6px; height:10px; overflow:hidden;">' +
+              '<div style="width:' + pct + '%; height:100%; background:' + color + '; border-radius:6px;"></div>' +
+            '</div>' +
+          '</div>'
+        );
+      }).join("");
+    }
+
     // ---------------- ตารางเคสค้างติดตาม ----------------
     function renderFollowUpTable_(followUpList, stats) {
       const tbody = document.getElementById("followup-tbody");
@@ -2504,23 +2524,26 @@
       }).join("");
     }
 
+    function statusBadgeClass_(status) {
+      if (status === "ครบ") return "badge-complete";
+      if (status === "ไม่ครบ") return "badge-incomplete";
+      return "badge-neutral"; // "ไม่ระบุ"
+    }
+
     function buildRecordItemEl_(r) {
       const wrap = document.createElement("div");
       wrap.className = "record-item";
 
-      const viewableThumbUrl = r.photoUrl ? toDriveViewableUrl_(r.photoUrl) : "";
-      const thumbHtml = viewableThumbUrl
-        ? '<img class="record-thumb" src="' + escapeHtml_(viewableThumbUrl) + '" alt="รูปยา" ' +
-            'data-placeholder-class="record-thumb-placeholder" data-placeholder-icon="medication" ' +
-            'onerror="handleImgLoadError_(this)">'
+      const thumbHtml = r.photoUrl
+        ? '<img class="record-thumb" src="' + escapeHtml_(r.photoUrl) + '" alt="รูปยา">'
         : '<div class="record-thumb-placeholder"><span class="material-icons-outlined">medication</span></div>';
 
-      const badgeClass = r.status === "ไม่ครบ" ? "badge-incomplete" : "badge-complete";
+      const badgeClass = statusBadgeClass_(r.status);
 
       wrap.innerHTML =
         thumbHtml +
         '<div class="record-info">' +
-          '<div class="name">' + escapeHtml_((r.prefix || "") + r.fullName) + ' (HN: ' + escapeHtml_(r.hn) + ')</div>' +
+          '<div class="name">' + (r.queueNumber ? ('คิว ' + escapeHtml_(r.queueNumber) + ' — ') : '') + escapeHtml_((r.prefix || "") + r.fullName) + ' (HN: ' + escapeHtml_(r.hn) + ')</div>' +
           '<div class="meta">' + escapeHtml_(r.medItems) + '</div>' +
           '<div class="meta">ค้างวันที่ ' + formatThaiDateShort_(r.pendingDate) + '</div>' +
         '</div>' +
@@ -2560,310 +2583,252 @@
       }
     }
 
-    // ---------------- รายการยา (Checklist + เพิ่มเอง) ----------------
-    function buildMedChecklist_() {
-      const container = document.getElementById("med-checklist-container");
-      container.innerHTML = "";
+    // ---------------- รายการยา (ค้นหาแบบ dropdown + คีย์จำนวน/ขนาด) ----------------
+
+    // รวมรายการยา (พร้อมขนาด/หน่วย) จาก MED_CATEGORIES ให้เป็น list เดียว (ตัดรายการซ้ำ) สำหรับค้นหา
+    function flattenMedCategories_() {
+      const seen = {};
+      const flat = [];
       MED_CATEGORIES.forEach(function (cat) {
-        const heading = document.createElement("div");
-        heading.style.fontSize = "12.5px";
-        heading.style.fontWeight = "700";
-        heading.style.color = "var(--muted)";
-        heading.style.margin = "10px 0 6px 0";
-        heading.textContent = cat.group;
-        container.appendChild(heading);
+        cat.items.forEach(function (med) {
+          const key = med.name.toLowerCase();
+          if (seen[key]) return;
+          seen[key] = true;
+          flat.push(med);
+        });
+      });
+      return flat;
+    }
 
-        const wrap = document.createElement("div");
-        wrap.className = "choice-group";
-        wrap.style.marginBottom = "4px";
+    // สร้าง pool รายการยาไว้ค้นหา จากบัญชียาของโรงพยาบาล (MED_CATEGORIES) เท่านั้น
+    function buildMedPool_() {
+      medPool = flattenMedCategories_();
+    }
 
-        cat.items.forEach(function (medName) {
-          const label = document.createElement("label");
-          label.className = "choice-pill";
-          label.innerHTML =
-            '<input type="checkbox" class="med-checkbox" value="' + escapeHtml_(medName) + '">' +
-            '<span>' + escapeHtml_(medName) + '</span>';
-          label.querySelector("input").addEventListener("change", function () {
-            updatePillStates_();
-            syncMedQtyList_();
+    // กรองรายการยาใน pool ตามคำค้นหา (จับคำที่ "มี" อยู่ในชื่อยาหรือขนาด ไม่ใช่แค่ขึ้นต้น)
+    // ไม่เอารายการที่เลือกไปแล้ว
+    function filterMedSuggestions_(query) {
+      const q = query.trim().toLowerCase();
+      const selectedKeys = {};
+      selectedMeds.forEach(function (m) { selectedKeys[m.name.toLowerCase()] = true; });
+
+      const source = medPool.length ? medPool : flattenMedCategories_();
+      const pool = q
+        ? source.filter(function (med) {
+            return (med.name + " " + (med.size || "")).toLowerCase().indexOf(q) !== -1;
+          })
+        : source;
+
+      return pool.filter(function (med) { return !selectedKeys[med.name.toLowerCase()]; }).slice(0, 8);
+    }
+
+    function renderMedSuggestDropdown_() {
+      const searchInput = document.getElementById("field-med-search");
+      const dropdown = document.getElementById("med-suggest-dropdown");
+      const query = searchInput.value;
+      const trimmedQuery = query.trim();
+      const matches = filterMedSuggestions_(query);
+
+      dropdown.innerHTML = "";
+
+      matches.forEach(function (med) {
+        const item = document.createElement("div");
+        item.className = "med-suggest-item";
+        item.innerHTML =
+          escapeHtml_(med.name) +
+          (med.size ? ' <span style="opacity:.6; font-size:12px;">(' + escapeHtml_(med.size) + ')</span>' : "");
+        item.addEventListener("mousedown", function (e) {
+          e.preventDefault(); // กัน input เสีย focus ก่อน click จะทำงาน
+          addSelectedMed_(med);
+        });
+        dropdown.appendChild(item);
+      });
+
+      if (trimmedQuery) {
+        const alreadyKnown =
+          medPool.some(function (med) { return med.name.toLowerCase() === trimmedQuery.toLowerCase(); }) ||
+          selectedMeds.some(function (m) { return m.name.toLowerCase() === trimmedQuery.toLowerCase(); });
+
+        if (!alreadyKnown) {
+          const addItem = document.createElement("div");
+          addItem.className = "med-suggest-item med-suggest-add";
+          addItem.innerHTML =
+            '<span class="material-icons-outlined" style="font-size:16px; vertical-align:-3px;">add_circle_outline</span> ' +
+            'เพิ่ม "' + escapeHtml_(trimmedQuery) + '" เป็นรายการยาใหม่ (ไม่มีในบัญชียา)';
+          addItem.addEventListener("mousedown", function (e) {
+            e.preventDefault();
+            addSelectedMed_({ name: trimmedQuery, size: "", unit: "เม็ด" });
           });
-          wrap.appendChild(label);
-        });
-
-        container.appendChild(wrap);
-      });
-    }
-
-    function addCustomMedItem_() {
-      const input = document.getElementById("field-med-custom-input");
-      const value = input.value.trim();
-      if (!value) return;
-      if (customMedItems.indexOf(value) === -1) {
-        customMedItems.push(value);
-        renderCustomMedChips_();
-        syncMedQtyList_();
+          dropdown.appendChild(addItem);
+        }
       }
-      input.value = "";
-      input.focus();
+
+      dropdown.classList.toggle("hidden", dropdown.children.length === 0);
     }
 
-    function removeCustomMedItem_(value) {
-      customMedItems = customMedItems.filter(function (v) { return v !== value; });
-      renderCustomMedChips_();
-      syncMedQtyList_();
+    function hideMedSuggestDropdown_() {
+      document.getElementById("med-suggest-dropdown").classList.add("hidden");
     }
 
-    function renderCustomMedChips_() {
-      const wrap = document.getElementById("custom-med-chips");
+    // เพิ่มยาที่เลือกเข้ารายการ — ถ้ามาจากบัญชียา (มี size กำกับ) จะ "ล็อก" ขนาดไว้ให้อัตโนมัติ
+    // ไม่ต้องคีย์เอง ถ้าเป็นยาที่พิมพ์เพิ่มเอง (ไม่มีในบัญชียา) จะเปิดให้คีย์ขนาดเองได้ตามเดิม
+    function addSelectedMed_(med) {
+      const trimmed = String((med && med.name) || "").trim();
+      if (!trimmed) return;
+
+      const exists = selectedMeds.some(function (m) { return m.name.toLowerCase() === trimmed.toLowerCase(); });
+      if (!exists) {
+        const hasFixedSize = !!(med && med.size);
+        selectedMeds.push({
+          name: trimmed,
+          qty: "",
+          size: hasFixedSize ? med.size : "",
+          unit: (med && med.unit) || "เม็ด",
+          fixedSize: hasFixedSize
+        });
+        renderSelectedMedList_();
+        document.getElementById("med-selection-error").style.display = "none";
+        // แจ้งเตือนทันทีว่าเลือกสำเร็จ เพราะ dropdown รายการยาบังรายการที่เพิ่งเพิ่มไว้
+        // ด้านล่าง ทำให้ผู้กดไม่แน่ใจว่ากดติดหรือยัง
+        showToast("เลือก \"" + trimmed + "\" สำเร็จ", "success");
+      } else {
+        showToast("\"" + trimmed + "\" ถูกเลือกไว้ในรายการแล้ว", "warning");
+      }
+
+      const searchInput = document.getElementById("field-med-search");
+      searchInput.value = "";
+      searchInput.focus();
+      renderMedSuggestDropdown_();
+    }
+
+    function removeSelectedMed_(name) {
+      selectedMeds = selectedMeds.filter(function (m) { return m.name !== name; });
+      renderSelectedMedList_();
+    }
+
+    // แสดงรายการยาที่เลือกไว้ด้านล่าง dropdown พร้อมช่องคีย์ "จำนวน" ต่อรายการ
+    // ถ้าเป็นยาจากบัญชียา (fixedSize) จะโชว์ "ขนาด" เป็น badge ล็อกไว้ ไม่ต้องคีย์เอง
+    // ถ้าเป็นยาที่พิมพ์เพิ่มเอง จะมีช่องคีย์ "ขนาด" แบบพิมพ์เองเหมือนเดิม
+    function renderSelectedMedList_() {
+      const wrap = document.getElementById("med-selected-list");
       wrap.innerHTML = "";
-      customMedItems.forEach(function (value) {
-        const chip = document.createElement("span");
-        chip.className = "choice-pill checked";
-        chip.style.cursor = "pointer";
-        chip.innerHTML =
-          '<span>' + escapeHtml_(value) + '</span>' +
-          '<span class="material-icons-outlined" style="font-size:16px;">close</span>';
-        chip.addEventListener("click", function () { removeCustomMedItem_(value); });
-        wrap.appendChild(chip);
-      });
-    }
 
-    /**
-     * รายชื่อยาที่ถูกเลือกอยู่ในปัจจุบัน (ติ๊ก checkbox + เพิ่มเอง) ตามลำดับที่แสดงผล
-     */
-    function getSelectedMedNames_() {
-      const checked = Array.prototype.map.call(
-        document.querySelectorAll(".med-checkbox:checked"),
-        function (el) { return el.value; }
-      );
-      return checked.concat(customMedItems);
-    }
-
-    /**
-     * ทำให้ selectedMedDetails (จำนวน+หน่วยของแต่ละรายการ) ตรงกับรายการยาที่เลือกอยู่ปัจจุบัน
-     * - รายการที่เพิ่งถูกเลือก จะได้ค่าเริ่มต้น จำนวน = 1, หน่วย = "เม็ด" (priority เม็ดก่อนเสมอ)
-     * - รายการที่ถูกยกเลิกการเลือก จะถูกลบออกจาก selectedMedDetails
-     */
-    function syncMedQtyList_() {
-      const names = getSelectedMedNames_();
-      const nextDetails = {};
-      names.forEach(function (name) {
-        nextDetails[name] = selectedMedDetails[name] || { qty: 1, unit: "เม็ด", dose: "" };
-      });
-      selectedMedDetails = nextDetails;
-      renderMedQtyList_(names);
-    }
-
-    function renderMedQtyList_(names) {
-      const section = document.getElementById("med-qty-section");
-      const list = document.getElementById("med-qty-list");
-      list.innerHTML = "";
-
-      if (!names || names.length === 0) {
-        section.classList.add("hidden");
-        return;
-      }
-      section.classList.remove("hidden");
-
-      names.forEach(function (name) {
-        const detail = selectedMedDetails[name] || { qty: 1, unit: "เม็ด", dose: "" };
+      selectedMeds.forEach(function (item) {
         const row = document.createElement("div");
-        row.className = "med-qty-row";
+        row.className = "med-selected-row";
 
-        const nameEl = document.createElement("span");
-        nameEl.className = "med-qty-name";
-        nameEl.textContent = name;
+        const sizeControlHtml = item.fixedSize
+          ? '<span class="med-size-badge">' +
+              '<span class="material-icons-outlined" style="font-size:13px; vertical-align:-2px;">verified</span> ' +
+              escapeHtml_(item.size || "ไม่มีขนาดระบุ") +
+            '</span>'
+          : '<input type="text" class="med-size-input" placeholder="ขนาด เช่น 500mg, เม็ด" value="' + escapeHtml_(item.size) + '">';
 
-        const qtyInput = document.createElement("input");
-        qtyInput.type = "number";
-        qtyInput.min = "1";
-        qtyInput.step = "1";
-        qtyInput.value = detail.qty;
-        qtyInput.setAttribute("aria-label", "จำนวน " + name);
-        qtyInput.addEventListener("input", function () {
-          const n = parseInt(qtyInput.value, 10);
-          selectedMedDetails[name].qty = (n > 0) ? n : 1;
+        row.innerHTML =
+          '<div class="med-selected-name">' +
+            '<span class="material-icons-outlined" style="font-size:16px; vertical-align:-3px; color:var(--primary);">medication</span> ' +
+            escapeHtml_(item.name) +
+          '</div>' +
+          '<div class="med-selected-inputs">' +
+            '<input type="number" min="0" step="1" inputmode="numeric" class="med-qty-input" placeholder="จำนวน" value="' + escapeHtml_(item.qty) + '">' +
+            sizeControlHtml +
+            '<button type="button" class="med-remove-btn" aria-label="ลบรายการยา">' +
+              '<span class="material-icons-outlined" style="font-size:18px;">close</span>' +
+            '</button>' +
+          '</div>';
+
+        row.querySelector(".med-qty-input").addEventListener("input", function (e) {
+          item.qty = e.target.value;
+        });
+        if (!item.fixedSize) {
+          row.querySelector(".med-size-input").addEventListener("input", function (e) {
+            item.size = e.target.value;
+          });
+        }
+        row.querySelector(".med-remove-btn").addEventListener("click", function () {
+          removeSelectedMed_(item.name);
         });
 
-       // เพิ่มหน่วยยา: เม็ด, ซอง, ขวด, หลอด, แผง, ชุด
-const unitSelect = document.createElement("select");
-["เม็ด", "ซอง", "ขวด", "หลอด", "แผง", "ชุด"].forEach(function (unit) {
-  const opt = document.createElement("option");
-  opt.value = unit;
-  opt.textContent = unit;
-  if (unit === detail.unit) opt.selected = true;
-  unitSelect.appendChild(opt);
-});
-        unitSelect.addEventListener("change", function () {
-          selectedMedDetails[name].unit = unitSelect.value;
-        });
-
-        const doseInput = document.createElement("input");
-        doseInput.type = "text";
-        doseInput.className = "med-qty-dose";
-        doseInput.maxLength = 50;
-        doseInput.placeholder = "ขนาด เช่น 500 มก., 5 มล. (ไม่บังคับ)";
-        doseInput.value = detail.dose || "";
-        doseInput.setAttribute("aria-label", "ขนาดยา " + name);
-        doseInput.addEventListener("input", function () {
-          selectedMedDetails[name].dose = doseInput.value;
-        });
-
-        row.appendChild(nameEl);
-        row.appendChild(qtyInput);
-        row.appendChild(unitSelect);
-        row.appendChild(doseInput);
-        list.appendChild(row);
+        wrap.appendChild(row);
       });
     }
 
-    /**
-     * รายการยาที่เลือก พร้อมจำนวน/หน่วย/ขนาด(ถ้ากรอก) รวมเป็น string เดียวสำหรับบันทึกลงฟอร์ม
-     * รูปแบบ: "ชื่อยา x จำนวน หน่วย" หรือ "ชื่อยา x จำนวน หน่วย | ขนาด: ..." ถ้ามีการกรอกขนาด
-     */
+    // ประกอบ string ต่อรายการยา 1 ตัว ในรูปแบบ "ชื่อยา x จำนวน หน่วย | ขนาด: ขนาดยา"
+    // (ตรงกับรูปแบบที่ backend ใช้ parseMedSegment_ อ่านค่ากลับ และตรงกับข้อมูลที่เคย
+    // บันทึกไว้จริงในระบบ) ถ้าไม่ได้คีย์จำนวนไว้ ก็ใช้แค่ชื่อยา (+ขนาดถ้ามี) เฉยๆ
+    function buildMedSegment_(item) {
+      const name = item.name;
+      const qty = parseInt(item.qty, 10);
+      const size = String(item.size || "").trim();
+      const unit = String(item.unit || "เม็ด").trim();
+
+      if (qty && qty > 0) {
+        let seg = name + " x " + qty + (unit ? " " + unit : "");
+        if (size) seg += " | ขนาด: " + size;
+        return seg;
+      }
+      if (size) {
+        return name + " (" + size + ")";
+      }
+      return name;
+    }
+
     function getSelectedMedItems_() {
-      return getSelectedMedNames_().map(function (name) {
-        const detail = selectedMedDetails[name] || { qty: 1, unit: "เม็ด", dose: "" };
-        const dose = (detail.dose || "").trim();
-        const base = name + " x " + detail.qty + " " + detail.unit;
-        return dose ? (base + " | ขนาด: " + dose) : base;
-      });
+      return selectedMeds.map(buildMedSegment_);
     }
 
-    /**
-     * นำ string รายการยาที่เคยบันทึกไว้ (คั่นด้วย comma) มา "ติ๊ก" checkbox
-     * ที่ตรงกับรายการในลิสต์ ส่วนที่ไม่ตรงจะถูกเติมเป็น custom chip
-     * รองรับทั้งรูปแบบใหม่ "ชื่อยา x จำนวน หน่วย [| ขนาด: ...]" และรูปแบบเดิม (แค่ชื่อยา ไม่มีจำนวน)
-     */
+    // ถอดรหัส segment รายการยา 1 ตัว (รูปแบบเดียวกับ parseMedSegment_ ฝั่ง backend
+    // รวมถึงรูปแบบเก่า "ชื่อยา (ขนาด)") กลับมาเป็น {name, qty, unit, size} เพื่อเติมฟอร์มตอนแก้ไข
+    function parseMedSegmentClient_(seg) {
+      const m = /^(.*?)\s*[xX]\s*(\d+)\s*([^|]*?)\s*(?:\|\s*(.*))?$/.exec(seg);
+      if (m) {
+        const rawDose = (m[4] || "").trim();
+        return {
+          name: (m[1] || "").trim() || seg,
+          qty: m[2] || "",
+          unit: (m[3] || "").trim(),
+          size: rawDose.replace(/^ขนาด[:：]?\s*/i, "").trim()
+        };
+      }
+      const paren = /^(.*?)\s*\(([^)]*)\)\s*$/.exec(seg);
+      if (paren) {
+        return { name: paren[1].trim() || seg, qty: "", unit: "", size: paren[2].trim() };
+      }
+      return { name: seg, qty: "", unit: "", size: "" };
+    }
+
     function applyMedItemsString_(medItemsString) {
-      document.querySelectorAll(".med-checkbox").forEach(function (el) { el.checked = false; });
-      customMedItems = [];
-      selectedMedDetails = {};
+      selectedMeds = [];
 
       const items = String(medItemsString || "")
         .split(",")
         .map(function (s) { return s.trim(); })
         .filter(Boolean);
 
-      const knownValues = Array.prototype.map.call(
-        document.querySelectorAll(".med-checkbox"),
-        function (el) { return el.value; }
-      );
+      const pool = medPool.length ? medPool : flattenMedCategories_();
 
-      const qtyPattern = /^(.*)\sx\s(\d+)\s(เม็ด|ซอง|ขวด|หลอด|แผง|ชุด)(?:\s\|\sขนาด:\s(.*))?$/;
+      items.forEach(function (seg) {
+        const parsed = parseMedSegmentClient_(seg);
+        if (!parsed.name) return;
 
-      items.forEach(function (item) {
-        let name = item;
-        let qty = 1;
-        let unit = "เม็ด";
-        let dose = "";
+        // ถ้าชื่อยาตรงกับบัญชียา ให้ล็อกขนาดตามบัญชียาปัจจุบัน (แหล่งข้อมูลล่าสุด)
+        // แทนขนาดที่เคยบันทึกไว้ในอดีต เผื่อบัญชียามีการปรับปรุงภายหลัง
+        const known = pool.find(function (med) { return med.name.toLowerCase() === parsed.name.toLowerCase(); });
 
-        const match = item.match(qtyPattern);
-        if (match) {
-          name = match[1].trim();
-          qty = parseInt(match[2], 10) || 1;
-          unit = match[3];
-          dose = match[4] ? match[4].trim() : "";
-        }
-
-        if (knownValues.indexOf(name) !== -1) {
-          const checkbox = document.querySelector('.med-checkbox[value="' + cssEscape_(name) + '"]');
-          if (checkbox) checkbox.checked = true;
-        } else {
-          customMedItems.push(name);
-        }
-        selectedMedDetails[name] = { qty: qty, unit: unit, dose: dose };
+        selectedMeds.push({
+          name: known ? known.name : parsed.name,
+          qty: parsed.qty,
+          unit: parsed.unit || (known && known.unit) || "เม็ด",
+          size: known ? known.size : parsed.size,
+          fixedSize: !!known
+        });
       });
 
-      renderCustomMedChips_();
-      updatePillStates_();
-      renderMedQtyList_(getSelectedMedNames_());
+      renderSelectedMedList_();
     }
 
     function cssEscape_(value) {
-    return String(value).replace(/["\\]/g, "\\$&");
-}
-
-/**
-* อัปเดตปุ่มโทรออกและสถานะของช่องเบอร์โทรศัพท์
-* - ถ้าเบอร์อยู่ในรูปแบบ 0xx-xxxxxxx → แสดงปุ่มโทรออก และตั้ง href เป็น tel:
-* - ถ้าไม่ใช่ → ซ่อนปุ่มโทรออก
-*/
-function updateCallPhoneLink_() {
-    const value = document.getElementById("field-phone").value.trim();
-    const btn = document.getElementById("btn-call-phone");
-    if (!btn) return;
-    if (/^0\d{2}-\d{7}$/.test(value)) {
-        btn.href = "tel:" + value.replace(/-/g, "");
-        btn.classList.remove("hidden");
-    } else {
-        btn.classList.add("hidden");
-    }
-}
-
-/**
-* แปลง URL รูปภาพจาก Google Drive ให้อยู่ในรูปแบบที่ฝังแสดงผลด้วย <img> ได้จริง
-...
-function toDriveViewableUrl_(url) {
-
-    /**
-     * แปลง URL รูปภาพจาก Google Drive ให้อยู่ในรูปแบบที่ฝังแสดงผลด้วย <img> ได้จริง
-     * แก้บั๊ก "รูปภาพไม่ขึ้น preview ในตารางประวัติการบันทึก":
-     * ลิงก์แบบเดิม "https://drive.google.com/uc?id=FILE_ID" (หรือ uc?export=view&id=,
-     * /file/d/FILE_ID/view ฯลฯ) ไม่สามารถใช้เป็น src ของ <img> ได้อย่างน่าเชื่อถืออีกต่อไป
-     * (Google มักตอบกลับเป็นหน้ายืนยัน/บล็อกการฝัง) จึงต้องดึง FILE_ID ออกมาแล้วสร้าง URL
-     * รูปแบบ "thumbnail" ซึ่งออกแบบมาสำหรับฝังรูปโดยเฉพาะ ใช้ได้ทั้งกับรูปที่เพิ่งบันทึกใหม่
-     * (ที่ backend คืนค่ามาเป็น thumbnail อยู่แล้ว) และรูปเก่าที่เคยบันทึกไว้ในรูปแบบเดิม
-     */
-    function toDriveViewableUrl_(url) {
-      const raw = String(url || "").trim();
-      if (!raw) return "";
-
-      let fileId = "";
-      let match = raw.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-      if (match) {
-        fileId = match[1];
-      } else {
-        match = raw.match(/\/d\/([a-zA-Z0-9_-]+)/);
-        if (match) fileId = match[1];
-      }
-
-      if (!fileId) return raw; // ไม่ใช่ลิงก์ Google Drive ที่รู้จัก ใช้ค่าเดิมไปก่อน
-      return "https://drive.google.com/thumbnail?id=" + fileId + "&sz=w1600";
-    }
-
-    /**
-     * เรียกจาก onerror ของ <img> รูปยาในตารางประวัติ: ถ้าโหลดรูปไม่สำเร็จจริงๆ
-     * (เช่น ไฟล์ถูกลบ/ไม่มีสิทธิ์เข้าถึง) ให้เปลี่ยนไปแสดงไอคอนแทนแทนที่จะปล่อยเป็นรูปแตก
-     */
-    function handleHistoryImgError_(imgEl) {
-      const link = imgEl.closest("a");
-      const placeholder = document.createElement("div");
-      placeholder.className = "history-thumb-placeholder";
-      placeholder.innerHTML = '<span class="material-icons-outlined">broken_image</span>';
-      if (link && link.parentNode) {
-        link.parentNode.replaceChild(placeholder, link);
-      } else if (imgEl.parentNode) {
-        imgEl.parentNode.replaceChild(placeholder, imgEl);
-      }
-    }
-
-    /**
-     * เรียกจาก onerror ของ <img> รูปยาอื่นๆ ทั่วไปนอกตารางประวัติ (เช่น การ์ด "รายการล่าสุด" หน้า Dashboard)
-     * ใช้ data-placeholder-class / data-placeholder-icon ที่ตั้งไว้บนแท็ก <img> เพื่อสร้างไอคอนแทนรูปที่โหลดไม่สำเร็จ
-     */
-    function handleImgLoadError_(imgEl) {
-      const placeholderClass = imgEl.getAttribute("data-placeholder-class") || "history-thumb-placeholder";
-      const placeholderIcon = imgEl.getAttribute("data-placeholder-icon") || "broken_image";
-      const link = imgEl.closest("a");
-      const placeholder = document.createElement("div");
-      placeholder.className = placeholderClass;
-      placeholder.innerHTML = '<span class="material-icons-outlined">' + placeholderIcon + '</span>';
-      if (link && link.parentNode) {
-        link.parentNode.replaceChild(placeholder, link);
-      } else if (imgEl.parentNode) {
-        imgEl.parentNode.replaceChild(placeholder, imgEl);
-      }
+      return String(value).replace(/["\\]/g, "\\$&");
     }
 
     // ---------------- ภาพถ่ายรายการยา ----------------
@@ -2912,17 +2877,62 @@ function toDriveViewableUrl_(url) {
       document.getElementById("field-photo-camera").value = "";
     }
 
-    // ---------------- บันทึก / แก้ไข ----------------
-    const PHONE_PATTERN_CLIENT_ = /^0\d{2}-\d{7}$/;
+    // ---------------- แจ้งเตือนแบบไม่บล็อก (advisory เท่านั้น ไม่ได้บังคับให้แก้) ----------------
+
+    let duplicateCheckTimer_ = null;
 
     /**
-     * เดิมฟังก์ชันนี้ตรวจสอบข้อมูลแล้วบันทึกทันที
-     * ตอนนี้เปลี่ยนเป็น: ตรวจสอบข้อมูล -> แสดงการ์ดสรุปให้ตรวจทานก่อน ->
-     * บันทึกจริงเมื่อผู้ใช้กด "ยืนยันบันทึกข้อมูล" ใน openConfirmRecordModal_() เท่านั้น
+     * เตือนว่า "กำลังจะบันทึกชื่อซ้ำ" — เรียกตอนผู้ใช้พิมพ์ HN หรือชื่อ-สกุลเสร็จ (blur)
+     * เป็นแค่การแจ้งเตือน ไม่ได้ห้ามบันทึก เพราะบางครั้งผู้ป่วยคนเดิมมารับยาเพิ่มเติม
+     * สำหรับเคสเดิมจริงๆ ก็ถือเป็นการบันทึกซ้ำที่ถูกต้อง เจ้าหน้าที่ต้องเป็นคนตัดสินใจเอง
      */
+    function checkDuplicateAndWarn_() {
+      clearTimeout(duplicateCheckTimer_);
+      duplicateCheckTimer_ = setTimeout(function () {
+        const hn = document.getElementById("field-hn").value.trim();
+        const fullName = document.getElementById("field-fullname").value.trim();
+        if (!hn && !fullName) return;
+
+        google.script.run
+          .withSuccessHandler(function (res) {
+            if (!res || !res.isDuplicate) return;
+            const latest = res.matches && res.matches[0];
+            const dateNote = latest && latest.pendingDate ? (" ล่าสุดวันที่ค้าง " + formatThaiDateShort_(latest.pendingDate)) : "";
+            showToast(
+              "⚠️ กำลังบันทึกชื่อซ้ำ: พบข้อมูล \"" + (fullName || hn) + "\" ในระบบแล้ว " +
+              res.count + " รายการ" + dateNote + " — กรุณาตรวจสอบก่อนบันทึกว่าไม่ได้ซ้ำโดยไม่ตั้งใจ",
+              "warning"
+            );
+          })
+          .withFailureHandler(function () { /* เช็คซ้ำไม่สำเร็จ ไม่ใช่ปัญหาร้ายแรง จึงไม่แจ้ง error รบกวนผู้ใช้ */ })
+          .checkDuplicateName(hn, fullName, editingRecordId || "");
+      }, 400);
+    }
+
+    /**
+     * เตือนตรงฟิลด์ "วันที่ค้าง" ว่าค่าปัจจุบันคือวันที่กำลังบันทึก (วันนี้) ไม่ใช่วันที่
+     * ยาเริ่มค้างจริง — ระบบตั้งค่าเริ่มต้นของฟิลด์นี้เป็นวันนี้ไว้ให้ (ดู clearRecordForm_ /
+     * bindStaticEvents_) ซึ่งอาจทำให้เจ้าหน้าที่ลืมเปลี่ยนเป็นวันที่ค้างจริงได้ง่าย
+     */
+    function checkPendingDateAndWarn_() {
+      const value = document.getElementById("field-pendingdate").value;
+      if (!value) return;
+      const todayIso = formatDateThaiISO_(new Date());
+      if (value === todayIso) {
+        showToast(
+          "⚠️ วันที่ค้างที่เลือกคือ \"วันนี้\" ซึ่งเป็นค่าที่ระบบตั้งไว้ให้อัตโนมัติ (วันที่กำลังบันทึก) — โปรดตรวจสอบว่าใช่วันที่ผู้ป่วยเริ่มค้างยาจริง ไม่ใช่แค่วันที่มาบันทึกข้อมูลวันนี้",
+          "warning"
+        );
+      }
+    }
+
+    // (ใช้ formatDateThaiISO_ ที่ประกาศไว้แล้วด้านล่างของไฟล์ ไม่ประกาศซ้ำ)
+
+    // ---------------- บันทึก / แก้ไข ----------------
     function onSubmitRecord_(e) {
       e.preventDefault();
 
+      const queueNumber = document.getElementById("field-queue").value.trim();
       const prefixInput = document.querySelector('input[name="prefix"]:checked');
       const fullName = document.getElementById("field-fullname").value.trim();
       const hn = document.getElementById("field-hn").value.trim();
@@ -2931,11 +2941,9 @@ function toDriveViewableUrl_(url) {
       const statusInput = document.querySelector('input[name="status"]:checked');
       const shortageDetail = document.getElementById("field-shortage-detail").value.trim();
       const receiverInputs = document.querySelectorAll('input[name="receiver"]:checked');
-      const phone = document.getElementById("field-phone").value.trim();
       const note = document.getElementById("field-note").value.trim();
 
       document.getElementById("med-selection-error").style.display = "none";
-      document.getElementById("phone-error").style.display = "none";
 
       if (!prefixInput) {
         showToast("กรุณาเลือกคำนำหน้าชื่อ", "error");
@@ -2950,15 +2958,6 @@ function toDriveViewableUrl_(url) {
         showToast("กรุณาเลือกหรือระบุรายการยาอย่างน้อย 1 รายการ", "error");
         return;
       }
-      // ตรวจสอบว่าทุกรายการยาที่เลือกกรอกจำนวนเป็นตัวเลขมากกว่า 0 แล้ว
-      const invalidQty = getSelectedMedNames_().some(function (name) {
-        const detail = selectedMedDetails[name];
-        return !detail || !(detail.qty > 0);
-      });
-      if (invalidQty) {
-        showToast("กรุณาระบุจำนวนของแต่ละรายการยาที่เลือกให้ถูกต้อง", "error");
-        return;
-      }
       if (!statusInput) {
         showToast("กรุณาเลือกจำนวนที่ได้รับ (ครบ/ไม่ครบ)", "error");
         return;
@@ -2971,13 +2970,12 @@ function toDriveViewableUrl_(url) {
         showToast("กรุณาเลือกผู้มารับอย่างน้อย 1 รายการ", "error");
         return;
       }
-      if (phone && !PHONE_PATTERN_CLIENT_.test(phone)) {
-        document.getElementById("phone-error").style.display = "block";
-        showToast("กรุณากรอกเบอร์โทรศัพท์ในรูปแบบ 0xx-xxxxxxx", "error");
-        return;
-      }
+
+      // แจ้งเตือนแบบไม่บล็อก: เตือนอีกครั้งก่อนบันทึกจริง เผื่อผู้ใช้ไม่ได้สังเกตตอนเลือกวันที่
+      checkPendingDateAndWarn_();
 
       const formData = {
+        queueNumber: queueNumber,
         prefix: prefixInput.value,
         fullName: fullName,
         hn: hn,
@@ -2986,79 +2984,17 @@ function toDriveViewableUrl_(url) {
         status: statusInput.value,
         shortageDetail: shortageDetail,
         receiverTypes: Array.prototype.map.call(receiverInputs, function (el) { return el.value; }),
-        phone: phone,
-        note: note,
-        recordedByName: currentRecorderName
+        note: note
       };
       if (editingRecordId && removeExistingPhoto && !selectedPhoto) {
         formData.removePhoto = true;
       }
 
-      pendingSubmit = { formData: formData, photo: selectedPhoto };
-      openConfirmRecordModal_(formData);
-    }
-
-    /**
-     * แสดงการ์ดสรุปข้อมูลทั้งหมดให้ตรวจทานก่อนกดยืนยันบันทึกจริง
-     */
-    function openConfirmRecordModal_(formData) {
-      const body = document.getElementById("confirm-summary-body");
-      const photoSrc = selectedPhoto
-        ? ("data:" + selectedPhoto.mimeType + ";base64," + selectedPhoto.base64)
-        : (!removeExistingPhoto && existingPhotoUrl ? toDriveViewableUrl_(existingPhotoUrl) : "");
-
-      const rows = [
-        ["ชื่อ-สกุล", escapeHtml_(formData.prefix + formData.fullName)],
-        ["HN", escapeHtml_(formData.hn)],
-        ["รับ ไอเทมยา", escapeHtml_(formData.medItems)],
-        ["วันที่ค้าง", escapeHtml_(formatThaiDateShort_(formData.pendingDate))],
-        ["จำนวนที่ได้รับ", escapeHtml_(formData.status) + (formData.shortageDetail ? (" (" + escapeHtml_(formData.shortageDetail) + ")") : "")],
-        ["ผู้มารับ", escapeHtml_(formData.receiverTypes.join(", "))],
-        ["เบอร์โทรศัพท์", escapeHtml_(formData.phone || "-")],
-        ["หมายเหตุ", escapeHtml_(formData.note || "-")]
-      ];
-
-      let html = "<dl>";
-      rows.forEach(function (row) {
-        html += "<dt>" + row[0] + "</dt><dd>" + row[1] + "</dd>";
-      });
-      if (photoSrc) {
-        html += "<dt>ภาพถ่าย</dt><dd><img class=\"confirm-photo\" src=\"" + escapeHtml_(photoSrc) + "\" alt=\"ตัวอย่างรูปภาพ\"></dd>";
-      }
-      html += "</dl>";
-      body.innerHTML = html;
-
-      document.getElementById("btn-confirm-record-label").textContent =
-        editingRecordId ? "ยืนยันบันทึกการแก้ไข" : "ยืนยันบันทึกข้อมูล";
-
-      document.getElementById("modal-confirm-record").classList.remove("hidden");
-    }
-
-    function closeConfirmRecordModal_() {
-      document.getElementById("modal-confirm-record").classList.add("hidden");
-    }
-
-    /**
-     * บันทึกข้อมูลจริงหลังผู้ใช้กดยืนยันในการ์ดสรุป
-     */
-    function onConfirmRecordSubmit_() {
-      if (!pendingSubmit) {
-        closeConfirmRecordModal_();
-        return;
-      }
-      const formData = pendingSubmit.formData;
-      const photo = pendingSubmit.photo;
-
-      const confirmBtn = document.getElementById("btn-confirm-record");
-      const submitBtn = document.getElementById("btn-submit-record");
-      setButtonLoading_(confirmBtn, true);
-      setButtonLoading_(submitBtn, true);
+      const btn = document.getElementById("btn-submit-record");
+      setButtonLoading_(btn, true);
 
       const onSuccess = function (res) {
-        setButtonLoading_(confirmBtn, false);
-        setButtonLoading_(submitBtn, false);
-        closeConfirmRecordModal_();
-        pendingSubmit = null;
+        setButtonLoading_(btn, false);
         showToast(res.message || "บันทึกข้อมูลสำเร็จ", "success");
         const wasEditing = !!editingRecordId;
         exitEditMode_();
@@ -3073,8 +3009,7 @@ function toDriveViewableUrl_(url) {
         }
       };
       const onFailure = function (err) {
-        setButtonLoading_(confirmBtn, false);
-        setButtonLoading_(submitBtn, false);
+        setButtonLoading_(btn, false);
         showToast("บันทึกไม่สำเร็จ: " + errMsg_(err), "error");
       };
 
@@ -3082,12 +3017,12 @@ function toDriveViewableUrl_(url) {
         google.script.run
           .withSuccessHandler(onSuccess)
           .withFailureHandler(onFailure)
-          .updateRecord(editingRecordId, formData, photo);
+          .updateRecord(editingRecordId, formData, selectedPhoto);
       } else {
         google.script.run
           .withSuccessHandler(onSuccess)
           .withFailureHandler(onFailure)
-          .saveRecord(formData, photo);
+          .saveRecord(formData, selectedPhoto);
       }
     }
 
@@ -3100,19 +3035,14 @@ function toDriveViewableUrl_(url) {
       document.getElementById("existing-photo-note").classList.add("hidden");
       document.getElementById("field-photo-attach").value = "";
       document.getElementById("field-photo-camera").value = "";
-      document.getElementById("field-med-custom-input").value = "";
+      document.getElementById("field-med-search").value = "";
+      hideMedSuggestDropdown_();
       document.getElementById("med-selection-error").style.display = "none";
-      document.getElementById("field-phone").value = "";
-      document.getElementById("phone-error").style.display = "none";
-      updateCallPhoneLink_();
       selectedPhoto = null;
       existingPhotoUrl = "";
       removeExistingPhoto = false;
-      customMedItems = [];
-      selectedMedDetails = {};
-      renderCustomMedChips_();
-      document.querySelectorAll(".med-checkbox").forEach(function (el) { el.checked = false; });
-      renderMedQtyList_([]);
+      selectedMeds = [];
+      renderSelectedMedList_();
       toggleShortageField_();
       updatePillStates_();
     }
@@ -3127,6 +3057,7 @@ function toDriveViewableUrl_(url) {
       const prefixInput = document.querySelector('input[name="prefix"][value="' + cssEscape_(record.prefix) + '"]');
       if (prefixInput) prefixInput.checked = true;
 
+      document.getElementById("field-queue").value = record.queueNumber || "";
       document.getElementById("field-fullname").value = record.fullName || "";
       document.getElementById("field-hn").value = record.hn || "";
       applyMedItemsString_(record.medItems);
@@ -3143,17 +3074,13 @@ function toDriveViewableUrl_(url) {
       });
 
       document.getElementById("field-note").value = record.note || "";
-      document.getElementById("field-phone").value = record.phone || "";
-      document.getElementById("phone-error").style.display = "none";
-      updateCallPhoneLink_();
 
       selectedPhoto = null;
       removeExistingPhoto = false;
       existingPhotoUrl = record.photoUrl || "";
       const preview = document.getElementById("photo-preview");
       if (existingPhotoUrl) {
-        preview.src = toDriveViewableUrl_(existingPhotoUrl);
-        preview.onerror = function () { preview.onerror = null; preview.src = existingPhotoUrl; };
+        preview.src = existingPhotoUrl;
         preview.style.display = "inline-block";
         document.getElementById("btn-remove-photo").classList.remove("hidden");
         document.getElementById("existing-photo-note").classList.remove("hidden");
@@ -3238,18 +3165,17 @@ function toDriveViewableUrl_(url) {
         historyRecordsCache[r.id] = r;
 
         const tr = document.createElement("tr");
-        const badgeClass = r.status === "ไม่ครบ" ? "badge-incomplete" : "badge-complete";
-        const viewablePhotoUrl = r.photoUrl ? toDriveViewableUrl_(r.photoUrl) : "";
-        const photoCell = viewablePhotoUrl
+        const badgeClass = statusBadgeClass_(r.status);
+        const photoCell = r.photoUrl
           ? '<a href="' + escapeHtml_(r.photoUrl) + '" target="_blank" rel="noopener">' +
-              '<img class="history-thumb" src="' + escapeHtml_(viewablePhotoUrl) + '" alt="รูปยา" loading="lazy" ' +
-              'onerror="handleHistoryImgError_(this)">' +
+              '<img class="history-thumb" src="' + escapeHtml_(r.photoUrl) + '" alt="รูปยา" loading="lazy">' +
             '</a>'
           : '<div class="history-thumb-placeholder"><span class="material-icons-outlined">image_not_supported</span></div>';
         const nameCell = escapeHtml_((r.prefix || "") + r.fullName);
 
         tr.innerHTML =
           '<td>' + formatThaiDateTime_(r.timestamp) + '</td>' +
+          '<td>' + escapeHtml_(r.queueNumber || "-") + '</td>' +
           '<td>' + nameCell + '</td>' +
           '<td>' + escapeHtml_(r.hn) + '</td>' +
           '<td>' + escapeHtml_(r.medItems) + '</td>' +
@@ -3257,12 +3183,9 @@ function toDriveViewableUrl_(url) {
           '<td><span class="badge ' + badgeClass + '">' + escapeHtml_(r.status) + '</span></td>' +
           '<td>' + escapeHtml_(r.shortageDetail || "-") + '</td>' +
           '<td>' + escapeHtml_(r.receiverType) + '</td>' +
-          '<td>' + escapeHtml_(r.phone || "-") + '</td>' +
           '<td>' + photoCell + '</td>' +
           '<td>' + escapeHtml_(r.note || "-") + '</td>' +
-          '<td><div style="display:flex; gap:6px; flex-wrap:wrap;"></div></td>';
-
-        const actionsWrap = tr.lastElementChild.firstElementChild;
+          '<td></td>';
 
         const editBtn = document.createElement("button");
         editBtn.type = "button";
@@ -3273,18 +3196,7 @@ function toDriveViewableUrl_(url) {
         editBtn.addEventListener("click", function () {
           enterEditMode_(historyRecordsCache[r.id]);
         });
-        actionsWrap.appendChild(editBtn);
-
-        const deleteBtn = document.createElement("button");
-        deleteBtn.type = "button";
-        deleteBtn.className = "btn btn-danger";
-        deleteBtn.style.width = "auto";
-        deleteBtn.style.padding = "6px 12px";
-        deleteBtn.innerHTML = '<span class="material-icons-outlined" style="font-size:16px;">delete_outline</span><span class="btn-label">ลบ</span>';
-        deleteBtn.addEventListener("click", function () {
-          openDeleteRecordModal_(historyRecordsCache[r.id]);
-        });
-        actionsWrap.appendChild(deleteBtn);
+        tr.lastElementChild.appendChild(editBtn);
 
         tbody.appendChild(tr);
       });
@@ -3298,14 +3210,15 @@ function toDriveViewableUrl_(url) {
       }
 
       const headers = [
-        "วันเวลาบันทึก", "คำนำหน้า", "ชื่อ-สกุล", "HN", "รายการยา",
-        "วันที่ค้าง", "สถานะ", "ขาดเหลือ", "ผู้มารับ", "เบอร์โทรศัพท์", "หมายเหตุ"
+        "วันเวลาบันทึก", "หมายเลขคิว", "คำนำหน้า", "ชื่อ-สกุล", "HN", "รายการยา",
+        "วันที่ค้าง", "สถานะ", "ขาดเหลือ", "ผู้มารับ", "หมายเหตุ"
       ];
 
       const csvRows = [headers.map(csvCell_).join(",")];
       lastHistoryRecords.forEach(function (r) {
         csvRows.push([
           formatThaiDateTime_(r.timestamp),
+          r.queueNumber || "",
           r.prefix || "",
           r.fullName || "",
           r.hn || "",
@@ -3314,7 +3227,6 @@ function toDriveViewableUrl_(url) {
           r.status || "",
           r.shortageDetail || "",
           r.receiverType || "",
-          r.phone || "",
           r.note || ""
         ].map(csvCell_).join(","));
       });
@@ -3331,45 +3243,6 @@ function toDriveViewableUrl_(url) {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-    }
-
-    // ---------------- ลบรายการ ----------------
-    let recordPendingDelete = null;
-
-    function openDeleteRecordModal_(record) {
-      recordPendingDelete = record;
-      const label = (record.prefix || "") + (record.fullName || "") + " (HN " + (record.hn || "-") + ")";
-      document.getElementById("delete-record-name").textContent = label;
-      document.getElementById("modal-delete-record").classList.remove("hidden");
-    }
-
-    function closeDeleteRecordModal_() {
-      recordPendingDelete = null;
-      document.getElementById("modal-delete-record").classList.add("hidden");
-    }
-
-    function onConfirmDeleteRecord_() {
-      if (!recordPendingDelete) {
-        closeDeleteRecordModal_();
-        return;
-      }
-      const id = recordPendingDelete.id;
-      const btn = document.getElementById("btn-confirm-delete-record");
-      setButtonLoading_(btn, true);
-
-      google.script.run
-        .withSuccessHandler(function () {
-          setButtonLoading_(btn, false);
-          closeDeleteRecordModal_();
-          showToast("ลบรายการสำเร็จ", "success");
-          loadHistory_();
-          loadDashboard_();
-        })
-        .withFailureHandler(function (err) {
-          setButtonLoading_(btn, false);
-          showToast("ลบรายการไม่สำเร็จ: " + errMsg_(err), "error");
-        })
-        .deleteRecord(id);
     }
 
     function csvCell_(value) {
@@ -3633,14 +3506,17 @@ function toDriveViewableUrl_(url) {
       const container = document.getElementById("toast-container");
       const toast = document.createElement("div");
       toast.className = "toast " + (type || "");
-      const icon = type === "success" ? "check_circle" : (type === "error" ? "error" : "info");
+      const icon = type === "success" ? "check_circle" : (type === "error" ? "error" : (type === "warning" ? "warning_amber" : "info"));
       toast.innerHTML = '<span class="material-icons-outlined">' + icon + '</span><span>' + escapeHtml_(message) + '</span>';
       container.appendChild(toast);
+      // แจ้งเตือนประเภท "warning" (เช่น ชื่อซ้ำ / วันที่ค้างผิดปกติ) ให้ค้างจอนานกว่าปกติ
+      // เพราะเป็นข้อมูลที่ต้องการให้เจ้าหน้าที่อ่านและตัดสินใจเอง ไม่ใช่แค่แจ้งผลลัพธ์สั้นๆ
+      const duration = type === "warning" ? 6000 : 3500;
       setTimeout(function () {
         toast.style.opacity = "0";
         toast.style.transition = "opacity 0.3s ease";
         setTimeout(function () { toast.remove(); }, 300);
-      }, 3500);
+      }, duration);
     }
 
     function errMsg_(err) {
