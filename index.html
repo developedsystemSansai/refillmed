@@ -1715,8 +1715,8 @@
             <h2>ภาพรวมข้อมูลจุดรับยาค้าง</h2>
             <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
               <div class="period-toggle" id="period-toggle">
-                <button type="button" data-range="1">วันนี้</button>
-                <button type="button" data-range="3" class="active">3 วันล่าสุด</button>
+                <button type="button" data-range="1" class="active">วันนี้</button>
+                <button type="button" data-range="3">3 วันล่าสุด</button>
                 <button type="button" data-range="7">7 วัน (สัปดาห์)</button>
                 <button type="button" data-range="all">ทั้งหมด (15-25 ก.ย.)</button>
               </div>
@@ -1780,8 +1780,9 @@
               <span class="material-icons-outlined" style="color:var(--primary);">schedule</span>
               แนวโน้มช่วงเวลาที่มารับบริการ (รายชั่วโมง)
             </div>
-            <p class="card-sub">นับจาก "วันเวลาบันทึก" จริง จัดกลุ่มตามชั่วโมงที่มาบันทึก (07:00-19:00) — ใช้ดูช่วงเวลาที่คนแน่น เพื่อเตรียมกำลังคนล่วงหน้า</p>
+            <p class="card-sub">นับจาก "วันเวลาบันทึก" จริง จัดกลุ่มตามชั่วโมงที่มาบันทึก (07:00-19:00) แยกเป็นเส้นตามวัน — ใช้เทียบรูปแบบช่วงเวลาที่คนแน่นระหว่างวัน เพื่อเตรียมกำลังคนล่วงหน้า (คลิกที่ป้ายวันที่ด้านล่างเพื่อซ่อน/แสดงเส้นนั้น)</p>
             <div id="hourly-trend-chart"></div>
+            <div class="legend-row" id="hourly-trend-legend" style="flex-wrap:wrap; gap:8px 14px;"></div>
             <div class="legend-row" id="hourly-trend-hint"></div>
           </div>
 
@@ -2370,7 +2371,7 @@
     // ================================================================
     let publicSettings = {};
     let currentPage = "dashboard";
-    let currentDashboardRange = 3; // 1 / 3 / 7 วัน
+    let currentDashboardRange = 1; // 1 / 3 / 7 วัน — ค่าเริ่มต้น: วันนี้
     let settingsToken = null;
     let settingsTokenExpiry = 0;
     let selectedPhotos = [];         // รูปใหม่ที่เพิ่ง เลือก/ถ่าย [{ base64, mimeType, fileName }]
@@ -3006,7 +3007,7 @@
         }))
         .withFailureHandler(busyHandler_(function (err) {
           if (btnEl) setButtonLoading_(btnEl, false);
-          renderDashboard_({ stats: null, trend: [], followUpList: [], recentRecords: [], weekBreakdown: [] });
+          renderDashboard_({ stats: null, trend: [], followUpList: [], recentRecords: [], weekBreakdown: [], hourlyTrend: { hours: [], days: [], overall: [] } });
           showToast("โหลดข้อมูล Dashboard ไม่สำเร็จ: " + errMsg_(err), "error");
         }))
         .getDashboardData(currentDashboardRange);
@@ -3137,23 +3138,38 @@
 
     // ---------------- แนวโน้มช่วงเวลาที่มารับบริการ (รายชั่วโมง) ----------------
     // กราฟเส้นแสดงจำนวนครั้งที่มารับบริการ จัดกลุ่มตามชั่วโมงของ "วันเวลาบันทึก" จริง
-    // (ไม่ใช่รายวันเหมือนกราฟแนวโน้มด้านบน) ช่วยให้เจ้าหน้าที่เห็นว่าช่วงเวลาใดของวัน
-    // มีคนมาหนาแน่นที่สุด เพื่อเตรียมกำลังคน/เตรียมพร้อมรับมือล่วงหน้าในแต่ละช่วง
+    // แยกเป็น "เส้นละวัน" (ไม่รวมเป็นเส้นเดียวเหมือนเดิม) เพื่อให้เทียบรูปแบบช่วงเวลา
+    // ที่คนแน่นระหว่างแต่ละวันในช่วงที่เลือกได้ — คลิกป้ายวันที่ในตำนาน (legend) ด้านล่าง
+    // เพื่อซ่อน/แสดงเส้นของวันนั้นเป็นรายวันได้ (กันกราฟรกเมื่อเลือกช่วงยาว)
+    const HOURLY_PALETTE_ = [
+      "#2563eb", "#dc2626", "#059669", "#d97706", "#7c3aed",
+      "#db2777", "#0891b2", "#65a30d", "#ea580c", "#4338ca",
+      "#0d9488", "#be123c", "#a16207", "#4d7c0f", "#9333ea"
+    ];
+
     function renderHourlyTrendChart_(hourlyTrend) {
       const container = document.getElementById("hourly-trend-chart");
+      const legendEl = document.getElementById("hourly-trend-legend");
       const hintEl = document.getElementById("hourly-trend-hint");
-      if (!hourlyTrend || hourlyTrend.length === 0 || hourlyTrend.every(function (d) { return d.count === 0; })) {
+      const hours = hourlyTrend && hourlyTrend.hours ? hourlyTrend.hours : [];
+      const days = hourlyTrend && hourlyTrend.days ? hourlyTrend.days : [];
+      const overall = hourlyTrend && hourlyTrend.overall ? hourlyTrend.overall : [];
+
+      if (!hours.length || !days.length || overall.every(function (c) { return c === 0; })) {
         container.innerHTML = emptyStateHtml_("schedule", "ยังไม่มีข้อมูลในช่วงที่เลือก");
+        if (legendEl) legendEl.innerHTML = "";
         if (hintEl) hintEl.innerHTML = "";
         return;
       }
 
-      const w = Math.max(560, hourlyTrend.length * 56), h = 230, padL = 34, padR = 14, padT = 16, padB = 34;
+      const w = Math.max(560, hours.length * 56), h = 230, padL = 34, padR = 14, padT = 16, padB = 34;
       const innerW = w - padL - padR, innerH = h - padT - padB;
-      const maxVal = Math.max.apply(null, hourlyTrend.map(function (d) { return d.count; }).concat([4]));
-      const slot = innerW / Math.max(hourlyTrend.length - 1, 1);
+      const maxVal = Math.max.apply(null,
+        days.reduce(function (acc, day) { return acc.concat(day.counts); }, []).concat([4])
+      );
+      const slot = innerW / Math.max(hours.length - 1, 1);
 
-      let gridLines = "", points = [], labels = "";
+      let gridLines = "", axisLabels = "";
       const steps = 4;
       for (let i = 0; i <= steps; i++) {
         const y = padT + innerH - (innerH * i / steps);
@@ -3161,41 +3177,63 @@
         gridLines += '<line x1="' + padL + '" x2="' + (w - padR) + '" y1="' + y + '" y2="' + y + '" stroke="var(--border)" stroke-width="1"/>';
         gridLines += '<text x="' + (padL - 8) + '" y="' + (y + 4) + '" font-size="10" fill="var(--muted)" text-anchor="end">' + val + '</text>';
       }
-
-      let peakIdx = 0;
-      hourlyTrend.forEach(function (d, i) {
-        const cx = hourlyTrend.length === 1 ? (padL + innerW / 2) : (padL + i * slot);
-        const cy = padT + innerH - innerH * (d.count / maxVal);
-        points.push(cx + "," + cy);
-        labels += '<text x="' + cx + '" y="' + (h - 10) + '" font-size="10.5" fill="var(--muted)" text-anchor="middle">' + d.label + '</text>';
-        if (d.count > hourlyTrend[peakIdx].count) peakIdx = i;
+      hours.forEach(function (hh, i) {
+        const cx = hours.length === 1 ? (padL + innerW / 2) : (padL + i * slot);
+        axisLabels += '<text x="' + cx + '" y="' + (h - 10) + '" font-size="10.5" fill="var(--muted)" text-anchor="middle">' + hh.label + '</text>';
       });
 
-      const linePath = "M" + points.join(" L");
-      const areaPath = "M" + points[0] + " L" + points.join(" L") +
-        " L" + (padL + (hourlyTrend.length - 1) * slot) + "," + (padT + innerH) +
-        " L" + padL + "," + (padT + innerH) + " Z";
+      const xOf_ = function (i) { return hours.length === 1 ? (padL + innerW / 2) : (padL + i * slot); };
+      const yOf_ = function (count) { return padT + innerH - innerH * (count / maxVal); };
 
-      const dots = points.map(function (p, i) {
-        const parts = p.split(",");
-        const isPeak = i === peakIdx && hourlyTrend[i].count > 0;
-        return '<circle cx="' + parts[0] + '" cy="' + parts[1] + '" r="' + (isPeak ? 5 : 3.5) + '" fill="' +
-          (isPeak ? "var(--danger)" : "var(--primary)") + '" stroke="#fff" stroke-width="1.5"/>';
-      }).join("");
+      let dayLines = "";
+      const dayColors = days.map(function (day, di) { return HOURLY_PALETTE_[di % HOURLY_PALETTE_.length]; });
+      days.forEach(function (day, di) {
+        const color = dayColors[di];
+        const points = day.counts.map(function (c, i) { return xOf_(i) + "," + yOf_(c); });
+        const linePath = "M" + points.join(" L");
+        const dots = points.map(function (p) {
+          const parts = p.split(",");
+          return '<circle cx="' + parts[0] + '" cy="' + parts[1] + '" r="3" fill="' + color + '" stroke="#fff" stroke-width="1.2"/>';
+        }).join("");
+        dayLines +=
+          '<g class="hourly-day-line" data-day-idx="' + di + '">' +
+            '<path d="' + linePath + '" fill="none" stroke="' + color + '" stroke-width="2.2"/>' +
+            dots +
+          '</g>';
+      });
 
       container.innerHTML =
         '<svg viewBox="0 0 ' + w + ' ' + h + '" style="width:100%;height:230px;" preserveAspectRatio="xMidYMid meet">' +
-          gridLines +
-          '<path d="' + areaPath + '" fill="var(--primary)" opacity="0.08"/>' +
-          '<path d="' + linePath + '" fill="none" stroke="var(--primary)" stroke-width="2.2"/>' +
-          dots + labels +
+          gridLines + dayLines + axisLabels +
         '</svg>';
 
+      if (legendEl) {
+        legendEl.innerHTML = days.map(function (day, di) {
+          const color = dayColors[di];
+          return '<span class="hourly-legend-item" data-day-idx="' + di + '" style="cursor:pointer; user-select:none;">' +
+              '<span class="legend-dot" style="background:' + color + ';"></span>' +
+              trendDayLabel_(day.date) + ' (' + day.total + ')' +
+            '</span>';
+        }).join("");
+
+        legendEl.querySelectorAll(".hourly-legend-item").forEach(function (item) {
+          item.addEventListener("click", function () {
+            const idx = item.dataset.dayIdx;
+            const line = container.querySelector('.hourly-day-line[data-day-idx="' + idx + '"]');
+            const hidden = item.classList.toggle("hourly-legend-item-off");
+            if (line) line.style.display = hidden ? "none" : "";
+            item.style.opacity = hidden ? "0.4" : "1";
+          });
+        });
+      }
+
       if (hintEl) {
-        const peak = hourlyTrend[peakIdx];
-        hintEl.innerHTML = peak.count > 0
+        let peakIdx = 0;
+        overall.forEach(function (c, i) { if (c > overall[peakIdx]) peakIdx = i; });
+        const peakCount = overall[peakIdx];
+        hintEl.innerHTML = peakCount > 0
           ? ('<span><span class="legend-dot" style="background:var(--danger);"></span>' +
-              'ช่วงเวลาที่มีผู้มารับบริการมากที่สุด: <strong>' + peak.label + ' น.</strong> (' + peak.count + ' ครั้ง) — เตรียมกำลังคนเสริมในช่วงนี้</span>')
+              'ช่วงเวลาที่มีผู้มารับบริการมากที่สุดรวมทุกวันในช่วงนี้: <strong>' + hours[peakIdx].label + ' น.</strong> (' + peakCount + ' ครั้ง) — เตรียมกำลังคนเสริมในช่วงนี้</span>')
           : "";
       }
     }
