@@ -2098,7 +2098,16 @@
                 <span class="material-icons-outlined">restart_alt</span>
                 <span class="btn-label">ล้างตัวกรอง</span>
               </button>
+              <button class="btn btn-outline" id="btn-export-med-excel" style="width:auto;">
+                <span class="material-icons-outlined">file_download</span>
+                <span class="btn-label">ส่งออก Excel</span>
+                <span class="spinner"></span>
+              </button>
             </div>
+            <p class="card-sub" style="margin-top:6px;margin-bottom:0;">
+              ไฟล์ที่ส่งออกจะเรียบเรียงตามช่วงวันที่ที่กรองไว้ด้านบน (ไม่สนใจช่องค้นหาชื่อยา)
+              พร้อมจัดหมวดหมู่ยาและแยกทุกขนาด/ความแรงให้อัตโนมัติ
+            </p>
 
             <div id="med-totals-summary" class="card-sub" style="margin-bottom:8px;"></div>
 
@@ -2721,6 +2730,9 @@
         document.getElementById("med-filter-end").value = "";
         document.getElementById("med-filter-keyword").value = "";
         loadMedTotals_();
+      });
+      document.getElementById("btn-export-med-excel").addEventListener("click", function () {
+        exportMedTotalsExcel_(this);
       });
       // กรองชื่อยาทันทีขณะพิมพ์จากข้อมูลที่โหลดไว้แล้ว (ไม่ยิงไปอ่านชีตใหม่ทุกตัวอักษร)
       document.getElementById("med-filter-keyword").addEventListener("input", renderMedTotalsTable_);
@@ -3389,6 +3401,58 @@
 
     function closeMedDetail_() {
       document.getElementById("modal-med-detail").classList.add("hidden");
+    }
+
+    /**
+     * ปุ่ม "ส่งออก Excel" บนแท็บ ค้นยอดจ่ายยา — เรียกฟังก์ชันฝั่งเซิร์ฟเวอร์
+     * exportMedicationTotalsExcel() ซึ่งจะสร้างไฟล์ .xlsx 5 แท็บ (คำแนะนำ/ภาพรวม/
+     * สรุปตามหมวดหมู่ยา/สรุปแยกชนิดยา-ขนาด/ข้อมูลยาแยกรายการ) โดยใช้ตัวกรองช่วงวันที่
+     * เดียวกับที่แสดงอยู่บนหน้าจอ (ไม่ใช้ช่องค้นหาชื่อยา เพราะไฟล์ต้องมีข้อมูลครบทุกชนิด
+     * เพื่อให้ตัวเลขสรุปในแท็บต่าง ๆ ถูกต้อง) แล้วสั่งดาวน์โหลดไฟล์ที่ได้กลับมาทันที
+     */
+    function exportMedTotalsExcel_(btnEl) {
+      if (btnEl) setButtonLoading_(btnEl, true);
+      beginBusy_();
+
+      google.script.run
+        .withSuccessHandler(busyHandler_(function (result) {
+          if (btnEl) setButtonLoading_(btnEl, false);
+          try {
+            downloadBase64File_(result.base64, result.fileName, result.mimeType);
+            showToast(
+              "ส่งออกไฟล์สำเร็จ: ยา " + (result.rowCount || 0).toLocaleString("th-TH") +
+              " แถว จาก " + (result.categoryCount || 0) + " หมวดหมู่ (" +
+              (result.variantCount || 0) + " รายการยา-ขนาด)",
+              "success"
+            );
+          } catch (e) {
+            showToast("ดาวน์โหลดไฟล์ไม่สำเร็จ: " + errMsg_(e), "error");
+          }
+        }))
+        .withFailureHandler(busyHandler_(function (err) {
+          if (btnEl) setButtonLoading_(btnEl, false);
+          showToast("ส่งออก Excel ไม่สำเร็จ: " + errMsg_(err), "error");
+        }))
+        .exportMedicationTotalsExcel(currentMedFilters_());
+    }
+
+    /** แปลงข้อมูลไฟล์ที่เข้ารหัสแบบ base64 กลับเป็น Blob แล้วสั่งให้เบราว์เซอร์ดาวน์โหลด */
+    function downloadBase64File_(base64Data, fileName, mimeType) {
+      const byteChars = atob(base64Data);
+      const byteNumbers = new Array(byteChars.length);
+      for (let i = 0; i < byteChars.length; i++) {
+        byteNumbers[i] = byteChars.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: mimeType || "application/octet-stream" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName || "export.xlsx";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
     }
 
     // ---------------- ตัวช่วยวาดกราฟแท่งแนวนอน (ไม่พึ่งไลบรารีภายนอก) ----------------
