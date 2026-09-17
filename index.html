@@ -1904,6 +1904,15 @@
       <h1 id="landing-sys-name">ข้อมูลจุดรับยาค้าง 15 - 25 กันยายน 2569</h1>
       <h2 id="landing-org-name">หน่วยงานสาธารณสุข</h2>
       <p class="welcome" id="landing-welcome">กำลังโหลดข้อมูล...</p>
+
+      <div class="form-field full" style="text-align:left;">
+        <label for="landing-recorder-name">ชื่อผู้บันทึก <span class="req">*</span></label>
+        <input type="text" id="landing-recorder-name" maxlength="100" placeholder="กรอกชื่อ-สกุลผู้บันทึกข้อมูล" autocomplete="off">
+        <p id="landing-recorder-error" style="display:none; color:var(--danger); font-size:12.5px; margin:2px 0 0 0;">
+          กรุณากรอกชื่อผู้บันทึกก่อนเข้าใช้งานระบบ
+        </p>
+      </div>
+
       <button class="btn btn-primary" id="btn-enter-app">
         <span class="material-icons-outlined">login</span>
         <span class="btn-label">เข้าใช้งานระบบ</span>
@@ -1949,7 +1958,11 @@
         </div>
       </nav>
 
-      <div class="sidebar-footer" id="sidebar-footer-msg">งานเภสัชกรรม</div>
+      <div class="sidebar-footer">
+        <div id="sidebar-footer-msg">งานเภสัชกรรม</div>
+        <div id="sidebar-recorder-name" style="margin-top:6px; font-size:12px; opacity:0.85;"></div>
+        <div id="btn-change-recorder-name" style="margin-top:4px; font-size:12px; text-decoration:underline; cursor:pointer; opacity:0.85;">เปลี่ยนชื่อผู้บันทึก</div>
+      </div>
     </aside>
 
     <div class="main-area">
@@ -2664,6 +2677,8 @@
     let historyRecordsCache = {};    // เก็บ record ล่าสุดที่โหลดไว้ ใช้ตอนกดแก้ไข
     let lastHistoryRecords = [];     // เก็บผลลัพธ์การค้นหาประวัติล่าสุด ใช้ตอนส่งออก CSV
     let pendingSaveFormData_ = null; // ข้อมูลฟอร์มที่รอผู้ใช้กด "ยืนยันบันทึก" ในหน้าสรุป
+    let currentRecorderName_ = "";   // ชื่อผู้บันทึกที่กรอกไว้ในหน้าเข้าใช้งานระบบ
+    const RECORDER_NAME_STORAGE_KEY_ = "pending_med_app_recorder_name";
 
     // บัญชียาของโรงพยาบาล พร้อม "ขนาด" (ความแรง/รูปแบบ) กำกับแต่ละตัว — สร้างขึ้นจากการ
     // วิเคราะห์ประวัติการจ่ายยาจริงของหน่วยงาน (ไฟล์ "ข้อมูลจุดรับยาค้าง") แล้วรวมชื่อยา
@@ -2842,7 +2857,21 @@
       restoreSettingsSession_();
       bindStaticEvents_();
       startClock_();
+      prefillRecorderName_();
     });
+
+    // จำชื่อผู้บันทึกที่เคยกรอกไว้ล่าสุด (เก็บไว้ในเครื่องนี้เท่านั้น) เพื่อความสะดวก
+    // โดยผู้ใช้ยังแก้ไข/เปลี่ยนชื่อใหม่ได้ทุกครั้งก่อนกด "เข้าใช้งานระบบ"
+    function prefillRecorderName_() {
+      try {
+        const saved = window.localStorage.getItem(RECORDER_NAME_STORAGE_KEY_);
+        if (saved) {
+          document.getElementById("landing-recorder-name").value = saved;
+        }
+      } catch (e) {
+        // เบราว์เซอร์บางตัวอาจปิดกั้น localStorage — ไม่เป็นไร แค่ไม่มีการจดจำชื่อไว้ให้
+      }
+    }
 
     function loadPublicSettings() {
       beginBusy_();
@@ -2936,6 +2965,13 @@
     // ================================================================
     function bindStaticEvents_() {
       document.getElementById("btn-enter-app").addEventListener("click", enterApp_);
+      document.getElementById("landing-recorder-name").addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          enterApp_();
+        }
+      });
+      document.getElementById("btn-change-recorder-name").addEventListener("click", changeRecorderName_);
 
       document.querySelectorAll(".sidebar-nav-item").forEach(function (item) {
         item.addEventListener("click", function () {
@@ -3085,6 +3121,24 @@
     }
 
     function enterApp_() {
+      const nameInput = document.getElementById("landing-recorder-name");
+      const errorEl = document.getElementById("landing-recorder-error");
+      const recorderName = nameInput.value.trim();
+
+      if (!recorderName) {
+        errorEl.style.display = "block";
+        nameInput.focus();
+        return;
+      }
+      errorEl.style.display = "none";
+
+      currentRecorderName_ = recorderName;
+      try {
+        window.localStorage.setItem(RECORDER_NAME_STORAGE_KEY_, recorderName);
+      } catch (e) {
+        // ไม่สามารถบันทึกลง localStorage ได้ก็ไม่เป็นไร แค่ต้องพิมพ์ชื่อใหม่ครั้งหน้า
+      }
+
       const btn = document.getElementById("btn-enter-app");
       setButtonLoading_(btn, true);
       // หน่วงสั้น ๆ 1 เฟรมก่อนสลับหน้า เพื่อให้เบราว์เซอร์ได้วาดสถานะปุ่มกำลังโหลดก่อน
@@ -3093,8 +3147,25 @@
         document.getElementById("page-landing").classList.add("hidden");
         document.getElementById("page-app").classList.remove("hidden");
         setButtonLoading_(btn, false);
+        renderRecorderNameInSidebar_();
         loadDashboard_();
       }, 60);
+    }
+
+    // แสดงชื่อผู้บันทึกปัจจุบันไว้ท้ายเมนูด้านข้าง พร้อมลิงก์ให้เปลี่ยนชื่อได้
+    // โดยไม่ต้องปิดหน้าเว็บ (เผื่อเครื่องนี้ใช้กันหลายคนในจุดรับยาเดียวกัน)
+    function renderRecorderNameInSidebar_() {
+      const el = document.getElementById("sidebar-recorder-name");
+      if (!el) return;
+      el.textContent = "ผู้บันทึก: " + currentRecorderName_;
+    }
+
+    function changeRecorderName_() {
+      document.getElementById("page-app").classList.add("hidden");
+      document.getElementById("page-landing").classList.remove("hidden");
+      const nameInput = document.getElementById("landing-recorder-name");
+      nameInput.value = currentRecorderName_;
+      nameInput.focus();
     }
 
     function goToPage_(pageKey) {
@@ -4492,13 +4563,13 @@
     let pendingDatePickerViewDate_ = new Date();
 
     function formatDateDMY_(isoDate) {
-      // แปลง yyyy-mm-dd -> dd/mm/yyyy (พ.ศ.) เช่น "2569-09-17" -> "17/09/2569"
+      // แปลง yyyy-mm-dd -> dd/mm/yyyy (ค.ศ.) เช่น "2026-09-17" -> "17/09/2026"
       if (!isoDate) return "";
       const parts = String(isoDate).split("-");
       if (parts.length !== 3) return isoDate;
       const dd = String(Number(parts[2])).padStart(2, "0");
       const mm = String(Number(parts[1])).padStart(2, "0");
-      const yyyy = Number(parts[0]) + 543;
+      const yyyy = Number(parts[0]);
       return dd + "/" + mm + "/" + yyyy;
     }
 
@@ -4699,7 +4770,8 @@
         status: statusInput.value,
         shortageDetail: shortageDetail,
         receiverTypes: Array.prototype.map.call(receiverInputs, function (el) { return el.value; }),
-        note: note
+        note: note,
+        recordedBy: currentRecorderName_
       };
       if (editingRecordId) {
         formData.existingPhotoUrls = existingPhotoUrls.slice();
