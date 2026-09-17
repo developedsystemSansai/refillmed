@@ -1136,6 +1136,27 @@
       border-color: var(--primary);
     }
 
+    .med-size-wrap {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      flex: 1 1 120px;
+    }
+
+    .med-size-wrap .med-size-verified-icon {
+      position: absolute;
+      left: 9px;
+      font-size: 15px;
+      color: var(--secondary);
+      pointer-events: none;
+    }
+
+    .med-size-wrap.has-verified .med-size-input {
+      padding-left: 28px;
+      border-color: rgba(18, 165, 148, 0.35);
+      background: rgba(18, 165, 148, 0.06);
+    }
+
     .med-size-badge {
       display: flex;
       align-items: center;
@@ -3870,8 +3891,9 @@
     }
 
     // แสดงรายการยาที่เลือกไว้ด้านล่าง dropdown พร้อมช่องคีย์ "จำนวน" ต่อรายการ
-    // ถ้าเป็นยาจากบัญชียา (fixedSize) จะโชว์ "ขนาด" เป็น badge ล็อกไว้ ไม่ต้องคีย์เอง
-    // ถ้าเป็นยาที่พิมพ์เพิ่มเอง จะมีช่องคีย์ "ขนาด" แบบพิมพ์เองเหมือนเดิม
+    // ช่อง "ขนาด" แก้ไขได้เสมอทุกรายการ (คลิก/แตะแล้วพิมพ์แก้ได้ทันที) แม้เป็นยาจากบัญชียา
+    // ที่มีขนาดมาตรฐานมาให้ค่าเริ่มต้นแล้วก็ตาม (เผื่อเคสที่ต้องจ่ายขนาดอื่นเป็นพิเศษ) —
+    // ไอคอน "verified" เป็นแค่ตัวบอกว่าค่าเริ่มต้นนี้มาจากบัญชียา ไม่ได้แปลว่าห้ามแก้
     // ทุกรายการ (ไม่ว่าจะมาจากบัญชียาหรือพิมพ์เอง) เปลี่ยน "หน่วย" ท้ายแถวได้เสมอ
     function renderSelectedMedList_() {
       const wrap = document.getElementById("med-selected-list");
@@ -3881,12 +3903,13 @@
         const row = document.createElement("div");
         row.className = "med-selected-row";
 
-        const sizeControlHtml = item.fixedSize
-          ? '<span class="med-size-badge">' +
-              '<span class="material-icons-outlined" style="font-size:13px; vertical-align:-2px;">verified</span> ' +
-              escapeHtml_(item.size || "ไม่มีขนาดระบุ") +
-            '</span>'
-          : '<input type="text" class="med-size-input" placeholder="ขนาด เช่น 500mg, เม็ด" value="' + escapeHtml_(item.size) + '">';
+        const sizeControlHtml =
+          '<span class="med-size-wrap' + (item.fixedSize ? ' has-verified' : '') + '">' +
+            (item.fixedSize
+              ? '<span class="material-icons-outlined med-size-verified-icon" title="ขนาดมาตรฐานจากบัญชียา — คลิกเพื่อแก้ไขได้">verified</span>'
+              : '') +
+            '<input type="text" class="med-size-input" placeholder="ขนาด เช่น 500mg, เม็ด" title="คลิกเพื่อแก้ไขขนาด" value="' + escapeHtml_(item.size) + '">' +
+          '</span>';
 
         row.innerHTML =
           '<div class="med-selected-name">' +
@@ -3905,11 +3928,9 @@
         row.querySelector(".med-qty-input").addEventListener("input", function (e) {
           item.qty = e.target.value;
         });
-        if (!item.fixedSize) {
-          row.querySelector(".med-size-input").addEventListener("input", function (e) {
-            item.size = e.target.value;
-          });
-        }
+        row.querySelector(".med-size-input").addEventListener("input", function (e) {
+          item.size = e.target.value;
+        });
         row.querySelector(".med-unit-select").addEventListener("change", function (e) {
           item.unit = e.target.value;
         });
@@ -3979,15 +4000,17 @@
         const parsed = parseMedSegmentClient_(seg);
         if (!parsed.name) return;
 
-        // ถ้าชื่อยาตรงกับบัญชียา ให้ล็อกขนาดตามบัญชียาปัจจุบัน (แหล่งข้อมูลล่าสุด)
-        // แทนขนาดที่เคยบันทึกไว้ในอดีต เผื่อบัญชียามีการปรับปรุงภายหลัง
+        // ชื่อยาตรงกับบัญชียาหรือไม่ ใช้บอกแค่ว่าจะโชว์ไอคอน "verified" (ที่มาจากบัญชียา)
+        // เท่านั้น — ค่า "ขนาด" ให้ยึดตามที่เคยบันทึกไว้จริงเสมอ (parsed.size) เพราะตอนนี้
+        // แก้ไขขนาดได้แม้เป็นยาจากบัญชียา จึงห้ามเอาขนาดปัจจุบันของบัญชียามาทับขนาดที่
+        // เจ้าหน้าที่เคยแก้ไว้เอง จะใช้ขนาดจากบัญชียาก็ต่อเมื่อรายการเดิมไม่มีขนาดระบุไว้เลย
         const known = pool.find(function (med) { return med.name.toLowerCase() === parsed.name.toLowerCase(); });
 
         selectedMeds.push({
           name: known ? known.name : parsed.name,
           qty: parsed.qty,
           unit: parsed.unit || (known && known.unit) || "เม็ด",
-          size: known ? known.size : parsed.size,
+          size: parsed.size || (known ? known.size : ""),
           fixedSize: !!known
         });
       });
