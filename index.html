@@ -1140,21 +1140,52 @@
       position: relative;
       display: inline-flex;
       align-items: center;
-      flex: 1 1 120px;
+      gap: 6px;
+      flex: 1 1 140px;
     }
 
-    .med-size-wrap .med-size-verified-icon {
-      position: absolute;
-      left: 9px;
-      font-size: 15px;
+    .med-size-display {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12.5px;
+      font-weight: 600;
       color: var(--secondary);
-      pointer-events: none;
+      background: rgba(18, 165, 148, 0.1);
+      border: 1px solid rgba(18, 165, 148, 0.3);
+      border-radius: 8px;
+      padding: 8px 10px;
+      white-space: nowrap;
+      flex: 1 1 auto;
+      min-width: 0;
     }
 
-    .med-size-wrap.has-verified .med-size-input {
-      padding-left: 28px;
-      border-color: rgba(18, 165, 148, 0.35);
-      background: rgba(18, 165, 148, 0.06);
+    .med-size-display-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .med-size-edit-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      flex: 0 0 auto;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--muted);
+      cursor: pointer;
+      transition: border-color 0.15s ease, color 0.15s ease;
+    }
+
+    .med-size-edit-btn:hover,
+    .med-size-edit-btn:focus-visible {
+      border-color: var(--primary);
+      color: var(--primary);
+      outline: none;
     }
 
     .med-size-badge {
@@ -3891,9 +3922,9 @@
     }
 
     // แสดงรายการยาที่เลือกไว้ด้านล่าง dropdown พร้อมช่องคีย์ "จำนวน" ต่อรายการ
-    // ช่อง "ขนาด" แก้ไขได้เสมอทุกรายการ (คลิก/แตะแล้วพิมพ์แก้ได้ทันที) แม้เป็นยาจากบัญชียา
-    // ที่มีขนาดมาตรฐานมาให้ค่าเริ่มต้นแล้วก็ตาม (เผื่อเคสที่ต้องจ่ายขนาดอื่นเป็นพิเศษ) —
-    // ไอคอน "verified" เป็นแค่ตัวบอกว่าค่าเริ่มต้นนี้มาจากบัญชียา ไม่ได้แปลว่าห้ามแก้
+    // ถ้าเป็นยาจากบัญชียา (fixedSize) จะโชว์ "ขนาด" เป็น badge พร้อมปุ่มดินสอ — ต้องกดปุ่ม
+    // ดินสอก่อนถึงจะสลับเป็นช่องกรอกแก้ไขได้ (ให้เห็นชัดเจนว่าแก้ไขได้ ไม่ใช่แค่ข้อความนิ่งๆ)
+    // ถ้าเป็นยาที่พิมพ์เพิ่มเอง จะเป็นช่องกรอกแก้ไขได้ตรงๆ อยู่แล้ว (หน้าตาเป็นช่องกรอกชัดเจน)
     // ทุกรายการ (ไม่ว่าจะมาจากบัญชียาหรือพิมพ์เอง) เปลี่ยน "หน่วย" ท้ายแถวได้เสมอ
     function renderSelectedMedList_() {
       const wrap = document.getElementById("med-selected-list");
@@ -3903,13 +3934,18 @@
         const row = document.createElement("div");
         row.className = "med-selected-row";
 
-        const sizeControlHtml =
-          '<span class="med-size-wrap' + (item.fixedSize ? ' has-verified' : '') + '">' +
-            (item.fixedSize
-              ? '<span class="material-icons-outlined med-size-verified-icon" title="ขนาดมาตรฐานจากบัญชียา — คลิกเพื่อแก้ไขได้">verified</span>'
-              : '') +
-            '<input type="text" class="med-size-input" placeholder="ขนาด เช่น 500mg, เม็ด" title="คลิกเพื่อแก้ไขขนาด" value="' + escapeHtml_(item.size) + '">' +
-          '</span>';
+        const sizeControlHtml = item.fixedSize
+          ? '<span class="med-size-wrap">' +
+              '<span class="med-size-display">' +
+                '<span class="material-icons-outlined" style="font-size:13px; vertical-align:-2px;">verified</span> ' +
+                '<span class="med-size-display-text">' + escapeHtml_(item.size || "ไม่มีขนาดระบุ") + '</span>' +
+              '</span>' +
+              '<button type="button" class="med-size-edit-btn" aria-label="แก้ไขขนาด" title="แก้ไขขนาด">' +
+                '<span class="material-icons-outlined" style="font-size:16px;">edit</span>' +
+              '</button>' +
+              '<input type="text" class="med-size-input hidden" placeholder="ขนาด เช่น 500mg, เม็ด" value="' + escapeHtml_(item.size) + '">' +
+            '</span>'
+          : '<input type="text" class="med-size-input" placeholder="ขนาด เช่น 500mg, เม็ด" value="' + escapeHtml_(item.size) + '">';
 
         row.innerHTML =
           '<div class="med-selected-name">' +
@@ -3928,9 +3964,42 @@
         row.querySelector(".med-qty-input").addEventListener("input", function (e) {
           item.qty = e.target.value;
         });
-        row.querySelector(".med-size-input").addEventListener("input", function (e) {
+
+        const sizeInput = row.querySelector(".med-size-input");
+        sizeInput.addEventListener("input", function (e) {
           item.size = e.target.value;
         });
+
+        if (item.fixedSize) {
+          // เข้าโหมดแก้ไข: กดปุ่มดินสอแล้วซ่อน badge/ปุ่ม โชว์ช่องกรอกแทน แล้วโฟกัส+เลือกข้อความให้พิมพ์ทับได้ทันที
+          const displayEl = row.querySelector(".med-size-display");
+          const editBtn = row.querySelector(".med-size-edit-btn");
+          const displayTextEl = row.querySelector(".med-size-display-text");
+
+          const enterEditMode = function () {
+            displayEl.classList.add("hidden");
+            editBtn.classList.add("hidden");
+            sizeInput.classList.remove("hidden");
+            sizeInput.focus();
+            sizeInput.select();
+          };
+          const exitEditMode = function () {
+            displayTextEl.textContent = sizeInput.value.trim() || "ไม่มีขนาดระบุ";
+            sizeInput.classList.add("hidden");
+            displayEl.classList.remove("hidden");
+            editBtn.classList.remove("hidden");
+          };
+
+          editBtn.addEventListener("click", enterEditMode);
+          sizeInput.addEventListener("blur", exitEditMode);
+          sizeInput.addEventListener("keydown", function (e) {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              sizeInput.blur();
+            }
+          });
+        }
+
         row.querySelector(".med-unit-select").addEventListener("change", function (e) {
           item.unit = e.target.value;
         });
