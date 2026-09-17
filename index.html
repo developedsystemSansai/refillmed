@@ -954,6 +954,193 @@
       min-height: 80px;
     }
 
+    /* ============================================================
+       ตัวเลือกวันที่แบบกำหนดเอง (วันที่ค้าง) — บังคับรูปแบบ วัน/เดือน/ปี
+       ============================================================ */
+    .date-picker {
+      position: relative;
+    }
+
+    .date-picker-native-input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .date-picker-field {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 13px 14px;
+      font-size: 16px;
+      color: var(--text);
+      background: var(--surface);
+      outline: none;
+      cursor: pointer;
+      min-height: 48px;
+      box-sizing: border-box;
+      font-family: 'Prompt', sans-serif;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .date-picker-field:hover {
+      border-color: rgba(var(--primary-rgb), 0.5);
+    }
+
+    .date-picker.open .date-picker-field,
+    .date-picker-field:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.12);
+    }
+
+    .date-picker-field-icon {
+      font-size: 19px;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .date-picker-field-text {
+      flex: 1;
+      text-align: left;
+      letter-spacing: 0.3px;
+    }
+
+    .date-picker-field-text.placeholder {
+      color: var(--muted);
+      letter-spacing: normal;
+    }
+
+    .date-picker-field-caret {
+      color: var(--muted);
+      font-size: 20px;
+      flex-shrink: 0;
+      transition: transform 0.15s ease;
+    }
+
+    .date-picker.open .date-picker-field-caret {
+      transform: rotate(180deg);
+    }
+
+    .date-picker-dropdown {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      z-index: 60;
+      width: 296px;
+      max-width: calc(100vw - 40px);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 12px 32px rgba(15, 23, 42, 0.18);
+      padding: 12px;
+    }
+
+    .date-picker-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .date-picker-nav {
+      border: none;
+      background: transparent;
+      color: var(--text);
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .date-picker-nav:hover {
+      background: rgba(var(--primary-rgb), 0.1);
+      color: var(--primary);
+    }
+
+    .date-picker-title {
+      font-size: 14.5px;
+      font-weight: 600;
+    }
+
+    .date-picker-weekdays,
+    .date-picker-days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 2px;
+    }
+
+    .date-picker-weekdays span {
+      text-align: center;
+      font-size: 11.5px;
+      color: var(--muted);
+      font-weight: 600;
+      padding: 4px 0;
+    }
+
+    .date-picker-day {
+      border: none;
+      background: transparent;
+      color: var(--text);
+      font-size: 13.5px;
+      height: 34px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: 'Prompt', sans-serif;
+    }
+
+    .date-picker-day:hover:not(:disabled) {
+      background: rgba(var(--primary-rgb), 0.12);
+    }
+
+    .date-picker-day:disabled {
+      visibility: hidden;
+      cursor: default;
+    }
+
+    .date-picker-day.is-today {
+      font-weight: 700;
+      color: var(--primary);
+      box-shadow: inset 0 0 0 1px rgba(var(--primary-rgb), 0.45);
+    }
+
+    .date-picker-day.is-selected {
+      background: var(--primary);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .date-picker-footer {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .date-picker-today-btn {
+      border: none;
+      background: transparent;
+      color: var(--primary);
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-family: 'Prompt', sans-serif;
+    }
+
+    .date-picker-today-btn:hover {
+      background: rgba(var(--primary-rgb), 0.1);
+    }
+
     .choice-group {
       display: flex;
       gap: 10px;
@@ -2007,7 +2194,32 @@
               <div class="form-grid">
                 <div class="form-field">
                   <label>วันที่ค้าง <span class="req">*</span></label>
-                  <input type="date" id="field-pendingdate" required>
+                  <div class="date-picker" id="pendingdate-picker">
+                    <button type="button" class="date-picker-field" id="pendingdate-picker-trigger" aria-haspopup="true" aria-expanded="false">
+                      <span class="material-icons-outlined date-picker-field-icon">event</span>
+                      <span class="date-picker-field-text placeholder" id="field-pendingdate-display">วว/ดด/ปปปป</span>
+                      <span class="material-icons-outlined date-picker-field-caret">arrow_drop_down</span>
+                    </button>
+                    <input type="date" id="field-pendingdate" class="date-picker-native-input" required aria-hidden="true" tabindex="-1">
+                    <div class="date-picker-dropdown hidden" id="pendingdate-picker-dropdown">
+                      <div class="date-picker-header">
+                        <button type="button" class="date-picker-nav" id="pendingdate-prev-month" aria-label="เดือนก่อนหน้า">
+                          <span class="material-icons-outlined">chevron_left</span>
+                        </button>
+                        <div class="date-picker-title" id="pendingdate-picker-title"></div>
+                        <button type="button" class="date-picker-nav" id="pendingdate-next-month" aria-label="เดือนถัดไป">
+                          <span class="material-icons-outlined">chevron_right</span>
+                        </button>
+                      </div>
+                      <div class="date-picker-weekdays">
+                        <span>อา</span><span>จ</span><span>อ</span><span>พ</span><span>พฤ</span><span>ศ</span><span>ส</span>
+                      </div>
+                      <div class="date-picker-days" id="pendingdate-picker-days"></div>
+                      <div class="date-picker-footer">
+                        <button type="button" class="date-picker-today-btn" id="pendingdate-today-btn">ไปวันนี้</button>
+                      </div>
+                    </div>
+                  </div>
                   <p style="color:var(--muted); font-size:11.5px; margin:6px 0 0 0; line-height:1.5;">
                     <span class="material-icons-outlined" style="font-size:13px; vertical-align:-2px;">info</span>
                     คือวันที่ผู้ป่วย "เริ่มค้างยา" (วันนัดที่ไม่ได้มารับ) ไม่ใช่วันที่ที่กำลังบันทึกข้อมูลนี้ — ระบบตั้งค่าเริ่มต้นเป็นวันนี้ไว้ให้เท่านั้น กรุณาเปลี่ยนให้ตรงกับวันที่ค้างจริง
@@ -2791,6 +3003,7 @@
       document.getElementById("field-hn").addEventListener("input", checkDuplicateAndWarn_);
       document.getElementById("field-fullname").addEventListener("input", checkDuplicateAndWarn_);
       document.getElementById("field-pendingdate").addEventListener("change", checkPendingDateAndWarn_);
+      initPendingDatePicker_();
 
       document.getElementById("btn-confirm-save-back").addEventListener("click", closeConfirmSaveModal_);
       document.getElementById("btn-confirm-save-yes").addEventListener("click", performConfirmedSave_);
@@ -2868,6 +3081,7 @@
       bindSettingsPreviewInputs_();
 
       document.getElementById("field-pendingdate").valueAsDate = new Date();
+      syncPendingDateDisplay_();
     }
 
     function enterApp_() {
@@ -4267,6 +4481,171 @@
 
     // (ใช้ formatDateThaiISO_ ที่ประกาศไว้แล้วด้านล่างของไฟล์ ไม่ประกาศซ้ำ)
 
+    /**
+     * ============================================================
+     * ตัวเลือกวันที่ "วันที่ค้าง" แบบกำหนดเอง — ปฏิทินป็อปอัพ + ช่องแสดงผล
+     * รูปแบบ วัน/เดือน/ปี (พ.ศ.) เพื่อให้ตรงกับความคุ้นเคยของผู้ใช้งานจริง
+     * (ค่าที่เก็บ/ส่งไป backend ยังเป็น ISO yyyy-mm-dd ตามเดิมผ่าน
+     * input[type=date] ที่ซ่อนไว้ #field-pendingdate)
+     * ============================================================
+     */
+    let pendingDatePickerViewDate_ = new Date();
+
+    function formatDateDMY_(isoDate) {
+      // แปลง yyyy-mm-dd -> dd/mm/yyyy (พ.ศ.) เช่น "2569-09-17" -> "17/09/2569"
+      if (!isoDate) return "";
+      const parts = String(isoDate).split("-");
+      if (parts.length !== 3) return isoDate;
+      const dd = String(Number(parts[2])).padStart(2, "0");
+      const mm = String(Number(parts[1])).padStart(2, "0");
+      const yyyy = Number(parts[0]) + 543;
+      return dd + "/" + mm + "/" + yyyy;
+    }
+
+    function syncPendingDateDisplay_() {
+      const nativeInput = document.getElementById("field-pendingdate");
+      const displaySpan = document.getElementById("field-pendingdate-display");
+      if (!nativeInput || !displaySpan) return;
+      const value = nativeInput.value;
+      if (!value) {
+        displaySpan.textContent = "วว/ดด/ปปปป";
+        displaySpan.classList.add("placeholder");
+      } else {
+        displaySpan.textContent = formatDateDMY_(value);
+        displaySpan.classList.remove("placeholder");
+        // ให้มุมมองปฏิทินตามหลังตรงกับค่าที่เลือกไว้ล่าสุดเสมอ เผื่อเปิดใหม่
+        const parts = value.split("-");
+        if (parts.length === 3) {
+          pendingDatePickerViewDate_ = new Date(Number(parts[0]), Number(parts[1]) - 1, 1);
+        }
+      }
+    }
+
+    function initPendingDatePicker_() {
+      const wrap = document.getElementById("pendingdate-picker");
+      const trigger = document.getElementById("pendingdate-picker-trigger");
+      const dropdown = document.getElementById("pendingdate-picker-dropdown");
+      const nativeInput = document.getElementById("field-pendingdate");
+      const prevBtn = document.getElementById("pendingdate-prev-month");
+      const nextBtn = document.getElementById("pendingdate-next-month");
+      const todayBtn = document.getElementById("pendingdate-today-btn");
+      const daysGrid = document.getElementById("pendingdate-picker-days");
+      if (!wrap || !trigger || !dropdown || !nativeInput) return;
+
+      function openDropdown() {
+        const value = nativeInput.value;
+        const parts = value ? value.split("-") : null;
+        pendingDatePickerViewDate_ = parts && parts.length === 3
+          ? new Date(Number(parts[0]), Number(parts[1]) - 1, 1)
+          : new Date();
+        renderPendingDateCalendar_();
+        wrap.classList.add("open");
+        dropdown.classList.remove("hidden");
+        trigger.setAttribute("aria-expanded", "true");
+      }
+
+      function closeDropdown() {
+        wrap.classList.remove("open");
+        dropdown.classList.add("hidden");
+        trigger.setAttribute("aria-expanded", "false");
+      }
+
+      trigger.addEventListener("click", function (e) {
+        e.stopPropagation();
+        if (wrap.classList.contains("open")) closeDropdown(); else openDropdown();
+      });
+
+      prevBtn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        pendingDatePickerViewDate_ = new Date(pendingDatePickerViewDate_.getFullYear(), pendingDatePickerViewDate_.getMonth() - 1, 1);
+        renderPendingDateCalendar_();
+      });
+
+      nextBtn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        pendingDatePickerViewDate_ = new Date(pendingDatePickerViewDate_.getFullYear(), pendingDatePickerViewDate_.getMonth() + 1, 1);
+        renderPendingDateCalendar_();
+      });
+
+      todayBtn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        selectPendingDate_(new Date());
+        closeDropdown();
+      });
+
+      daysGrid.addEventListener("click", function (e) {
+        const btn = e.target.closest(".date-picker-day");
+        if (!btn || btn.disabled) return;
+        e.stopPropagation();
+        const iso = btn.getAttribute("data-date");
+        if (!iso) return;
+        const parts = iso.split("-");
+        selectPendingDate_(new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2])));
+        closeDropdown();
+      });
+
+      dropdown.addEventListener("click", function (e) { e.stopPropagation(); });
+
+      document.addEventListener("click", function () {
+        if (wrap.classList.contains("open")) closeDropdown();
+      });
+
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && wrap.classList.contains("open")) closeDropdown();
+      });
+
+      syncPendingDateDisplay_();
+    }
+
+    function selectPendingDate_(dateObj) {
+      const nativeInput = document.getElementById("field-pendingdate");
+      nativeInput.valueAsDate = dateObj;
+      syncPendingDateDisplay_();
+      // ยิง event "change" เอง เนื่องจากการตั้งค่าด้วย JS ไม่ทำให้ input เดิมยิง change
+      // ให้ตัวเอง เพื่อให้คำเตือน "วันที่ยังเป็นวันนี้" (checkPendingDateAndWarn_) ทำงานตามปกติ
+      nativeInput.dispatchEvent(new Event("change"));
+    }
+
+    function renderPendingDateCalendar_() {
+      const titleEl = document.getElementById("pendingdate-picker-title");
+      const daysGrid = document.getElementById("pendingdate-picker-days");
+      const nativeInput = document.getElementById("field-pendingdate");
+      if (!titleEl || !daysGrid) return;
+
+      const monthNamesFull = [
+        "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+        "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+      ];
+
+      const viewYear = pendingDatePickerViewDate_.getFullYear();
+      const viewMonth = pendingDatePickerViewDate_.getMonth();
+      titleEl.textContent = monthNamesFull[viewMonth] + " " + (viewYear + 543);
+
+      const today = new Date();
+      const todayIso = formatDateThaiISO_(today);
+      const selectedIso = nativeInput.value || "";
+
+      const firstOfMonth = new Date(viewYear, viewMonth, 1);
+      const startWeekday = firstOfMonth.getDay(); // 0 = อาทิตย์
+      const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+      const totalCells = Math.ceil((startWeekday + daysInMonth) / 7) * 7;
+
+      let html = "";
+      for (let i = 0; i < totalCells; i++) {
+        const dayNum = i - startWeekday + 1;
+        if (dayNum < 1 || dayNum > daysInMonth) {
+          html += '<button type="button" class="date-picker-day" disabled></button>';
+          continue;
+        }
+        const iso = viewYear + "-" + String(viewMonth + 1).padStart(2, "0") + "-" + String(dayNum).padStart(2, "0");
+        const classes = ["date-picker-day"];
+        if (iso === todayIso) classes.push("is-today");
+        if (iso === selectedIso) classes.push("is-selected");
+        html += '<button type="button" class="' + classes.join(" ") + '" data-date="' + iso + '">' + dayNum + '</button>';
+      }
+      daysGrid.innerHTML = html;
+    }
+
     // ---------------- บันทึก / แก้ไข ----------------
     function onSubmitRecord_(e) {
       e.preventDefault();
@@ -4347,15 +4726,31 @@
     function renderConfirmSummary_(formData) {
       const todayIso = formatDateThaiISO_(new Date());
       const warnEl = document.getElementById("confirm-save-warning");
+      const confirmBtn = document.getElementById("btn-confirm-save-yes");
       if (formData.pendingDate === todayIso) {
         warnEl.classList.remove("hidden");
         warnEl.innerHTML =
-          '<span class="material-icons-outlined" style="font-size:20px;">warning_amber</span>' +
-          '<span>วันที่ค้างที่กรอกคือ "วันนี้" ซึ่งเป็นวันที่กำลังบันทึกข้อมูลพอดี — ' +
-          'โปรดตรวจสอบว่าใช่วันที่ผู้ป่วยเริ่มค้างยาจริง ไม่ใช่แค่ลืมเปลี่ยนวันที่จากค่าเริ่มต้น</span>';
+          '<div style="display:flex; gap:8px; align-items:flex-start; width:100%;">' +
+            '<span class="material-icons-outlined" style="font-size:20px;">warning_amber</span>' +
+            '<div style="flex:1;">' +
+              '<span>วันที่ค้างที่กรอกคือ "วันนี้" (' + formatDateDMY_(formData.pendingDate) + ') ซึ่งเป็นวันที่กำลังบันทึกข้อมูลพอดี — ' +
+              'โปรดตรวจสอบว่าใช่วันที่ผู้ป่วยเริ่มค้างยาจริง ไม่ใช่แค่ลืมเปลี่ยนวันที่จากค่าเริ่มต้น</span>' +
+              '<label style="display:flex; gap:8px; align-items:flex-start; margin-top:10px; cursor:pointer; font-weight:600;">' +
+                '<input type="checkbox" id="confirm-save-warning-ack" style="margin-top:2px; width:16px; height:16px; flex-shrink:0;">' +
+                '<span>ฉันตรวจสอบแล้วว่า "วันนี้" คือวันที่ผู้ป่วยเริ่มค้างยาจริง ไม่ใช่ค่าที่ระบบตั้งให้อัตโนมัติ</span>' +
+              '</label>' +
+            '</div>' +
+          '</div>';
+        // บังคับให้ต้องติ๊กยืนยันก่อน ปุ่ม "ยืนยันบันทึก" จึงจะกดได้ — กันการกดยืนยันข้าม
+        // คำเตือนโดยไม่ทันสังเกตวันที่ค้าง
+        confirmBtn.disabled = true;
+        document.getElementById("confirm-save-warning-ack").addEventListener("change", function () {
+          confirmBtn.disabled = !this.checked;
+        });
       } else {
         warnEl.classList.add("hidden");
         warnEl.innerHTML = "";
+        confirmBtn.disabled = false;
       }
 
       const photoCount = totalPhotoCount_();
@@ -4364,7 +4759,7 @@
         ["ชื่อ-สกุล", (formData.prefix || "") + formData.fullName],
         ["HN", formData.hn],
         ["รายการยา", formData.medItems],
-        ["วันที่ค้าง", formatThaiDateShort_(formData.pendingDate)],
+        ["วันที่ค้าง", formatDateDMY_(formData.pendingDate)],
         ["จำนวนที่ได้รับ", formData.status + (formData.status === "ไม่ครบ" && formData.shortageDetail ? (" (ขาด: " + formData.shortageDetail + ")") : "")],
         ["ผู้มารับ", formData.receiverTypes.join(", ") || "-"],
         ["หมายเหตุ", formData.note || "-"],
@@ -4437,6 +4832,7 @@
     function clearRecordForm_() {
       document.getElementById("record-form").reset();
       document.getElementById("field-pendingdate").valueAsDate = new Date();
+      syncPendingDateDisplay_();
       document.getElementById("field-photo-attach").value = "";
       document.getElementById("field-photo-camera").value = "";
       document.getElementById("field-med-search").value = "";
@@ -4466,6 +4862,7 @@
       document.getElementById("field-hn").value = record.hn || "";
       applyMedItemsString_(record.medItems);
       document.getElementById("field-pendingdate").value = record.pendingDate || "";
+      syncPendingDateDisplay_();
 
       const statusInput = document.querySelector('input[name="status"][value="' + cssEscape_(record.status) + '"]');
       if (statusInput) statusInput.checked = true;
