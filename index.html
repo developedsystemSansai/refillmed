@@ -3116,7 +3116,7 @@
       buildColorGrid_();
       bindSettingsPreviewInputs_();
 
-      document.getElementById("field-pendingdate").valueAsDate = new Date();
+      document.getElementById("field-pendingdate").value = formatDateThaiISO_(new Date());
       syncPendingDateDisplay_();
     }
 
@@ -4670,7 +4670,13 @@
 
     function selectPendingDate_(dateObj) {
       const nativeInput = document.getElementById("field-pendingdate");
-      nativeInput.valueAsDate = dateObj;
+      // สำคัญ: ห้ามใช้ nativeInput.valueAsDate = dateObj เพราะ valueAsDate ตีความ/แปลงวันที่
+      // โดยอิงเวลา UTC เสมอ ขณะที่ dateObj ที่ส่งเข้ามา (ทั้งจากการคลิกวันในปฏิทินและปุ่ม
+      // "ไปวันนี้") ถูกสร้างด้วยเวลาท้องถิ่นเที่ยงคืน (เช่น new Date(2569,8,17) เวลาไทย)
+      // ซึ่งเมื่อแปลงเป็น UTC จะกลายเป็นเวลา 17:00 ของ "วันก่อนหน้า" ทำให้ค่าที่ได้ในช่อง
+      // input[type=date] เลื่อนถอยหลังไป 1 วันเสมอสำหรับโซนเวลาที่เร็วกว่า UTC (เช่น ไทย
+      // UTC+7) — จึงต้องประกอบสตริง yyyy-mm-dd จากปี/เดือน/วัน "ตามเวลาท้องถิ่น" เองโดยตรง
+      nativeInput.value = formatDateThaiISO_(dateObj);
       syncPendingDateDisplay_();
       // ยิง event "change" เอง เนื่องจากการตั้งค่าด้วย JS ไม่ทำให้ input เดิมยิง change
       // ให้ตัวเอง เพื่อให้คำเตือน "วันที่ยังเป็นวันนี้" (checkPendingDateAndWarn_) ทำงานตามปกติ
@@ -4903,7 +4909,7 @@
 
     function clearRecordForm_() {
       document.getElementById("record-form").reset();
-      document.getElementById("field-pendingdate").valueAsDate = new Date();
+      document.getElementById("field-pendingdate").value = formatDateThaiISO_(new Date());
       syncPendingDateDisplay_();
       document.getElementById("field-photo-attach").value = "";
       document.getElementById("field-photo-camera").value = "";
