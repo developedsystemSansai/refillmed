@@ -348,6 +348,56 @@
       z-index: 30;
     }
 
+    /* ============================================================
+       แถบเมนูล่าง (Bottom Navigation) — รูปแบบที่แอปมือถือทั่วไปใช้กัน
+       ซ่อนไว้เป็นค่าเริ่มต้น (เดสก์ท็อป/แท็บเล็ตใช้เมนูข้างตามปกติ) จะแสดงเฉพาะ
+       จอมือถือผ่าน @media ด้านล่าง (ดูหัวข้อ "Responsive: แถบเมนูล่างบนมือถือ")
+       ============================================================ */
+    .bottom-nav {
+      display: none;
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 45;
+      background: var(--topbar-background);
+      border-top: 1px solid var(--border);
+      box-shadow: 0 -2px 16px rgba(15, 23, 42, 0.08);
+      padding: 6px calc(4px + var(--safe-right)) calc(6px + var(--safe-bottom)) calc(4px + var(--safe-left));
+      box-sizing: border-box;
+    }
+
+    .bottom-nav .bottom-nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      padding: 6px 2px;
+      margin-bottom: 0;
+      border-radius: 10px;
+      min-height: 48px;
+      font-size: 10.5px;
+      font-weight: 600;
+      line-height: 1.2;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .bottom-nav .bottom-nav-item .material-icons-outlined {
+      font-size: 22px;
+    }
+
+    .bottom-nav .bottom-nav-item.active {
+      color: var(--primary);
+      background: rgba(var(--primary-rgb), 0.08);
+    }
+
+    .bottom-nav .bottom-nav-item:active {
+      background: rgba(var(--primary-rgb), 0.14);
+    }
+
     .main-area {
       flex: 1;
       margin-left: var(--sidebar-width);
@@ -1965,6 +2015,26 @@
     }
 
     /* ============================================================
+       Responsive: แถบเมนูล่างบนมือถือ (จอ ≤ 760px)
+       รูปแบบที่แอปมือถือทั่วไปใช้กัน (แท็บไอคอน+ป้ายกำกับด้านล่างจอ) แทนที่การย่อ
+       เมนูข้างแบบเดสก์ท็อปลงมาเป็นลิ้นชักอย่างเดียว ทำให้ใช้งานเป็นธรรมชาติกว่าบนมือถือ
+       จอกว้างกว่านี้ (แท็บเล็ต/ไอแพด) ยังคงใช้เมนูข้างแบบลิ้นชัก (hamburger) ตามเดิม
+       เพราะมีพื้นที่แนวนอนเพียงพอและเป็นรูปแบบที่คุ้นเคยของแอปบนแท็บเล็ตทั่วไป
+       ============================================================ */
+    @media (max-width: 760px) {
+      .bottom-nav {
+        display: flex;
+      }
+      .content {
+        /* กันเนื้อหาแถวล่างสุดถูกแถบเมนูล่างบัง (สูง ~64px + safe-area) */
+        padding-bottom: calc(72px + var(--safe-bottom));
+      }
+      #toast-container {
+        bottom: calc(76px + var(--safe-bottom));
+      }
+    }
+
+    /* ============================================================
        Responsive: แท็บเล็ต / มือถือ (จอ ≤ 900px)
        ครอบคลุมทุกหน้า: แดชบอร์ด, ฟอร์มบันทึก, ประวัติ, ค้นยอดจ่ายยา, ตั้งค่า
        ============================================================ */
@@ -2010,6 +2080,8 @@
       }
       .topbar {
         padding: 0 12px;
+        padding-left: calc(12px + var(--safe-left));
+        padding-right: calc(12px + var(--safe-right));
       }
       .topbar-title {
         font-size: 15px;
@@ -2022,6 +2094,34 @@
       }
       .section-header > div {
         width: 100%;
+      }
+      /* แถบเลือกช่วงเวลา (period-toggle) บนมือถือ: ให้เลื่อนแนวนอนแบบชิป (chip)
+         เหมือนแอปทั่วไป (เช่น ตัวกรองใน Google/Airbnb) แทนการขึ้นบรรทัดใหม่แบบพับ
+         ซึ่งกินพื้นที่แนวตั้งเยอะและดูเหมือนทูลบาร์เดสก์ท็อปที่ถูกบีบลงมา */
+      .period-toggle {
+        display: flex;
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+      .period-toggle::-webkit-scrollbar {
+        display: none;
+      }
+      .period-toggle button {
+        flex: 0 0 auto;
+        white-space: nowrap;
+      }
+      /* ปุ่ม "รีเฟรชข้อมูล" ย่อเหลือแค่ไอคอนบนมือถือ ประหยัดพื้นที่แถวเครื่องมือ */
+      #btn-refresh-dashboard {
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        flex: 0 0 auto;
+        border-radius: 12px;
+      }
+      #btn-refresh-dashboard .btn-label {
+        display: none;
       }
       .stat-grid {
         grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -2159,6 +2259,11 @@
         padding-top: 14px;
         padding-bottom: calc(14px + var(--safe-bottom));
       }
+      /* แนวนอนจอเตี้ย: พื้นที่แนวตั้งเหลือน้อยมาก ใช้เมนูลิ้นชัก (hamburger) แทน
+         แถบเมนูล่าง เพื่อไม่ให้แถบเมนูล่างมากินพื้นที่จอที่มีอยู่จำกัดอยู่แล้ว */
+      .bottom-nav {
+        display: none;
+      }
     }
   </style>
 </head>
@@ -2239,6 +2344,32 @@
         <div id="btn-change-recorder-name" style="margin-top:4px; font-size:12px; text-decoration:underline; cursor:pointer; opacity:0.85;">เปลี่ยนชื่อผู้บันทึก</div>
       </div>
     </aside>
+
+    <!-- แถบเมนูล่าง (Bottom Navigation) — แสดงเฉพาะจอมือถือ (ดู .bottom-nav ใน CSS)
+         ใช้คลาส .sidebar-nav-item ร่วมกับเมนูข้างเพื่อให้ระบบสลับหน้า/ไฮไลต์สถานะ active
+         ทำงานร่วมกันได้ทันทีโดยไม่ต้องเพิ่มโค้ด JS แยกต่างหาก -->
+    <nav class="bottom-nav" id="bottom-nav">
+      <div class="bottom-nav-item sidebar-nav-item active" data-page="dashboard">
+        <span class="material-icons-outlined">dashboard</span>
+        <span>หน้าแรก</span>
+      </div>
+      <div class="bottom-nav-item sidebar-nav-item" data-page="record-form">
+        <span class="material-icons-outlined">edit_note</span>
+        <span>บันทึก</span>
+      </div>
+      <div class="bottom-nav-item sidebar-nav-item" data-page="history">
+        <span class="material-icons-outlined">history</span>
+        <span>ประวัติ</span>
+      </div>
+      <div class="bottom-nav-item sidebar-nav-item" data-page="med-search">
+        <span class="material-icons-outlined">query_stats</span>
+        <span>ค้นยา</span>
+      </div>
+      <div class="bottom-nav-item sidebar-nav-item" data-page="settings">
+        <span class="material-icons-outlined">settings</span>
+        <span>ตั้งค่า</span>
+      </div>
+    </nav>
 
     <div class="main-area">
       <div class="topbar">
