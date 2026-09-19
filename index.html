@@ -570,7 +570,7 @@
 
     .stat-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(180px, 280px));
       gap: 14px;
       margin-bottom: 20px;
     }
@@ -620,7 +620,12 @@
       min-width: 0;
     }
 
-    @media (max-width: 900px) {
+    /* จอ ≤1200px (มือถือทุกแนว + ไอแพดทั้งแนวตั้งและแนวนอน): ให้การ์ดกราฟ/ตาราง 2 คอลัมน์
+       เรียงต่อกันเป็นคอลัมน์เดียวเต็มความกว้างแทน เพื่อให้กราฟ/ตารางมีพื้นที่แสดงรายละเอียด
+       ได้ชัดเจนที่สุด ไม่ถูกบีบแคบจนตัวหนังสือ/เส้นกราฟเบียดกันจนอ่านยาก — ใช้เบรกพอยต์เดียว
+       กับจุดที่เมนูข้างเปลี่ยนเป็นแบบลิ้นชัก (ดู "Responsive: ซ่อนเมนูด้านข้าง") เพราะเป็น
+       เกณฑ์เดียวกันว่าจอกว้างพอจะวางเนื้อหาแบบ 2 คอลัมน์ได้อย่างสบายตาหรือไม่ */
+    @media (max-width: 1200px) {
       .grid-2 { grid-template-columns: 1fr; }
     }
 
@@ -631,6 +636,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      flex-wrap: wrap;
     }
 
     .bar-row {
@@ -1594,6 +1600,7 @@
       gap: 10px;
       justify-content: flex-end;
       margin-top: 6px;
+      flex-wrap: wrap;
     }
 
     /* ============================================================
@@ -1842,6 +1849,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      flex-wrap: wrap;
     }
 
     .modal-box p.hint {
@@ -2332,10 +2340,6 @@
           <span class="material-icons-outlined">query_stats</span>
           <span>ค้นยอดจ่ายยา</span>
         </div>
-        <div class="sidebar-nav-item" data-page="settings">
-          <span class="material-icons-outlined">settings</span>
-          <span>ตั้งค่าระบบ</span>
-        </div>
       </nav>
 
       <div class="sidebar-footer">
@@ -2364,10 +2368,6 @@
       <div class="bottom-nav-item sidebar-nav-item" data-page="med-search">
         <span class="material-icons-outlined">query_stats</span>
         <span>ค้นยา</span>
-      </div>
-      <div class="bottom-nav-item sidebar-nav-item" data-page="settings">
-        <span class="material-icons-outlined">settings</span>
-        <span>ตั้งค่า</span>
       </div>
     </nav>
 
@@ -2855,74 +2855,6 @@
           </div>
         </section>
 
-        <!-- ============ ตั้งค่าระบบ (Protected) ============ -->
-        <section class="page-section" id="section-settings">
-          <div class="section-header">
-            <h2>ตั้งค่าระบบ</h2>
-            <button class="btn btn-outline" id="btn-lock-settings">
-              <span class="material-icons-outlined">lock</span>
-              <span class="btn-label">ล็อกหน้าตั้งค่า</span>
-            </button>
-          </div>
-
-          <div class="grid-2">
-            <div class="card">
-              <div class="card-title"><span class="material-icons-outlined">info</span> ข้อมูลทั่วไป</div>
-
-              <div class="form-field">
-                <label>ชื่อระบบ</label>
-                <input type="text" id="set-sys-name">
-              </div>
-              <div class="form-field">
-                <label>ชื่อหน่วยงาน</label>
-                <input type="text" id="set-org-name">
-              </div>
-              <div class="form-field">
-                <label>Logo URL</label>
-                <input type="text" id="set-logo-url" placeholder="https://...">
-              </div>
-              <div class="form-field">
-                <label>ข้อความต้อนรับ</label>
-                <textarea id="set-welcome-msg"></textarea>
-              </div>
-              <div class="form-field">
-                <label>ข้อความท้ายระบบ</label>
-                <input type="text" id="set-footer-msg">
-              </div>
-
-              <div class="card-title" style="margin-top:20px;"><span class="material-icons-outlined">palette</span> สีเว็บไซต์</div>
-              <div class="color-grid" id="color-grid"></div>
-
-              <div class="card-title" style="margin-top:20px;"><span class="material-icons-outlined">key</span> เปลี่ยนรหัสผู้ดูแล</div>
-              <div class="form-field">
-                <label>รหัสผ่านใหม่ (เว้นว่างหากไม่เปลี่ยน)</label>
-                <input type="password" id="set-new-password" placeholder="อย่างน้อย 6 ตัวอักษร" autocomplete="new-password">
-              </div>
-
-              <div class="form-actions">
-                <button class="btn btn-outline" id="btn-reset-colors">คืนค่าสีเริ่มต้น</button>
-                <button class="btn btn-primary" id="btn-save-settings" style="width:auto;">
-                  <span class="material-icons-outlined">save</span>
-                  <span class="btn-label">บันทึกการตั้งค่า</span>
-                  <span class="spinner"></span>
-                </button>
-              </div>
-            </div>
-
-            <div class="card">
-              <div class="card-title"><span class="material-icons-outlined">visibility</span> ตัวอย่างแบบทันที (Preview)</div>
-              <div class="preview-frame">
-                <div class="preview-inner" id="preview-inner">
-                  <img class="preview-logo" id="preview-logo" src="" alt="โลโก้" style="display:none;">
-                  <h4 id="preview-sys-name">ชื่อระบบ</h4>
-                  <p id="preview-welcome">ข้อความต้อนรับ</p>
-                  <span class="preview-btn">เข้าใช้งานระบบ</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
       </div>
     </div>
   </div>
@@ -2965,24 +2897,6 @@
     </div>
   </div>
 
-  <div class="modal-overlay hidden" id="modal-password">
-    <div class="modal-box">
-      <h3><span class="material-icons-outlined">admin_panel_settings</span> ยืนยันตัวตนผู้ดูแล</h3>
-      <p class="hint">กรุณากรอกรหัสผู้ดูแลเพื่อเข้าสู่หน้าตั้งค่าระบบ</p>
-      <div class="form-field">
-        <input type="password" id="input-admin-password" placeholder="รหัสผู้ดูแล" autocomplete="current-password">
-      </div>
-      <p class="modal-error" id="password-error">รหัสผู้ดูแลไม่ถูกต้อง</p>
-      <div class="form-actions" style="margin-top:14px;">
-        <button class="btn btn-outline" id="btn-cancel-password">ยกเลิก</button>
-        <button class="btn btn-primary" id="btn-confirm-password" style="width:auto;">
-          <span class="btn-label">เข้าสู่ระบบ</span>
-          <span class="spinner"></span>
-        </button>
-      </div>
-    </div>
-  </div>
-<!-- ================= Modal: สรุปข้อมูลก่อนบันทึก ================= -->
   <div class="modal-overlay hidden" id="modal-confirm-save">
     <div class="modal-box" style="max-width:560px; text-align:left;">
       <h3><span class="material-icons-outlined">fact_check</span> ตรวจสอบข้อมูลก่อนบันทึก</h3>
@@ -3072,8 +2986,6 @@
     let publicSettings = {};
     let currentPage = "dashboard";
     let currentDashboardRange = 1; // 1 / 3 / 7 วัน — ค่าเริ่มต้น: วันนี้
-    let settingsToken = null;
-    let settingsTokenExpiry = 0;
     let selectedPhotos = [];         // รูปใหม่ที่เพิ่ง เลือก/ถ่าย [{ base64, mimeType, fileName }]
     let existingPhotoUrls = [];      // รูปเดิมของรายการที่กำลังแก้ไข (ที่ยังไม่ถูกลบออก)
     const MAX_PHOTOS_CLIENT = 10;    // จำกัดจำนวนรูปสูงสุดต่อ 1 รายการ (ต้องตรงกับฝั่ง Code.gs)
@@ -3260,7 +3172,6 @@
     // ================================================================
     document.addEventListener("DOMContentLoaded", function () {
       loadPublicSettings();
-      restoreSettingsSession_();
       bindStaticEvents_();
       startClock_();
       prefillRecorderName_();
@@ -3506,22 +3417,6 @@
       });
       document.getElementById("btn-export-history").addEventListener("click", exportHistoryCsv_);
 
-      document.getElementById("btn-cancel-password").addEventListener("click", function () {
-        document.getElementById("modal-password").classList.add("hidden");
-        goToPage_("dashboard");
-      });
-      document.getElementById("btn-confirm-password").addEventListener("click", onConfirmPassword_);
-      document.getElementById("input-admin-password").addEventListener("keydown", function (e) {
-        if (e.key === "Enter") onConfirmPassword_();
-      });
-
-      document.getElementById("btn-lock-settings").addEventListener("click", onLockSettings_);
-      document.getElementById("btn-save-settings").addEventListener("click", onSaveSettings_);
-      document.getElementById("btn-reset-colors").addEventListener("click", onResetColors_);
-
-      buildColorGrid_();
-      bindSettingsPreviewInputs_();
-
       document.getElementById("field-pendingdate").value = formatDateThaiISO_(new Date());
       syncPendingDateDisplay_();
     }
@@ -3575,18 +3470,13 @@
     }
 
     function goToPage_(pageKey) {
-      if (pageKey === "settings") {
-        if (isSettingsSessionValid_()) {
-          currentPage = "settings";
-          showPage_("settings");
-          loadProtectedSettingsIntoForm_();
-        } else {
-          document.getElementById("password-error").style.display = "none";
-          document.getElementById("input-admin-password").value = "";
-          document.getElementById("modal-password").classList.remove("hidden");
-        }
-        closeMobileSidebar_();
-        return;
+      // สำคัญ: ถ้ากำลังเปิดฟอร์มแก้ไขรายการแบบ Modal ค้างอยู่ (เปิดจากหน้าประวัติ) แล้วผู้ใช้
+      // กดสลับหน้าโดยตรงผ่านเมนู (แถบเมนูล่าง/เมนูข้าง) แทนที่จะกดปุ่ม "ปิด" ของฟอร์มก่อน
+      // ต้องปิด Modal นี้ให้เรียบร้อยเสมอ ไม่เช่นนั้น .page-section.as-modal จะค้างแสดงทับ
+      // หน้าใหม่อยู่ (บัง เนื้อหาบางส่วน) และ document.body.style.overflow="hidden" จะค้างตลอด
+      // ทำให้ทุกหน้าเลื่อนขึ้น-ลงไม่ได้อีกเลย ไม่ว่าจะเป็นแดชบอร์ด/ประวัติ/ค้นยอดจ่ายยาก็ตาม
+      if (document.getElementById("section-record-form").classList.contains("as-modal")) {
+        closeRecordModal_();
       }
 
       currentPage = pageKey;
@@ -3612,8 +3502,7 @@
         dashboard: "Dashboard",
         "record-form": "บันทึกการรับยา",
         history: "ประวัติการบันทึก",
-        "med-search": "ค้นยอดจ่ายยา",
-        settings: "ตั้งค่าระบบ"
+        "med-search": "ค้นยอดจ่ายยา"
       };
       document.getElementById("topbar-title").textContent = titles[pageKey] || "";
     }
@@ -5575,260 +5464,6 @@
       return date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0") + "-" + String(date.getDate()).padStart(2, "0");
     }
 
-    // ================================================================
-    // ตั้งค่าระบบ: การยืนยันตัวตน (Token)
-    // ================================================================
-    function isSettingsSessionValid_() {
-      return !!settingsToken && Date.now() < settingsTokenExpiry;
-    }
-
-    function restoreSettingsSession_() {
-      try {
-        const raw = sessionStorage.getItem("settingsSession");
-        if (!raw) return;
-        const parsed = JSON.parse(raw);
-        if (parsed && parsed.token && parsed.expiry && Date.now() < parsed.expiry) {
-          settingsToken = parsed.token;
-          settingsTokenExpiry = parsed.expiry;
-        } else {
-          sessionStorage.removeItem("settingsSession");
-        }
-      } catch (e) {
-        sessionStorage.removeItem("settingsSession");
-      }
-    }
-
-    function persistSettingsSession_() {
-      sessionStorage.setItem("settingsSession", JSON.stringify({
-        token: settingsToken,
-        expiry: settingsTokenExpiry
-      }));
-    }
-
-    function clearSettingsSession_() {
-      settingsToken = null;
-      settingsTokenExpiry = 0;
-      sessionStorage.removeItem("settingsSession");
-    }
-
-    function onConfirmPassword_() {
-      const password = document.getElementById("input-admin-password").value;
-      if (!password) return;
-
-      const btn = document.getElementById("btn-confirm-password");
-      setButtonLoading_(btn, true);
-      document.getElementById("password-error").style.display = "none";
-
-      beginBusy_();
-      google.script.run
-        .withSuccessHandler(busyHandler_(function (res) {
-          setButtonLoading_(btn, false);
-          settingsToken = res.token;
-          settingsTokenExpiry = Date.now() + (res.expiresInSeconds * 1000) - 5000;
-          persistSettingsSession_();
-          document.getElementById("modal-password").classList.add("hidden");
-          currentPage = "settings";
-          showPage_("settings");
-          loadProtectedSettingsIntoForm_();
-        }))
-        .withFailureHandler(busyHandler_(function (err) {
-          setButtonLoading_(btn, false);
-          const errEl = document.getElementById("password-error");
-          errEl.textContent = errMsg_(err);
-          errEl.style.display = "block";
-        }))
-        .verifySettingsPassword(password);
-    }
-
-    function onLockSettings_() {
-      const token = settingsToken;
-      clearSettingsSession_();
-      goToPage_("dashboard");
-      showToast("ล็อกหน้าตั้งค่าเรียบร้อย", "success");
-      if (token) {
-        google.script.run
-          .withFailureHandler(function () {})
-          .logoutSettings(token);
-      }
-    }
-
-    // ================================================================
-    // ตั้งค่าระบบ: ฟอร์มและ Preview
-    // ================================================================
-    function buildColorGrid_() {
-      const grid = document.getElementById("color-grid");
-      grid.innerHTML = "";
-      COLOR_FIELD_DEFS.forEach(function (def) {
-        const wrap = document.createElement("div");
-        wrap.className = "color-field";
-        wrap.innerHTML =
-          '<label>' + def.label + '</label>' +
-          '<div class="color-row">' +
-            '<input type="color" id="color-picker-' + def.key + '">' +
-            '<input type="text" id="color-text-' + def.key + '" maxlength="7">' +
-          '</div>';
-        grid.appendChild(wrap);
-      });
-    }
-
-    function bindSettingsPreviewInputs_() {
-      ["set-sys-name", "set-welcome-msg", "set-logo-url"].forEach(function (id) {
-        document.getElementById(id).addEventListener("input", updateLivePreview_);
-      });
-
-      COLOR_FIELD_DEFS.forEach(function (def) {
-        const picker = document.getElementById("color-picker-" + def.key);
-        const text = document.getElementById("color-text-" + def.key);
-
-        picker.addEventListener("input", function () {
-          text.value = picker.value;
-          updateLivePreview_();
-        });
-        text.addEventListener("input", function () {
-          if (/^#([0-9A-Fa-f]{6})$/.test(text.value)) {
-            picker.value = text.value;
-            updateLivePreview_();
-          }
-        });
-      });
-    }
-
-    function setSettingsLoading_(isLoading) {
-      document.querySelectorAll("#section-settings .card").forEach(function (card) {
-        card.classList.toggle("is-loading", isLoading);
-      });
-    }
-
-    function loadProtectedSettingsIntoForm_() {
-      setSettingsLoading_(true);
-      beginBusy_();
-      google.script.run
-        .withSuccessHandler(busyHandler_(function (settings) {
-          setSettingsLoading_(false);
-          fillSettingsForm_(settings);
-        }))
-        .withFailureHandler(busyHandler_(function (err) {
-          setSettingsLoading_(false);
-          showToast("โหลดการตั้งค่าไม่สำเร็จ: " + errMsg_(err), "error");
-          if (String(err.message || err).indexOf("เซสชันหมดอายุ") !== -1) {
-            clearSettingsSession_();
-            goToPage_("settings");
-          }
-        }))
-        .getProtectedSettings(settingsToken);
-    }
-
-    function fillSettingsForm_(settings) {
-      document.getElementById("set-sys-name").value = settings.SYS_NAME || "";
-      document.getElementById("set-org-name").value = settings.ORG_NAME || "";
-      document.getElementById("set-logo-url").value = settings.LOGO_URL || "";
-      document.getElementById("set-welcome-msg").value = settings.WELCOME_MSG || "";
-      document.getElementById("set-footer-msg").value = settings.FOOTER_MSG || "";
-      document.getElementById("set-new-password").value = "";
-
-      COLOR_FIELD_DEFS.forEach(function (def) {
-        const value = settings[def.key] || "#000000";
-        document.getElementById("color-picker-" + def.key).value = value;
-        document.getElementById("color-text-" + def.key).value = value;
-      });
-
-      updateLivePreview_();
-    }
-
-    function updateLivePreview_() {
-      const theme = {}; // ประกาศก่อนใช้งานเสมอ เพื่อป้องกันการอ้างตัวแปรก่อนประกาศ
-      COLOR_FIELD_DEFS.forEach(function (def) {
-        theme[def.key] = document.getElementById("color-text-" + def.key).value;
-      });
-
-      const previewInner = document.getElementById("preview-inner");
-      if (theme.COLOR_SURFACE) previewInner.style.background = theme.COLOR_SURFACE;
-      if (theme.COLOR_TEXT) previewInner.style.color = theme.COLOR_TEXT;
-
-      const previewBtn = document.querySelector(".preview-btn");
-      if (theme.COLOR_PRIMARY) previewBtn.style.background = theme.COLOR_PRIMARY;
-
-      document.getElementById("preview-sys-name").textContent =
-        document.getElementById("set-sys-name").value || "ชื่อระบบ";
-      document.getElementById("preview-welcome").textContent =
-        document.getElementById("set-welcome-msg").value || "ข้อความต้อนรับ";
-
-      const logoUrl = document.getElementById("set-logo-url").value;
-      const previewLogo = document.getElementById("preview-logo");
-      if (logoUrl) {
-        previewLogo.src = logoUrl;
-        previewLogo.style.display = "block";
-        previewLogo.onerror = function () { previewLogo.style.display = "none"; };
-      } else {
-        previewLogo.style.display = "none";
-      }
-    }
-
-    function onSaveSettings_() {
-      if (!isSettingsSessionValid_()) {
-        showToast("เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่", "error");
-        goToPage_("settings");
-        return;
-      }
-
-      const input = {
-        SYS_NAME: document.getElementById("set-sys-name").value,
-        ORG_NAME: document.getElementById("set-org-name").value,
-        LOGO_URL: document.getElementById("set-logo-url").value,
-        WELCOME_MSG: document.getElementById("set-welcome-msg").value,
-        FOOTER_MSG: document.getElementById("set-footer-msg").value
-      };
-
-      COLOR_FIELD_DEFS.forEach(function (def) {
-        input[def.key] = document.getElementById("color-text-" + def.key).value;
-      });
-
-      const newPassword = document.getElementById("set-new-password").value;
-      if (newPassword) {
-        input.newPassword = newPassword;
-      }
-
-      const btn = document.getElementById("btn-save-settings");
-      setButtonLoading_(btn, true);
-      beginBusy_();
-
-      google.script.run
-        .withSuccessHandler(busyHandler_(function (res) {
-          setButtonLoading_(btn, false);
-          showToast(res.message || "บันทึกการตั้งค่าสำเร็จ", "success");
-          publicSettings = res.settings || publicSettings;
-          applyPublicSettings_(publicSettings);
-          document.getElementById("set-new-password").value = "";
-        }))
-        .withFailureHandler(busyHandler_(function (err) {
-          setButtonLoading_(btn, false);
-          showToast("บันทึกการตั้งค่าไม่สำเร็จ: " + errMsg_(err), "error");
-        }))
-        .saveSystemSettings(settingsToken, input);
-    }
-
-    function onResetColors_() {
-      if (!isSettingsSessionValid_()) {
-        showToast("เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่", "error");
-        goToPage_("settings");
-        return;
-      }
-
-      const resetBtn = document.getElementById("btn-reset-colors");
-      setButtonLoading_(resetBtn, true);
-      beginBusy_();
-      google.script.run
-        .withSuccessHandler(busyHandler_(function (res) {
-          setButtonLoading_(resetBtn, false);
-          fillSettingsForm_(res.settings);
-          showToast("คืนค่าสีเริ่มต้นเรียบร้อย (ยังไม่ได้บันทึกถาวร)", "success");
-        }))
-        .withFailureHandler(busyHandler_(function (err) {
-          setButtonLoading_(resetBtn, false);
-          showToast("คืนค่าสีเริ่มต้นไม่สำเร็จ: " + errMsg_(err), "error");
-        }))
-        .resetDefaultColors(settingsToken);
-    }
 
     // ================================================================
     // UTILITIES (ฝั่ง Client)
