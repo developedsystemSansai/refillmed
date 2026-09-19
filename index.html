@@ -553,8 +553,16 @@
 
     .grid-2 {
       display: grid;
-      grid-template-columns: 1.2fr 1fr;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
       gap: 16px;
+    }
+
+    /* กันเนื้อหาภายในการ์ด (กราฟ/ตาราง) ที่มีความกว้างตามธรรมชาติมาก ๆ ดันให้คอลัมน์กว้าง
+       เกินพื้นที่จอ จนส่วนขวาสุดโดนขอบจอบัง — ให้คอลัมน์ยุบแคบลงได้ตามพื้นที่จริงเสมอ
+       ส่วนเนื้อหาข้างในที่กว้างเกิน จะจัดการล้นด้วยกลไกของตัวเอง (เช่น SVG width:100%,
+       .table-wrap ที่มี overflow-x:auto อยู่แล้ว) แทนที่จะดันทั้งกริดให้ล้นจอ */
+    .grid-2 > * {
+      min-width: 0;
     }
 
     @media (max-width: 900px) {
@@ -948,7 +956,7 @@
        ============================================================ */
     .form-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
       gap: 16px;
     }
 
