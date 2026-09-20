@@ -55,10 +55,6 @@
       background: var(--background);
       color: var(--text);
       -webkit-tap-highlight-color: transparent;
-      /* กันสกอลล์แนวนอนของทั้งหน้าเว็บโดยไม่ตั้งใจ (เช่น จากองค์ประกอบที่กว้างเกิน viewport
-         ชั่วคราวระหว่างโหลด) — ตารางที่ต้องเลื่อนแนวนอนจริง ๆ (.table-wrap ฯลฯ) ยังเลื่อนได้ปกติ
-         เพราะเป็น scroll container ของตัวเองแยกต่างหาก ไม่ได้พึ่งการสกอลล์ของ body */
-      overflow-x: hidden;
       width: 100%;
       /* ข้อความภาษาไทยยาว ๆ ไม่มีช่องว่างระหว่างคำแบบภาษาอังกฤษ บางกรณีเบราว์เซอร์/แพลตฟอร์ม
          อาจหาจุดตัดคำไม่เจอแล้วปล่อยให้ข้อความยาวล้นกล่องออกไปด้านขวาแทนที่จะขึ้นบรรทัดใหม่
@@ -459,6 +455,11 @@
       width: 100%;
       margin: 0 auto;
       box-sizing: border-box;
+      /* กันสกอลล์แนวนอนของเนื้อหาโดยไม่ตั้งใจ — ใส่ไว้ที่ .content (ซึ่งเป็น "พี่น้อง" ของ
+         .topbar ไม่ใช่ "บรรพบุรุษ" ของมัน) แทนที่จะใส่ไว้ที่ body/html เหมือนเดิม เพราะ Safari
+         มีบั๊กที่ทำให้ position:sticky (เช่น .topbar) เพี้ยน/แสดงผลทับซ้อนกันเมื่อ body หรือ html
+         มี overflow-x:hidden อยู่ — ย้ายมาไว้ตรงนี้ได้ผลลัพธ์เดียวกันโดยไม่กระทบ .topbar เลย */
+      overflow-x: hidden;
     }
 
     .page-section {
@@ -3486,6 +3487,18 @@
       if (pageKey === "dashboard") loadDashboard_();
       if (pageKey === "history") loadHistory_();
       if (pageKey === "med-search") loadMedTotals_();
+      // โฟกัสช่องแรกของฟอร์มบันทึกให้อัตโนมัติ ผู้ใช้พิมพ์ต่อได้ทันทีโดยไม่ต้องแตะช่องกรอกก่อน
+      // ช่วยให้ลงข้อมูลติดต่อกันหลายรายการได้เร็วขึ้น (ไม่นับกรณีกำลังแก้ไขรายการเดิมอยู่)
+      if (pageKey === "record-form" && !editingRecordId) focusFirstRecordField_();
+    }
+
+    function focusFirstRecordField_() {
+      // หน่วงเล็กน้อยให้ browser สลับหน้า/เลื่อน scroll เสร็จก่อน ไม่เช่นนั้นบางเบราว์เซอร์
+      // (โดยเฉพาะ mobile Safari) จะไม่ยอม focus ช่องกรอกที่เพิ่งเปลี่ยนมาเป็น visible
+      setTimeout(function () {
+        const el = document.getElementById("field-queue");
+        if (el) el.focus({ preventScroll: true });
+      }, 80);
     }
 
     function showPage_(pageKey) {
@@ -5078,10 +5091,16 @@
         formData.existingPhotoUrls = existingPhotoUrls.slice();
       }
 
-      // แทนที่จะบันทึกทันที ให้เปิดหน้าสรุปข้อมูลก่อนเสมอ พร้อมคำเตือนถ้าวันที่ค้าง
-      // เป็นวันเดียวกับวันที่กำลังบันทึก (เผื่อผู้ใช้ลืมเปลี่ยนวันที่) แล้วค่อยรอผู้ใช้
-      // กดยืนยันบันทึกอีกครั้งในหน้าสรุป
-      openConfirmSaveModal_(formData);
+      // เดิม: ทุกครั้งต้องเปิดหน้าสรุปแล้วกดยืนยันซ้ำอีกครั้งเสมอ ทำให้ลงข้อมูลช้าลงโดยไม่จำเป็น
+      // ในกรณีปกติที่ไม่มีอะไรต้องเตือน — ปรับใหม่: เปิดหน้าสรุปเฉพาะตอนที่ "วันที่ค้าง" ตรงกับ
+      // วันนี้พอดี (กรณีเสี่ยงลืมเปลี่ยนวันที่) เท่านั้น ส่วนกรณีอื่นบันทึกทันทีเพื่อความรวดเร็ว
+      pendingSaveFormData_ = formData;
+      const todayIso = formatDateThaiISO_(new Date());
+      if (formData.pendingDate === todayIso) {
+        openConfirmSaveModal_(formData);
+      } else {
+        performConfirmedSave_();
+      }
     }
 
     // ---------------- หน้าสรุปข้อมูลก่อนบันทึก (ยืนยันก่อนบันทึกจริง) ----------------
@@ -5173,8 +5192,10 @@
           // (ไม่เด้งเปลี่ยนหน้า)
           closeRecordModal_();
           loadHistory_();
-        } else if (currentPage === "dashboard") {
-          loadDashboard_();
+        } else {
+          if (currentPage === "dashboard") loadDashboard_();
+          // บันทึกรายการใหม่สำเร็จ: โฟกัสช่องแรกอัตโนมัติ พิมพ์รายการถัดไปต่อได้ทันที
+          if (currentPage === "record-form") focusFirstRecordField_();
         }
       });
       const onFailure = busyHandler_(function (err) {
