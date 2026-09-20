@@ -2667,6 +2667,16 @@
               <div class="form-field full hidden" id="field-shortage-wrap">
                 <label>ขาดเหลืออะไร <span class="req">*</span></label>
                 <textarea id="field-shortage-detail" maxlength="500" placeholder="ระบุรายการยาหรือจำนวนที่ยังขาด"></textarea>
+                <div class="choice-group" id="group-shortage-options" style="margin-top:10px;">
+                  <label class="choice-pill">
+                    <input type="checkbox" name="shortageOption" value="รอยาได้">
+                    <span>รอยาได้</span>
+                  </label>
+                  <label class="choice-pill">
+                    <input type="checkbox" name="shortageOption" value="จัดส่งทางไปรษณีย์">
+                    <span>จัดส่งทางไปรษณีย์</span>
+                  </label>
+                </div>
               </div>
 
               <div class="form-field full">
@@ -3352,6 +3362,9 @@
         });
       });
       document.querySelectorAll('input[name="receiver"]').forEach(function (el) {
+        el.addEventListener("change", updatePillStates_);
+      });
+      document.querySelectorAll('input[name="shortageOption"]').forEach(function (el) {
         el.addEventListener("change", updatePillStates_);
       });
 
@@ -4399,6 +4412,7 @@
       } else {
         wrap.classList.add("hidden");
         document.getElementById("field-shortage-detail").value = "";
+        document.querySelectorAll('input[name="shortageOption"]').forEach(function (el) { el.checked = false; });
       }
     }
 
@@ -5068,6 +5082,7 @@
       const pendingDate = document.getElementById("field-pendingdate").value;
       const statusInput = document.querySelector('input[name="status"]:checked');
       const shortageDetail = document.getElementById("field-shortage-detail").value.trim();
+      const shortageOptionInputs = document.querySelectorAll('input[name="shortageOption"]:checked');
       const receiverInputs = document.querySelectorAll('input[name="receiver"]:checked');
       const note = document.getElementById("field-note").value.trim();
 
@@ -5108,6 +5123,7 @@
         pendingDate: pendingDate,
         status: statusInput.value,
         shortageDetail: shortageDetail,
+        shortageOptions: Array.prototype.map.call(shortageOptionInputs, function (el) { return el.value; }),
         receiverTypes: Array.prototype.map.call(receiverInputs, function (el) { return el.value; }),
         note: note,
         recordedBy: currentRecorderName_
@@ -5177,11 +5193,16 @@
         ["HN", formData.hn],
         ["รายการยา", formData.medItems],
         ["วันที่ค้าง", formatDateDMY_(formData.pendingDate)],
-        ["จำนวนที่ได้รับ", formData.status + (formData.status === "ไม่ครบ" && formData.shortageDetail ? (" (ขาด: " + formData.shortageDetail + ")") : "")],
+        ["จำนวนที่ได้รับ", formData.status + (formData.status === "ไม่ครบ" && formData.shortageDetail ? (" (ขาด: " + formData.shortageDetail + ")") : "")]
+      ];
+      if (formData.status === "ไม่ครบ" && formData.shortageOptions && formData.shortageOptions.length) {
+        rows.push(["แนวทางกรณียาขาด", formData.shortageOptions.join(", ")]);
+      }
+      rows.push(
         ["ผู้มารับ", formData.receiverTypes.join(", ") || "-"],
         ["หมายเหตุ", formData.note || "-"],
         ["รูปภาพแนบ", photoCount ? (photoCount + " รูป") : "ไม่มี"]
-      ];
+      );
 
       document.getElementById("confirm-save-summary").innerHTML = rows.map(function (r) {
         return (
@@ -5299,6 +5320,10 @@
       if (statusInput) statusInput.checked = true;
       toggleShortageField_();
       document.getElementById("field-shortage-detail").value = record.shortageDetail || "";
+      const shortageOptionValues = String(record.shortageOptions || "").split(",").map(function (s) { return s.trim(); }).filter(Boolean);
+      document.querySelectorAll('input[name="shortageOption"]').forEach(function (el) {
+        el.checked = shortageOptionValues.indexOf(el.value) !== -1;
+      });
 
       const receiverValues = String(record.receiverType || "").split(",").map(function (s) { return s.trim(); });
       document.querySelectorAll('input[name="receiver"]').forEach(function (el) {
@@ -5405,6 +5430,9 @@
         const badgeClass = statusBadgeClass_(r.status);
         const photoCell = buildPhotoThumbStripHtml_(r.photoUrl, "history-thumb", "history-thumb-placeholder");
         const nameCell = escapeHtml_((r.prefix || "") + r.fullName);
+        const shortageCellText = r.shortageDetail
+          ? (r.shortageDetail + (r.shortageOptions ? " (" + r.shortageOptions + ")" : ""))
+          : "-";
 
         tr.innerHTML =
           '<td>' + formatThaiDateTime_(r.timestamp) + '</td>' +
@@ -5414,7 +5442,7 @@
           '<td>' + escapeHtml_(r.medItems) + '</td>' +
           '<td>' + formatThaiDateShort_(r.pendingDate) + '</td>' +
           '<td><span class="badge ' + badgeClass + '">' + escapeHtml_(r.status) + '</span></td>' +
-          '<td>' + escapeHtml_(r.shortageDetail || "-") + '</td>' +
+          '<td>' + escapeHtml_(shortageCellText) + '</td>' +
           '<td>' + escapeHtml_(r.receiverType) + '</td>' +
           '<td>' + photoCell + '</td>' +
           '<td>' + escapeHtml_(r.note || "-") + '</td>' +
@@ -5478,7 +5506,7 @@
 
       const headers = [
         "วันเวลาบันทึก", "หมายเลขคิว", "คำนำหน้า", "ชื่อ-สกุล", "HN", "รายการยา",
-        "วันที่ค้าง", "สถานะ", "ขาดเหลือ", "ผู้มารับ", "หมายเหตุ"
+        "วันที่ค้าง", "สถานะ", "ขาดเหลือ", "แนวทางกรณียาขาด", "ผู้มารับ", "หมายเหตุ"
       ];
 
       const csvRows = [headers.map(csvCell_).join(",")];
@@ -5493,6 +5521,7 @@
           formatThaiDateShort_(r.pendingDate),
           r.status || "",
           r.shortageDetail || "",
+          r.shortageOptions || "",
           r.receiverType || "",
           r.note || ""
         ].map(csvCell_).join(","));
