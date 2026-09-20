@@ -1049,6 +1049,7 @@
 
     .form-field input[type="text"],
     .form-field input[type="date"],
+    .form-field input[type="tel"],
     .form-field textarea,
     .form-field input[type="password"] {
       border: 1px solid var(--border);
@@ -1445,6 +1446,16 @@
     .med-unit-select:focus {
       outline: none;
       border-color: var(--primary);
+    }
+
+    /* แถวยาที่ยังกรอก "จำนวน" หรือ "ขนาด" ไม่ครบ (โชว์หลังพยายามบันทึกแล้วไม่ผ่าน) */
+    .med-selected-row.row-error {
+      border-color: var(--danger);
+      background: rgba(220, 38, 38, 0.06);
+    }
+    .med-selected-row.row-error .med-qty-input,
+    .med-selected-row.row-error .med-size-input {
+      border-color: var(--danger);
     }
 
     .med-size-wrap {
@@ -2677,6 +2688,10 @@
                     <span>จัดส่งทางไปรษณีย์</span>
                   </label>
                 </div>
+                <div style="margin-top:14px;">
+                  <label style="font-size:13.5px; font-weight:600; display:block; margin-bottom:6px;">เบอร์โทรติดต่อผู้ป่วย</label>
+                  <input type="tel" id="field-shortage-phone" maxlength="20" inputmode="tel" autocomplete="off" placeholder="เช่น 081-234-5678">
+                </div>
               </div>
 
               <div class="form-field full">
@@ -2785,6 +2800,7 @@
                     <th>วันที่ค้าง</th>
                     <th>สถานะ</th>
                     <th>ขาดเหลือ</th>
+                    <th>เบอร์โทรติดต่อ</th>
                     <th>ผู้มารับ</th>
                     <th>รูปภาพ</th>
                     <th>หมายเหตุ</th>
@@ -3005,6 +3021,9 @@
     let existingPhotoUrls = [];      // รูปเดิมของรายการที่กำลังแก้ไข (ที่ยังไม่ถูกลบออก)
     const MAX_PHOTOS_CLIENT = 10;    // จำกัดจำนวนรูปสูงสุดต่อ 1 รายการ (ต้องตรงกับฝั่ง Code.gs)
     let selectedMeds = [];           // รายการยาที่เลือกไว้ [{name, qty, size, fixedSize}]
+    // true หลังจากพยายามบันทึกแล้วพบว่ามีรายการยากรอก "จำนวน"/"ขนาด" ไม่ครบ —
+    // ใช้โชว์กรอบสีแดงเตือนเฉพาะแถวที่ยังไม่ครบ แบบเรียลไทม์ขณะพิมพ์แก้ไข
+    let showMedRowErrors_ = false;
     let medPool = [];                // รายชื่อยา+ขนาดทั้งหมดจากบัญชียา (MED_CATEGORIES) สำหรับค้นหา
     let editingRecordId = null;      // null = โหมดเพิ่มใหม่ / มีค่า = โหมดแก้ไข
     let historyRecordsCache = {};    // เก็บ record ล่าสุดที่โหลดไว้ ใช้ตอนกดแก้ไข
@@ -4413,6 +4432,7 @@
         wrap.classList.add("hidden");
         document.getElementById("field-shortage-detail").value = "";
         document.querySelectorAll('input[name="shortageOption"]').forEach(function (el) { el.checked = false; });
+        document.getElementById("field-shortage-phone").value = "";
       }
     }
 
@@ -4553,6 +4573,33 @@
         '</select>';
     }
 
+    // ยารายการหนึ่งจะถือว่า "ครบ" ก็ต่อเมื่อมีทั้ง "จำนวน" (ตัวเลขมากกว่า 0) และ "ขนาด"
+    // (ไม่ว่าง) เพื่อบังคับให้ทุกรายการยาที่บันทึกออกมาอยู่ในรูปแบบเดียวกันเสมอ:
+    // "ชื่อยา x จำนวน หน่วย | ขนาด: ขนาดยา" (เช่น "Carvedilol x 20 เม็ด | ขนาด: 12.5 mg")
+    // ซึ่งจำเป็นสำหรับหน้า "ค้นยอดจ่ายยา" ที่ต้องอ่านจำนวน/ขนาดกลับไปสรุปยอดให้ถูกต้อง
+    function isMedItemComplete_(item) {
+      const qty = parseInt(item.qty, 10);
+      const hasQty = !!qty && qty > 0;
+      const hasSize = String(item.size || "").trim().length > 0;
+      return hasQty && hasSize;
+    }
+
+    function findIncompleteMeds_() {
+      return selectedMeds.filter(function (item) { return !isMedItemComplete_(item); });
+    }
+
+    // อัปเดตกรอบสีแดงของแถวเดียวแบบเรียลไทม์ขณะพิมพ์ (ไม่ re-render ทั้งลิสต์
+    // เพื่อไม่ให้ผู้ใช้หลุดโฟกัสจากช่องที่กำลังพิมพ์อยู่) ใช้เฉพาะตอนที่เคยกดบันทึก
+    // แล้วไม่ผ่านมาก่อน (showMedRowErrors_ = true) เท่านั้น
+    function updateMedRowErrorState_(row, item) {
+      if (!showMedRowErrors_) return;
+      row.classList.toggle("row-error", !isMedItemComplete_(item));
+    }
+
+    function setMedSelectionErrorText_(msg) {
+      document.getElementById("med-selection-error").textContent = msg;
+    }
+
     // แสดงรายการยาที่เลือกไว้ด้านล่าง dropdown พร้อมช่องคีย์ "จำนวน" ต่อรายการ
     // ถ้าเป็นยาจากบัญชียา (fixedSize) จะโชว์ "ขนาด" เป็น badge พร้อมปุ่มดินสอ — ต้องกดปุ่ม
     // ดินสอก่อนถึงจะสลับเป็นช่องกรอกแก้ไขได้ (ให้เห็นชัดเจนว่าแก้ไขได้ ไม่ใช่แค่ข้อความนิ่งๆ)
@@ -4564,7 +4611,7 @@
 
       selectedMeds.forEach(function (item) {
         const row = document.createElement("div");
-        row.className = "med-selected-row";
+        row.className = "med-selected-row" + ((showMedRowErrors_ && !isMedItemComplete_(item)) ? " row-error" : "");
 
         const sizeControlHtml = item.fixedSize
           ? '<span class="med-size-wrap">' +
@@ -4595,11 +4642,13 @@
 
         row.querySelector(".med-qty-input").addEventListener("input", function (e) {
           item.qty = e.target.value;
+          updateMedRowErrorState_(row, item);
         });
 
         const sizeInput = row.querySelector(".med-size-input");
         sizeInput.addEventListener("input", function (e) {
           item.size = e.target.value;
+          updateMedRowErrorState_(row, item);
         });
 
         if (item.fixedSize) {
@@ -5083,6 +5132,7 @@
       const statusInput = document.querySelector('input[name="status"]:checked');
       const shortageDetail = document.getElementById("field-shortage-detail").value.trim();
       const shortageOptionInputs = document.querySelectorAll('input[name="shortageOption"]:checked');
+      const shortagePhone = document.getElementById("field-shortage-phone").value.trim();
       const receiverInputs = document.querySelectorAll('input[name="receiver"]:checked');
       const note = document.getElementById("field-note").value.trim();
 
@@ -5097,8 +5147,20 @@
         return;
       }
       if (medItemsList.length === 0) {
+        setMedSelectionErrorText_("กรุณาเลือกหรือระบุรายการยาอย่างน้อย 1 รายการ");
         document.getElementById("med-selection-error").style.display = "block";
         showToast("กรุณาเลือกหรือระบุรายการยาอย่างน้อย 1 รายการ", "error");
+        return;
+      }
+      const incompleteMeds = findIncompleteMeds_();
+      if (incompleteMeds.length > 0) {
+        showMedRowErrors_ = true;
+        renderSelectedMedList_();
+        setMedSelectionErrorText_(
+          "กรุณากรอก \"จำนวน\" และ \"ขนาด\" ให้ครบทุกรายการยา (เช่น Carvedilol x 20 เม็ด | ขนาด: 12.5 mg) — แถวที่ยังไม่ครบขึ้นกรอบสีแดงไว้ให้แล้ว"
+        );
+        document.getElementById("med-selection-error").style.display = "block";
+        showToast("กรุณากรอกจำนวนและขนาดยาให้ครบทุกรายการยา", "error");
         return;
       }
       if (!statusInput) {
@@ -5124,6 +5186,7 @@
         status: statusInput.value,
         shortageDetail: shortageDetail,
         shortageOptions: Array.prototype.map.call(shortageOptionInputs, function (el) { return el.value; }),
+        phone: shortagePhone,
         receiverTypes: Array.prototype.map.call(receiverInputs, function (el) { return el.value; }),
         note: note,
         recordedBy: currentRecorderName_
@@ -5197,6 +5260,9 @@
       ];
       if (formData.status === "ไม่ครบ" && formData.shortageOptions && formData.shortageOptions.length) {
         rows.push(["แนวทางกรณียาขาด", formData.shortageOptions.join(", ")]);
+      }
+      if (formData.status === "ไม่ครบ" && formData.phone) {
+        rows.push(["เบอร์โทรติดต่อ", formData.phone]);
       }
       rows.push(
         ["ผู้มารับ", formData.receiverTypes.join(", ") || "-"],
@@ -5294,6 +5360,7 @@
       existingPhotoUrls = [];
       renderPhotoThumbs_();
       selectedMeds = [];
+      showMedRowErrors_ = false;
       renderSelectedMedList_();
       toggleShortageField_();
       updatePillStates_();
@@ -5301,6 +5368,7 @@
 
     function enterEditMode_(record) {
       editingRecordId = record.id;
+      showMedRowErrors_ = false;
 
       document.getElementById("edit-mode-banner").style.display = "block";
       document.getElementById("edit-mode-id").textContent = record.id;
@@ -5324,6 +5392,7 @@
       document.querySelectorAll('input[name="shortageOption"]').forEach(function (el) {
         el.checked = shortageOptionValues.indexOf(el.value) !== -1;
       });
+      document.getElementById("field-shortage-phone").value = record.phone || "";
 
       const receiverValues = String(record.receiverType || "").split(",").map(function (s) { return s.trim(); });
       document.querySelectorAll('input[name="receiver"]').forEach(function (el) {
@@ -5443,6 +5512,7 @@
           '<td>' + formatThaiDateShort_(r.pendingDate) + '</td>' +
           '<td><span class="badge ' + badgeClass + '">' + escapeHtml_(r.status) + '</span></td>' +
           '<td>' + escapeHtml_(shortageCellText) + '</td>' +
+          '<td>' + escapeHtml_(r.phone || "-") + '</td>' +
           '<td>' + escapeHtml_(r.receiverType) + '</td>' +
           '<td>' + photoCell + '</td>' +
           '<td>' + escapeHtml_(r.note || "-") + '</td>' +
@@ -5506,7 +5576,7 @@
 
       const headers = [
         "วันเวลาบันทึก", "หมายเลขคิว", "คำนำหน้า", "ชื่อ-สกุล", "HN", "รายการยา",
-        "วันที่ค้าง", "สถานะ", "ขาดเหลือ", "แนวทางกรณียาขาด", "ผู้มารับ", "หมายเหตุ"
+        "วันที่ค้าง", "สถานะ", "ขาดเหลือ", "แนวทางกรณียาขาด", "เบอร์โทรศัพท์", "ผู้มารับ", "หมายเหตุ"
       ];
 
       const csvRows = [headers.map(csvCell_).join(",")];
@@ -5522,6 +5592,7 @@
           r.status || "",
           r.shortageDetail || "",
           r.shortageOptions || "",
+          r.phone || "",
           r.receiverType || "",
           r.note || ""
         ].map(csvCell_).join(","));
