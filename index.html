@@ -2052,7 +2052,9 @@
         grid-template-columns: 1fr;
       }
       .content {
-        padding: 16px;
+        padding-top: 16px;
+        padding-left: calc(16px + var(--safe-left));
+        padding-right: calc(16px + var(--safe-right));
       }
       .card {
         padding: 16px;
@@ -2172,7 +2174,9 @@
        ============================================================ */
     @media (max-width: 380px) {
       .content {
-        padding: 12px;
+        padding-top: 12px;
+        padding-left: calc(12px + var(--safe-left));
+        padding-right: calc(12px + var(--safe-right));
       }
       .card {
         padding: 12px;
@@ -3750,11 +3754,19 @@
     function renderTrendChart_(trend) {
       const container = document.getElementById("trend-chart");
       if (!trend || trend.length === 0) {
+        container.style.overflowX = "";
         container.innerHTML = emptyStateHtml_("show_chart", "ยังไม่มีข้อมูลในช่วงที่เลือก");
         return;
       }
 
-      const w = Math.max(560, trend.length * 70), h = 230, padL = 34, padR = 14, padT = 14, padB = 34;
+      // เดิมกราฟใช้ viewBox กว้างคงที่ (อิงจำนวนแท่ง แต่ขั้นต่ำ 560 หน่วยเสมอ) แล้วบีบ scale
+      // ลงให้พอดีความกว้างจอ ทำให้ตัวหนังสือ/รายละเอียดเล็กลงตามไปด้วยจนอ่านไม่ออกบนมือถือ
+      // (viewBox กว้างกว่าจอจริงมาก) — แก้ใหม่: ให้ viewBox กว้างเท่าพื้นที่จริงที่มี (ไม่บีบ
+      // scale ตัวหนังสือ) เว้นแต่ข้อมูลมีจำนวนมากจนต้องการพื้นที่มากกว่านั้นจริง ๆ ถึงจะให้
+      // กราฟกว้างเกินจอแล้วเลื่อนดูแนวนอนได้เฉพาะในการ์ดกราฟเอง (ตัวหนังสือยังคมชัดขนาดเดิม)
+      const containerWidth = container.clientWidth || 320;
+      const naturalWidth = trend.length * 60;
+      const w = Math.max(containerWidth, naturalWidth), h = 230, padL = 34, padR = 14, padT = 14, padB = 34;
       const innerW = w - padL - padR, innerH = h - padT - padB;
       const maxVal = Math.max.apply(null, trend.map(function (d) { return d.complete + d.incomplete; }).concat([4]));
       const barSlot = innerW / trend.length;
@@ -3790,8 +3802,12 @@
         return '<circle cx="' + parts[0] + '" cy="' + parts[1] + '" r="3.5" fill="var(--primary)" stroke="#fff" stroke-width="1.5"/>';
       }).join("");
 
+      // width/height เป็นค่าจริง (ไม่ใช่ width:100%) เพื่อไม่ให้เบราว์เซอร์ scale ตัวหนังสือ
+      // เล็กลง — ถ้า w กว้างกว่าการ์ด จะเกิด scroll แนวนอนเฉพาะในกรอบกราฟนี้เท่านั้น
+      container.style.overflowX = "auto";
+      container.style.webkitOverflowScrolling = "touch";
       container.innerHTML =
-        '<svg viewBox="0 0 ' + w + ' ' + h + '" style="width:100%;height:230px;" preserveAspectRatio="xMidYMid meet">' +
+        '<svg viewBox="0 0 ' + w + ' ' + h + '" width="' + w + '" height="' + h + '" style="display:block;">' +
           gridLines + bars +
           '<path d="' + linePath + '" fill="none" stroke="var(--primary)" stroke-width="2.2"/>' +
           dots +
@@ -3818,13 +3834,20 @@
       const overall = hourlyTrend && hourlyTrend.overall ? hourlyTrend.overall : [];
 
       if (!hours.length || !days.length || overall.every(function (c) { return c === 0; })) {
+        container.style.overflowX = "";
         container.innerHTML = emptyStateHtml_("schedule", "ยังไม่มีข้อมูลในช่วงที่เลือก");
         if (legendEl) legendEl.innerHTML = "";
         if (hintEl) hintEl.innerHTML = "";
         return;
       }
 
-      const w = Math.max(560, hours.length * 56), h = 230, padL = 34, padR = 14, padT = 16, padB = 34;
+      // เดิมกว้างคงที่ขั้นต่ำ 560 (หรือ 56/ชม. ถ้ามากกว่า) แล้วบีบ scale ลงพอดีจอ ทำให้ตัวหนังสือ
+      // เล็กมากบนมือถือ (กราฟนี้มีถึง 13 ชั่วโมง ยิ่งบีบหนักกว่ากราฟอื่น) — แก้แบบเดียวกับ
+      // renderTrendChart_: ใช้ความกว้างจริงของพื้นที่ ไม่บีบตัวหนังสือ ถ้าข้อมูลเยอะเกินพอดี
+      // ให้เลื่อนดูแนวนอนในกรอบกราฟแทน
+      const containerWidth = container.clientWidth || 320;
+      const naturalWidth = hours.length * 52;
+      const w = Math.max(containerWidth, naturalWidth), h = 230, padL = 34, padR = 14, padT = 16, padB = 34;
       const innerW = w - padL - padR, innerH = h - padT - padB;
       const maxVal = Math.max.apply(null,
         days.reduce(function (acc, day) { return acc.concat(day.counts); }, []).concat([4])
@@ -3864,8 +3887,10 @@
           '</g>';
       });
 
+      container.style.overflowX = "auto";
+      container.style.webkitOverflowScrolling = "touch";
       container.innerHTML =
-        '<svg viewBox="0 0 ' + w + ' ' + h + '" style="width:100%;height:230px;" preserveAspectRatio="xMidYMid meet">' +
+        '<svg viewBox="0 0 ' + w + ' ' + h + '" width="' + w + '" height="' + h + '" style="display:block;">' +
           gridLines + dayLines + axisLabels +
         '</svg>';
 
@@ -5172,16 +5197,26 @@
       if (!pendingSaveFormData_) return;
       const formData = pendingSaveFormData_;
 
+      // สำคัญ: ต้องใส่สถานะ loading ให้ปุ่ม "บันทึกข้อมูล" ตัวจริงที่ผู้ใช้เห็น/กดด้วยเสมอ
+      // ไม่ใช่แค่ปุ่มยืนยันในหน้าต่างสรุป เพราะตอนนี้กรณีส่วนใหญ่จะข้ามหน้าต่างสรุปไปเลย
+      // (ดู onSubmitRecord_) ทำให้ผู้ใช้เห็นแต่ปุ่ม "บันทึกข้อมูล" เท่านั้น — ถ้าไม่ใส่สถานะ
+      // ตรงนี้ด้วย ผู้ใช้จะไม่เห็นการตอบสนองใด ๆ เลยระหว่างรอเซิร์ฟเวอร์ และอาจกดซ้ำจนบันทึกซ้ำ
       const btn = document.getElementById("btn-confirm-save-yes");
+      const submitBtn = document.getElementById("btn-submit-record");
       setButtonLoading_(btn, true);
+      setButtonLoading_(submitBtn, true);
       // ปิดปุ่ม "ยกเลิก" ด้วยระหว่างกำลังบันทึก เพื่อกันผู้ใช้ปิดหน้าต่างขณะข้อมูลยังส่งไม่เสร็จ
       const cancelBtn = document.getElementById("btn-confirm-save-back");
       if (cancelBtn) cancelBtn.disabled = true;
+      const clearBtn = document.getElementById("btn-clear-form");
+      if (clearBtn) clearBtn.disabled = true;
       beginBusy_();
 
       const onSuccess = busyHandler_(function (res) {
         setButtonLoading_(btn, false);
+        setButtonLoading_(submitBtn, false);
         if (cancelBtn) cancelBtn.disabled = false;
+        if (clearBtn) clearBtn.disabled = false;
         closeConfirmSaveModal_();
         showToast(res.message || "บันทึกข้อมูลสำเร็จ", "success");
         const wasEditing = !!editingRecordId;
@@ -5200,7 +5235,9 @@
       });
       const onFailure = busyHandler_(function (err) {
         setButtonLoading_(btn, false);
+        setButtonLoading_(submitBtn, false);
         if (cancelBtn) cancelBtn.disabled = false;
+        if (clearBtn) clearBtn.disabled = false;
         showToast("บันทึกไม่สำเร็จ: " + errMsg_(err), "error");
       });
 
