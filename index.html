@@ -2356,6 +2356,10 @@
           <span class="material-icons-outlined">query_stats</span>
           <span>ค้นยอดจ่ายยา</span>
         </div>
+        <div class="sidebar-nav-item" data-page="line-notify">
+          <span class="material-icons-outlined">notifications_active</span>
+          <span>แจ้งเตือน LINE</span>
+        </div>
       </nav>
 
       <div class="sidebar-footer">
@@ -2384,6 +2388,10 @@
       <div class="bottom-nav-item sidebar-nav-item" data-page="med-search">
         <span class="material-icons-outlined">query_stats</span>
         <span>ค้นยา</span>
+      </div>
+      <div class="bottom-nav-item sidebar-nav-item" data-page="line-notify">
+        <span class="material-icons-outlined">notifications_active</span>
+        <span>LINE</span>
       </div>
     </nav>
 
@@ -2886,6 +2894,64 @@
           </div>
         </section>
 
+        <!-- ================= หน้า: แจ้งเตือน LINE ================= -->
+        <section class="page-section" id="section-line-notify">
+          <div class="section-header">
+            <h2>แจ้งเตือน LINE</h2>
+          </div>
+
+          <div class="card">
+            <p class="card-sub" style="margin-top:0;">
+              ระบบจะส่งสรุปข้อมูลจุดรับยาค้าง <strong>ประจำวัน</strong> พร้อมรายชื่อเคสที่ได้รับยา
+              <strong>ไม่ครบ</strong> ไปยัง LINE ของแอดมินที่ลงทะเบียนไว้โดยอัตโนมัติทุกวัน
+              เวลา <strong>16:00 น.</strong> หรือกดปุ่มด้านล่างเพื่อส่งทันทีได้ทุกเมื่อ
+              (เคสได้ยาไม่ครบแต่ละรายการมีการแจ้งเตือนทันทีอยู่แล้วตั้งแต่ตอนบันทึกข้อมูล
+              สรุปนี้คือการรวบยอดอีกครั้งตอนเย็น)
+            </p>
+
+            <div id="line-summary-admin-status" class="card-sub" style="margin-bottom:14px;">
+              <span class="skeleton" style="width:70%; height:14px;"></span>
+            </div>
+
+            <div id="line-summary-stats-loading">
+              <div style="display:flex; flex-wrap:wrap; gap:12px; margin-bottom:14px;">
+                <span class="skeleton" style="flex:1; min-width:120px; height:64px; border-radius:12px;"></span>
+                <span class="skeleton" style="flex:1; min-width:120px; height:64px; border-radius:12px;"></span>
+                <span class="skeleton" style="flex:1; min-width:120px; height:64px; border-radius:12px;"></span>
+                <span class="skeleton" style="flex:1; min-width:120px; height:64px; border-radius:12px;"></span>
+              </div>
+            </div>
+            <div id="line-summary-stats" class="hidden"></div>
+
+            <div class="form-actions" style="justify-content:flex-start; flex-wrap:wrap;">
+              <button class="btn btn-primary" id="btn-send-daily-summary" style="width:auto;">
+                <span class="material-icons-outlined">send</span>
+                <span class="btn-label">ส่งสรุปประจำวันตอนนี้</span>
+                <span class="spinner"></span>
+              </button>
+              <button class="btn btn-outline" id="btn-refresh-line-summary" style="width:auto;">
+                <span class="material-icons-outlined">refresh</span>
+                <span class="btn-label">รีเฟรชข้อมูล</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3 style="margin-top:0; display:flex; align-items:center; gap:6px;">
+              <span class="material-icons-outlined" style="color:#DC2626;">warning_amber</span>
+              เคสได้ยาไม่ครบวันนี้
+            </h3>
+            <p class="card-sub">
+              รายการเหล่านี้จะถูกส่งพร้อมรายละเอียดไปพร้อมกับสรุปประจำวันด้านบน
+            </p>
+            <div id="line-shortage-list"></div>
+            <div id="line-shortage-empty" class="empty-state hidden">
+              <div class="material-icons-outlined">check_circle</div>
+              <div>วันนี้ยังไม่มีเคสที่ได้รับยาไม่ครบ</div>
+            </div>
+          </div>
+        </section>
+
       </div>
     </div>
   </div>
@@ -2939,6 +3005,24 @@
         <button type="button" class="btn btn-primary" id="btn-confirm-save-yes" style="width:auto;">
           <span class="material-icons-outlined">check_circle</span>
           <span class="btn-label">ยืนยันบันทึก</span>
+          <span class="spinner"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay hidden" id="modal-confirm-send-summary">
+    <div class="modal-box" style="max-width:480px; text-align:left;">
+      <h3><span class="material-icons-outlined">send</span> ยืนยันการส่งสรุปประจำวัน</h3>
+      <p class="hint" id="confirm-send-summary-text">
+        ระบบจะส่งข้อความสรุปประจำวัน พร้อมรายชื่อเคสที่ได้ยาไม่ครบ ไปยัง LINE ของแอดมิน
+        ทุกคนที่ลงทะเบียนไว้ทันที ต้องการดำเนินการต่อหรือไม่?
+      </p>
+      <div class="form-actions">
+        <button type="button" class="btn btn-outline" id="btn-cancel-send-summary">ยกเลิก</button>
+        <button type="button" class="btn btn-primary" id="btn-confirm-send-summary" style="width:auto;">
+          <span class="material-icons-outlined">check_circle</span>
+          <span class="btn-label">ยืนยันส่ง</span>
           <span class="spinner"></span>
         </button>
       </div>
@@ -3454,6 +3538,23 @@
       });
       document.getElementById("btn-export-history").addEventListener("click", exportHistoryCsv_);
 
+      // ── แจ้งเตือน LINE (สรุปประจำวัน) ──
+      document.getElementById("btn-refresh-line-summary").addEventListener("click", function () {
+        loadLineSummary_();
+      });
+      document.getElementById("btn-send-daily-summary").addEventListener("click", function () {
+        document.getElementById("modal-confirm-send-summary").classList.remove("hidden");
+      });
+      document.getElementById("btn-cancel-send-summary").addEventListener("click", function () {
+        document.getElementById("modal-confirm-send-summary").classList.add("hidden");
+      });
+      document.getElementById("modal-confirm-send-summary").addEventListener("click", function (e) {
+        if (e.target === this) this.classList.add("hidden");
+      });
+      document.getElementById("btn-confirm-send-summary").addEventListener("click", function () {
+        sendDailySummaryNow_(this);
+      });
+
       document.getElementById("field-pendingdate").value = formatDateThaiISO_(new Date());
       syncPendingDateDisplay_();
     }
@@ -3523,6 +3624,7 @@
       if (pageKey === "dashboard") loadDashboard_();
       if (pageKey === "history") loadHistory_();
       if (pageKey === "med-search") loadMedTotals_();
+      if (pageKey === "line-notify") loadLineSummary_();
       // โฟกัสช่องแรกของฟอร์มบันทึกให้อัตโนมัติ ผู้ใช้พิมพ์ต่อได้ทันทีโดยไม่ต้องแตะช่องกรอกก่อน
       // ช่วยให้ลงข้อมูลติดต่อกันหลายรายการได้เร็วขึ้น (ไม่นับกรณีกำลังแก้ไขรายการเดิมอยู่)
       if (pageKey === "record-form" && !editingRecordId) focusFirstRecordField_();
@@ -3551,7 +3653,8 @@
         dashboard: "Dashboard",
         "record-form": "บันทึกการรับยา",
         history: "ประวัติการบันทึก",
-        "med-search": "ค้นยอดจ่ายยา"
+        "med-search": "ค้นยอดจ่ายยา",
+        "line-notify": "แจ้งเตือน LINE"
       };
       document.getElementById("topbar-title").textContent = titles[pageKey] || "";
     }
@@ -4093,6 +4196,105 @@
           ((data && data.medCount) ? data.medCount : slices.length) + " ชนิด · " +
           "หมายเหตุ: ยาแต่ละชนิดอาจใช้หน่วยต่างกัน (เม็ด/หลอด/ขวด) กราฟนี้เทียบจากจำนวนที่บันทึกไว้";
       }
+    }
+
+    // ================================================================
+    // แท็บ "แจ้งเตือน LINE" — สรุปประจำวัน + เคสได้ยาไม่ครบ
+    // ================================================================
+    // ฟังก์ชันฝั่งเซิร์ฟเวอร์ที่ต้องมี (ดูไฟล์ LineDailySummary.gs):
+    //   getLineDailySummaryPreview()  -> คืนค่าสถิติของวันนี้ (ไม่ส่งข้อความ) สำหรับแสดงบนหน้านี้
+    //   sendDailySummaryManual()      -> สั่งส่งสรุปประจำวันไปยัง LINE ของแอดมินทันที
+
+    /** โหลดสถิติสรุปประจำวัน (ของวันนี้) มาแสดงบนหน้า "แจ้งเตือน LINE" แบบพรีวิว
+     *  ก่อนตัดสินใจกดส่งจริง — ไม่ได้ส่งข้อความ LINE ใดๆ ในขั้นตอนนี้ */
+    function loadLineSummary_() {
+      document.getElementById("line-summary-stats-loading").classList.remove("hidden");
+      document.getElementById("line-summary-stats").classList.add("hidden");
+      beginBusy_();
+
+      google.script.run
+        .withSuccessHandler(busyHandler_(renderLineSummary_))
+        .withFailureHandler(busyHandler_(function (err) {
+          showToast("โหลดข้อมูลสรุป LINE ไม่สำเร็จ: " + errMsg_(err), "error");
+        }))
+        .getLineDailySummaryPreview();
+    }
+
+    function renderLineSummary_(stats) {
+      stats = stats || {};
+      document.getElementById("line-summary-stats-loading").classList.add("hidden");
+
+      const statsBox = document.getElementById("line-summary-stats");
+      statsBox.classList.remove("hidden");
+      statsBox.innerHTML =
+        '<div style="display:flex; flex-wrap:wrap; gap:12px; margin-bottom:6px;">' +
+          lineStatBox_("บันทึกวันนี้", stats.totalToday, "#0F172A") +
+          lineStatBox_("ได้รับยาครบ", stats.completeToday, "#059669") +
+          lineStatBox_("ได้รับยาไม่ครบ", stats.incompleteToday, "#DC2626") +
+          lineStatBox_("ค้างสะสมทั้งหมด", stats.stillOpenTotal, "#D97706") +
+        '</div>';
+
+      const adminBox = document.getElementById("line-summary-admin-status");
+      if (stats.adminCount > 0) {
+        adminBox.innerHTML =
+          '<span class="material-icons-outlined" style="vertical-align:middle;font-size:18px;color:#059669;">check_circle</span> ' +
+          'มีแอดมิน LINE รับการแจ้งเตือนอยู่ <strong>' + stats.adminCount + ' คน</strong>';
+      } else {
+        adminBox.innerHTML =
+          '<span class="material-icons-outlined" style="vertical-align:middle;font-size:18px;color:#D97706;">warning_amber</span> ' +
+          'ยังไม่มีแอดมิน LINE ลงทะเบียนรับการแจ้งเตือน — ให้แอดมินสแกน QR Code ของ LINE OA แล้วกด "เพิ่มเพื่อน" ก่อน';
+      }
+
+      const listEl = document.getElementById("line-shortage-list");
+      const emptyEl = document.getElementById("line-shortage-empty");
+      const list = stats.incompleteList || [];
+      if (list.length === 0) {
+        listEl.innerHTML = "";
+        emptyEl.classList.remove("hidden");
+      } else {
+        emptyEl.classList.add("hidden");
+        listEl.innerHTML = list.map(function (c) {
+          return (
+            '<div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:10px 12px;margin-bottom:8px;">' +
+              '<div style="font-weight:600;color:#7F1D1D;">' + escapeHtml_(c.displayName || "-") + '</div>' +
+              '<div style="font-size:12.5px;color:#6B7280;margin-top:2px;">HN ' + escapeHtml_(c.hn || "-") +
+                (c.queueNumber ? "  •  คิว " + escapeHtml_(c.queueNumber) : "") + '</div>' +
+              '<div style="font-size:13px;color:#B91C1C;margin-top:4px;">ขาด: ' + escapeHtml_(c.shortageDetail || "-") + '</div>' +
+              (c.phone ? '<div style="font-size:12.5px;color:#6B7280;margin-top:2px;">โทร: ' + escapeHtml_(c.phone) + '</div>' : "") +
+            '</div>'
+          );
+        }).join("");
+      }
+    }
+
+    function lineStatBox_(label, value, color) {
+      return (
+        '<div style="flex:1;min-width:120px;background:#F9FAFB;border-radius:12px;padding:12px 14px;text-align:center;">' +
+          '<div style="font-size:24px;font-weight:700;color:' + color + ';">' + (value == null ? 0 : value) + '</div>' +
+          '<div style="font-size:12.5px;color:#6B7280;margin-top:2px;">' + escapeHtml_(label) + '</div>' +
+        '</div>'
+      );
+    }
+
+    /** กดยืนยันในโมดัล -> สั่งส่งสรุปประจำวันไปยัง LINE ของแอดมินทันที (ส่งจริง) */
+    function sendDailySummaryNow_(btnEl) {
+      setButtonLoading_(btnEl, true);
+
+      google.script.run
+        .withSuccessHandler(function (result) {
+          setButtonLoading_(btnEl, false);
+          document.getElementById("modal-confirm-send-summary").classList.add("hidden");
+          result = result || {};
+          showToast(result.message || (result.success ? "ส่งสรุปประจำวันสำเร็จ" : "ส่งไม่สำเร็จ"),
+            result.success ? "success" : "warning");
+          loadLineSummary_();
+        })
+        .withFailureHandler(function (err) {
+          setButtonLoading_(btnEl, false);
+          document.getElementById("modal-confirm-send-summary").classList.add("hidden");
+          showToast("เกิดข้อผิดพลาดขณะส่งสรุปประจำวัน: " + errMsg_(err), "error");
+        })
+        .sendDailySummaryManual();
     }
 
     // ================================================================
