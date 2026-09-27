@@ -881,6 +881,35 @@
       vertical-align: middle;
     }
 
+    /* ---- Legend แบบ "ชิป" ใช้เฉพาะกราฟ ผู้มารับยาค้าง/สัปดาห์ที่ค้าง (#crosstab-legend) ----
+       แยกเป็น class ใหม่ ไม่ใช้ปนกับ .legend-row เดิม เพื่อไม่กระทบกราฟอื่นในหน้านี้ ทำเป็น
+       ชิปพื้นหลัง + เว้นระยะห่างกว้างขึ้น ให้ตา "จับสี" แต่ละหมวดได้ง่ายขึ้นเมื่อมีถึง 5-6 รายการ */
+    #crosstab-legend {
+      gap: 10px 12px;
+      row-gap: 10px;
+    }
+    #crosstab-legend .legend-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--background);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 5px 12px 5px 9px;
+      font-size: 12.5px;
+      line-height: 1.5;
+      white-space: nowrap;
+    }
+    #crosstab-legend .legend-chip .legend-dot {
+      width: 10px;
+      height: 10px;
+      margin-right: 0;
+      flex: none;
+    }
+    @media (max-width: 640px) {
+      #crosstab-legend .legend-chip { white-space: normal; }
+    }
+
     table.case-table {
       width: 100%;
       border-collapse: collapse;
@@ -2566,12 +2595,12 @@
           <div class="card" style="margin-bottom:16px;">
             <div class="card-title">
               <span class="material-icons-outlined" style="color:var(--primary);">stacked_bar_chart</span>
-              ผู้มารับยาค้าง แยกตาม "วันที่ค้าง" จริง ในแต่ละวันที่บันทึก
+              ผู้มารับยาค้าง แยกตาม "ค้างมาแล้วกี่สัปดาห์" ในแต่ละวันที่เปิดบริการ
             </div>
-            <p class="card-sub">แต่ละแท่ง = 1 วันที่บันทึกจริง แบ่งสีตาม "วันที่ค้าง" จริง (เฉพาะวันที่ค้างที่มีคนมารับมากที่สุด 8 อันดับ ส่วนวันที่ค้างอื่น ๆ ที่เหลือรวมเป็นแท่งสีเทา) · เส้นประ = ยอดรวมผู้มารับบริการ/วัน ใช้ดูว่าส่วนใหญ่มาเคลียร์ยาค้างของวันที่ไหนเป็นหลัก (ไม่ผูกกับตัวกรองช่วงเวลาด้านบน แสดงข้อมูลทั้งหมดเสมอ)</p>
-            <div id="crosstab-chart"></div>
-            <div class="legend-row" id="crosstab-legend" style="flex-wrap:wrap; gap:8px 14px; margin-top:10px;"></div>
-            <div id="crosstab-insight" style="margin-top:12px;"></div>
+            <p class="card-sub">แต่ละแท่ง = 1 วันที่เปิดบริการจริง แบ่งสีตามระยะเวลาที่ค้าง (สัปดาห์) นับสัมพัทธ์กับวันนั้น สีเดียวกันมีความหมายเดิมเสมอทุกแท่ง เทียบข้ามวันได้ทันที · ตัวเลขใต้แท่ง = ค่าเฉลี่ยจำนวนสัปดาห์ที่ค้างของวันนั้น ยิ่งลดลงเข้าใกล้ 0 ยิ่งแปลว่า "วันที่ค้างยา" ไล่ใกล้ชิด "วันที่เปิดบริการ" มากขึ้น ใกล้ถึงจุดที่ควรปิดจุดนี้ได้ (ไม่ผูกกับตัวกรองช่วงเวลาด้านบน แสดงข้อมูลทั้งหมดเสมอ)</p>
+            <div id="crosstab-chart" style="margin-top:4px;"></div>
+            <div class="legend-row" id="crosstab-legend" style="margin-top:14px;"></div>
+            <div id="crosstab-insight" style="margin-top:14px;"></div>
           </div>
 
           <div class="grid-2">
@@ -4254,14 +4283,11 @@
       renderHorizontalBarList_("week-breakdown-chart", items, "var(--secondary)", "calendar_view_week", "ยังไม่มีข้อมูลในช่วงที่เลือก");
     }
 
-    // ---------------- กราฟแท่งซ้อน: ผู้มารับยาค้าง แยกตาม "วันที่ค้าง" จริง ต่อวันที่บันทึก ----------------
+    // ---------------- กราฟแท่งซ้อน: ผู้มารับยาค้าง แยกตาม "ค้างมาแล้วกี่สัปดาห์" ต่อวันที่เปิดบริการ ----------------
     // วาดด้วย SVG ล้วน (ไม่พึ่งไลบรารีภายนอก) ตามธรรมเนียมเดิมของกราฟอื่นในหน้านี้
-    // เลือกใช้ "แท่งซ้อน (stacked bar)" แทน Heatmap ตาราง เพราะอ่านง่ายกว่ามากสำหรับผู้บริหาร:
-    // แสดงเฉพาะ "วันที่ค้าง" จริงที่มีคนมารับมากที่สุด 8 อันดับ (สีตามธีมของระบบ) ส่วนวันที่ค้าง
-    // อื่น ๆ ที่กระจัดกระจายและมีจำนวนน้อยกว่ามาก รวมเป็นแท่งสีเทาเดียว "วันที่ค้างอื่น ๆ"
-    const PENDING_DATE_COLORS_ = ["#0B5FBA", "#12A594", "#F59E0B", "#8B5CF6", "#EC4899", "#0EA5E9", "#65A30D", "#F97316"];
-    const OTHERS_COLOR_ = "#94A3B8";
-
+    // หมวดสี (bucketRows) มาจาก backend แบบตายตัว (0 ถึง 4+ สัปดาห์) เรียงจาก "สด" (ค้างน้อย)
+    // อยู่ล่างสุด ไปหา "ค้างนาน" อยู่บนสุด ทำให้เห็นด้วยตาว่าเมื่อเวลาผ่านไป ส่วนบนสุด (สีแดง/ส้ม
+    // ของยาค้างเก่า) ควรจะแคบลงเรื่อย ๆ จนแท่งเหลือแต่สีเขียวล้วน = ยาค้างเก่าหมดแล้ว
     function renderCrossTabChart_(data) {
       const container = document.getElementById("crosstab-chart");
       const legendEl = document.getElementById("crosstab-legend");
@@ -4271,6 +4297,7 @@
       const recordDates = data.recordDates || [];
       const bucketRows = data.bucketRows || [];
       const matrix = data.matrix || [];
+      const avgWeeksLate = data.avgWeeksLate || [];
 
       if (recordDates.length === 0 || bucketRows.length === 0) {
         container.style.overflowX = "";
@@ -4280,22 +4307,20 @@
         return;
       }
 
-      // สีของแต่ละแถว: แถว "อื่น ๆ" (ถ้ามี) เป็นสีเทาเสมอ ส่วนวันที่ค้างจริงแต่ละวันไล่สีตามลำดับ
-      const bucketColors = bucketRows.map(function (b, bi) {
-        if (b.isOther) return OTHERS_COLOR_;
-        const dateBi = bucketRows.slice(0, bi).filter(function (x) { return !x.isOther; }).length;
-        return PENDING_DATE_COLORS_[dateBi % PENDING_DATE_COLORS_.length];
-      });
-      const bucketLabels = bucketRows.map(function (b) {
-        return b.isOther ? "วันที่ค้างอื่น ๆ" : ("ค้างวันที่ " + trendDayLabel_(b.key));
-      });
+      const bucketColors = bucketRows.map(function (b) { return b.color; });
+      const bucketLabels = bucketRows.map(function (b) { return b.label; });
 
+      // เผื่อพื้นที่ให้กว้าง-สูงขึ้นกว่าเดิมชัดเจน (แก้ปัญหากราฟดูอัดแน่น อ่านยาก):
+      // - แต่ละแท่งกว้างขึ้น (naturalWidth ต่อคอลัมน์ 64→104px) มีช่องไฟระหว่างแท่งมากขึ้น
+      // - กราฟสูงขึ้น (h 274→336) ให้แต่ละ segment มีพื้นที่แสดงตัวเลขได้ชัดโดยไม่เบียดกัน
+      // - เผื่อขอบล่าง (padB) มากขึ้น ให้ 2 บรรทัดใต้แท่ง (วันที่ + ค่าเฉลี่ยสัปดาห์) มีระยะห่างพอ
+      // ผู้ใช้เลื่อนแนวนอนดูได้ (container มี overflow-x:auto อยู่แล้ว) จึงไม่ต้องบีบให้พอดีจอ
       const containerWidth = container.clientWidth || 320;
-      const naturalWidth = recordDates.length * 64;
-      const w = Math.max(containerWidth, naturalWidth), h = 260, padL = 40, padR = 16, padT = 18, padB = 34;
+      const naturalWidth = recordDates.length * 104;
+      const w = Math.max(containerWidth, naturalWidth), h = 336, padL = 46, padR = 20, padT = 26, padB = 62;
       const innerW = w - padL - padR, innerH = h - padT - padB;
       const barSlot = innerW / recordDates.length;
-      const barW = Math.min(46, barSlot * 0.58);
+      const barW = Math.min(58, barSlot * 0.6);
 
       const totals = recordDates.map(function (rd, ci) {
         let s = 0;
@@ -4305,12 +4330,12 @@
       const maxVal = Math.max.apply(null, totals.concat([4]));
 
       let gridLines = "";
-      const steps = 4;
+      const steps = 5;
       for (let i = 0; i <= steps; i++) {
         const y = padT + innerH - (innerH * i / steps);
         const val = Math.round(maxVal * i / steps);
         gridLines += '<line x1="' + padL + '" x2="' + (w - padR) + '" y1="' + y + '" y2="' + y + '" stroke="var(--border)" stroke-width="1"/>';
-        gridLines += '<text x="' + (padL - 8) + '" y="' + (y + 4) + '" font-size="10" fill="var(--muted)" text-anchor="end">' + val + '</text>';
+        gridLines += '<text x="' + (padL - 10) + '" y="' + (y + 4) + '" font-size="11" fill="var(--muted)" text-anchor="end">' + val + '</text>';
       }
 
       let bars = "", colLabels = "";
@@ -4324,17 +4349,25 @@
           const segH = innerH * (v / maxVal);
           const y = yCursor - segH;
           const color = bucketColors[bi];
-          bars += '<rect x="' + x + '" y="' + y + '" width="' + barW + '" height="' + Math.max(segH, 0.5) + '" fill="' + color + '"/>';
-          if (segH > 13) {
+          // เส้นขอบสีขาวบาง ๆ คั่นระหว่าง segment ให้แยกแต่ละหมวดออกจากกันชัดเจนขึ้นด้วยตา
+          bars += '<rect x="' + x + '" y="' + y + '" width="' + barW + '" height="' + Math.max(segH, 0.5) +
+            '" fill="' + color + '" stroke="var(--surface)" stroke-width="1"/>';
+          if (segH > 15) {
             bars +=
-              '<text x="' + (x + barW / 2) + '" y="' + (y + segH / 2 + 4) + '" font-size="10" font-weight="600" ' +
+              '<text x="' + (x + barW / 2) + '" y="' + (y + segH / 2 + 4) + '" font-size="11" font-weight="600" ' +
               'fill="#fff" text-anchor="middle">' + v + '</text>';
           }
           yCursor = y;
         });
+
+        // บรรทัดวันที่ (บน) + ค่าเฉลี่ยจำนวนสัปดาห์ที่ค้างของวันนั้น สีไล่ตามระดับ (เขียว=ใกล้จบ)
+        const avgWk = avgWeeksLate[ci] || 0;
+        const avgColor = avgWk <= 0.5 ? "#12A594" : (avgWk <= 1.5 ? "#F59E0B" : "#DC2626");
         colLabels +=
-          '<text x="' + (x + barW / 2) + '" y="' + (h - 10) + '" font-size="10.5" fill="var(--muted)" text-anchor="middle">' +
-          trendDayLabel_(rd) + '</text>';
+          '<text x="' + (x + barW / 2) + '" y="' + (h - 34) + '" font-size="11.5" font-weight="600" fill="var(--text)" text-anchor="middle">' +
+          trendDayLabel_(rd) + '</text>' +
+          '<text x="' + (x + barW / 2) + '" y="' + (h - 15) + '" font-size="11" font-weight="700" fill="' + avgColor + '" text-anchor="middle">' +
+          'เฉลี่ย ' + avgWk.toLocaleString("th-TH") + ' สัปดาห์</text>';
 
         const cx = padL + ci * barSlot + barSlot / 2;
         const cy = padT + innerH - innerH * (totals[ci] / maxVal);
@@ -4343,11 +4376,11 @@
 
       const linePath = "M" + points.map(function (p) { return p.x + "," + p.y; }).join(" L");
       const dots = points.map(function (p) {
-        const labelAbove = p.y > padT + 12;
-        const labelY = labelAbove ? p.y - 8 : p.y + 15;
+        const labelAbove = p.y > padT + 16;
+        const labelY = labelAbove ? p.y - 10 : p.y + 17;
         return (
-          '<circle cx="' + p.x + '" cy="' + p.y + '" r="3.5" fill="var(--text)" stroke="#fff" stroke-width="1.5"/>' +
-          '<text x="' + p.x + '" y="' + labelY + '" font-size="10.5" font-weight="700" fill="var(--text)" text-anchor="middle">' + p.total + '</text>'
+          '<circle cx="' + p.x + '" cy="' + p.y + '" r="4" fill="var(--text)" stroke="var(--surface)" stroke-width="1.5"/>' +
+          '<text x="' + p.x + '" y="' + labelY + '" font-size="11.5" font-weight="700" fill="var(--text)" text-anchor="middle">' + p.total + '</text>'
         );
       }).join("");
 
@@ -4356,49 +4389,56 @@
       container.innerHTML =
         '<svg viewBox="0 0 ' + w + ' ' + h + '" width="' + w + '" height="' + h + '" style="display:block;">' +
           gridLines + bars +
-          '<path d="' + linePath + '" fill="none" stroke="var(--text)" stroke-width="1.6" stroke-dasharray="4 3"/>' +
+          '<path d="' + linePath + '" fill="none" stroke="var(--text)" stroke-width="1.8" stroke-dasharray="5 3"/>' +
           dots + colLabels +
         '</svg>';
 
       if (legendEl) {
         legendEl.innerHTML =
           bucketRows.map(function (b, bi) {
-            return '<span><span class="legend-dot" style="background:' + bucketColors[bi] + ';"></span>' +
+            return '<span class="legend-chip"><span class="legend-dot" style="background:' + bucketColors[bi] + ';"></span>' +
               escapeHtml_(bucketLabels[bi]) + ' (' + b.total.toLocaleString("th-TH") + ')</span>';
           }).join("") +
-          '<span><span class="legend-dot" style="background:var(--text);"></span>เส้นประ = ยอดรวมผู้มารับบริการ/วัน</span>';
+          '<span class="legend-chip"><span class="legend-dot" style="background:var(--text);"></span>เส้นประ = ยอดรวมผู้มารับบริการ/วัน</span>';
       }
 
       renderCrossTabInsight_(insightEl, data);
     }
 
-    /** กล่องข้อความสรุป: (1) วันที่ค้างที่มีคนมารับมากที่สุด (ตอบคำถาม "ส่วนใหญ่ค้างวันที่อะไร")
-     *  (2) แนวโน้ม + ประมาณการวันที่คาดว่าจุดรับยาค้างจะบริการ "จบพอดี" */
+    /** กล่องข้อความสรุป: (1) แนวโน้ม "ค่าเฉลี่ยจำนวนสัปดาห์ที่ค้าง" กำลังไล่ใกล้ชิดกับวันที่
+     *  เปิดบริการหรือไม่ (ตอบคำถามหลัก "ควรเปิดบริการต่อถึงวันไหน")
+     *  (2) แนวโน้มยอดรวม + ประมาณการวันที่คาดว่าจุดรับยาค้างจะบริการ "จบพอดี" */
     function renderCrossTabInsight_(el, data) {
       if (!el) return;
       data = data || {};
-      const top = data.topPendingDate;
+      const wf = data.weekFocus;
       const proj = data.projection;
 
       let html = "";
 
-      if (top) {
+      if (wf) {
+        const trendColor = wf.narrowing ? "var(--secondary)" : "#DC2626";
+        const trendIcon = wf.narrowing ? "trending_down" : "trending_flat";
+        const trendMsg = wf.narrowing
+          ? ('เทียบกับช่วงต้นแคมเปญ (เฉลี่ยค้าง ' + wf.avgWeeksLateEarly + ' สัปดาห์) ค่าเฉลี่ยนี้ลดลงเหลือ ' +
+              wf.avgWeeksLateRecent + ' สัปดาห์ในช่วงหลัง แสดงว่า "วันที่ค้างยา" กำลังไล่ใกล้ชิดกับ "วันที่เปิดบริการ" ' +
+              'มากขึ้นเรื่อย ๆ — เป็นสัญญาณที่ดีว่ากำลังใกล้ถึงจุดที่ควรปิดจุดรับยาค้างนี้ได้')
+          : ('เทียบกับช่วงต้นแคมเปญ (เฉลี่ยค้าง ' + wf.avgWeeksLateEarly + ' สัปดาห์) ค่าเฉลี่ยในช่วงหลัง (' +
+              wf.avgWeeksLateRecent + ' สัปดาห์) ยังไม่ลดลงชัดเจน แสดงว่ายังมีคนไข้ที่ค้างยามานานทยอยมารับอยู่ ' +
+              'ควรเปิดบริการต่อไปก่อน ยังไม่ควรกำหนดวันปิดในตอนนี้');
+
         html +=
           '<div style="background:var(--background); border-radius:10px; padding:12px 14px; font-size:13.5px; line-height:1.65; margin-bottom:10px;">' +
             '<div style="font-weight:700; color:var(--secondary); margin-bottom:4px; display:flex; gap:6px; align-items:center;">' +
               '<span class="material-icons-outlined" style="font-size:19px;">event</span>' +
-              '<span>วันที่ค้างที่มีคนมารับยามากที่สุด คือวันที่ ' + formatThaiDateShort_(top.date) + '</span>' +
+              '<span>วันที่เปิดบริการล่าสุด (' + formatThaiDateShort_(wf.lastRecordDate) + ') ผู้มารับยา ' +
+                wf.freshPercentLast + '% ค้างจากสัปดาห์เดียวกันหรือสัปดาห์ก่อนหน้าเพียง 1 สัปดาห์เท่านั้น</span>' +
             '</div>' +
-            '<div style="color:var(--muted);">มารับยาไปแล้ว ' + top.count.toLocaleString("th-TH") +
-              ' ครั้ง (คิดเป็น ' + top.percent + '% ของทุกครั้งที่มารับยาค้าง)</div>' +
-            (top.distinctPendingDateCount
-              ? ('<div style="color:var(--muted); margin-top:2px;">ทั้งแคมเปญมีวันที่ค้างที่แตกต่างกันทั้งหมด ' +
-                  top.distinctPendingDateCount + ' วัน — ' +
-                  (top.percent < 15
-                    ? 'ยาค้างกระจายตัวอยู่หลายวัน ไม่ได้กระจุกอยู่ที่วันใดวันหนึ่งเป็นพิเศษ'
-                    : 'ยาค้างส่วนใหญ่กระจุกตัวอยู่ที่วันดังกล่าวชัดเจน') +
-                  '</div>')
-              : '') +
+            '<div style="color:var(--muted);">ค่าเฉลี่ยจำนวนสัปดาห์ที่ค้างของวันนั้น = ' + wf.avgWeeksLateLast + ' สัปดาห์</div>' +
+            '<div style="color:' + trendColor + '; margin-top:6px; display:flex; gap:6px; align-items:flex-start;">' +
+              '<span class="material-icons-outlined" style="font-size:18px; flex:none;">' + trendIcon + '</span>' +
+              '<span>' + trendMsg + '</span>' +
+            '</div>' +
           '</div>';
       }
 
