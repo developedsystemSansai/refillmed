@@ -2566,9 +2566,9 @@
           <div class="card" style="margin-bottom:16px;">
             <div class="card-title">
               <span class="material-icons-outlined" style="color:var(--primary);">stacked_bar_chart</span>
-              องค์ประกอบผู้มารับยาค้าง แยกตามอายุความค้าง ในแต่ละวันที่บันทึก
+              ผู้มารับยาค้าง แยกตาม "วันที่ค้าง" จริง ในแต่ละวันที่บันทึก
             </div>
-            <p class="card-sub">แต่ละแท่ง = 1 วันที่บันทึกจริง แบ่งสีตาม "อายุความค้าง" (วันที่บันทึก − วันที่ค้าง) · เส้นประ = ยอดรวมผู้มารับบริการ/วัน ใช้ดูว่าจุดบริการกำลังไล่เคลียร์ยาค้างเก่า (สีแดง/ส้ม) ให้หมดไปเรื่อย ๆ หรือไม่ (ไม่ผูกกับตัวกรองช่วงเวลาด้านบน แสดงข้อมูลทั้งหมดเสมอ)</p>
+            <p class="card-sub">แต่ละแท่ง = 1 วันที่บันทึกจริง แบ่งสีตาม "วันที่ค้าง" จริง (เฉพาะวันที่ค้างที่มีคนมารับมากที่สุด 8 อันดับ ส่วนวันที่ค้างอื่น ๆ ที่เหลือรวมเป็นแท่งสีเทา) · เส้นประ = ยอดรวมผู้มารับบริการ/วัน ใช้ดูว่าส่วนใหญ่มาเคลียร์ยาค้างของวันที่ไหนเป็นหลัก (ไม่ผูกกับตัวกรองช่วงเวลาด้านบน แสดงข้อมูลทั้งหมดเสมอ)</p>
             <div id="crosstab-chart"></div>
             <div class="legend-row" id="crosstab-legend" style="flex-wrap:wrap; gap:8px 14px; margin-top:10px;"></div>
             <div id="crosstab-insight" style="margin-top:12px;"></div>
@@ -4254,12 +4254,13 @@
       renderHorizontalBarList_("week-breakdown-chart", items, "var(--secondary)", "calendar_view_week", "ยังไม่มีข้อมูลในช่วงที่เลือก");
     }
 
-    // ---------------- กราฟแท่งซ้อน: องค์ประกอบยาค้างตามอายุความค้าง ต่อวันที่บันทึก ----------------
+    // ---------------- กราฟแท่งซ้อน: ผู้มารับยาค้าง แยกตาม "วันที่ค้าง" จริง ต่อวันที่บันทึก ----------------
     // วาดด้วย SVG ล้วน (ไม่พึ่งไลบรารีภายนอก) ตามธรรมเนียมเดิมของกราฟอื่นในหน้านี้
-    // เลือกใช้ "แท่งซ้อน (stacked bar)" แทน Heatmap ตาราง เพราะอ่านง่ายกว่ามากสำหรับ
-    // ผู้บริหาร: จำนวนกลุ่มอายุคงที่แค่ 6 กลุ่ม (ไม่ใช่หลายสิบสัปดาห์) และเห็น "เรื่องราว"
-    // ได้ในสายตาเดียวจากสีที่หดตัวลง (ยาค้างเก่าลดลง) พร้อมเส้นประกำกับยอดรวม/วัน
-    const AGE_BUCKET_COLORS_ = ["#12A594", "#0B5FBA", "#F59E0B", "#F97316", "#DC2626", "#7C2D12"];
+    // เลือกใช้ "แท่งซ้อน (stacked bar)" แทน Heatmap ตาราง เพราะอ่านง่ายกว่ามากสำหรับผู้บริหาร:
+    // แสดงเฉพาะ "วันที่ค้าง" จริงที่มีคนมารับมากที่สุด 8 อันดับ (สีตามธีมของระบบ) ส่วนวันที่ค้าง
+    // อื่น ๆ ที่กระจัดกระจายและมีจำนวนน้อยกว่ามาก รวมเป็นแท่งสีเทาเดียว "วันที่ค้างอื่น ๆ"
+    const PENDING_DATE_COLORS_ = ["#0B5FBA", "#12A594", "#F59E0B", "#8B5CF6", "#EC4899", "#0EA5E9", "#65A30D", "#F97316"];
+    const OTHERS_COLOR_ = "#94A3B8";
 
     function renderCrossTabChart_(data) {
       const container = document.getElementById("crosstab-chart");
@@ -4278,6 +4279,16 @@
         if (insightEl) insightEl.innerHTML = "";
         return;
       }
+
+      // สีของแต่ละแถว: แถว "อื่น ๆ" (ถ้ามี) เป็นสีเทาเสมอ ส่วนวันที่ค้างจริงแต่ละวันไล่สีตามลำดับ
+      const bucketColors = bucketRows.map(function (b, bi) {
+        if (b.isOther) return OTHERS_COLOR_;
+        const dateBi = bucketRows.slice(0, bi).filter(function (x) { return !x.isOther; }).length;
+        return PENDING_DATE_COLORS_[dateBi % PENDING_DATE_COLORS_.length];
+      });
+      const bucketLabels = bucketRows.map(function (b) {
+        return b.isOther ? "วันที่ค้างอื่น ๆ" : ("ค้างวันที่ " + trendDayLabel_(b.key));
+      });
 
       const containerWidth = container.clientWidth || 320;
       const naturalWidth = recordDates.length * 64;
@@ -4312,7 +4323,7 @@
           if (v <= 0) return;
           const segH = innerH * (v / maxVal);
           const y = yCursor - segH;
-          const color = AGE_BUCKET_COLORS_[bi % AGE_BUCKET_COLORS_.length];
+          const color = bucketColors[bi];
           bars += '<rect x="' + x + '" y="' + y + '" width="' + barW + '" height="' + Math.max(segH, 0.5) + '" fill="' + color + '"/>';
           if (segH > 13) {
             bars +=
@@ -4352,9 +4363,8 @@
       if (legendEl) {
         legendEl.innerHTML =
           bucketRows.map(function (b, bi) {
-            const color = AGE_BUCKET_COLORS_[bi % AGE_BUCKET_COLORS_.length];
-            return '<span><span class="legend-dot" style="background:' + color + ';"></span>' +
-              escapeHtml_(b.label) + ' (' + b.total.toLocaleString("th-TH") + ')</span>';
+            return '<span><span class="legend-dot" style="background:' + bucketColors[bi] + ';"></span>' +
+              escapeHtml_(bucketLabels[bi]) + ' (' + b.total.toLocaleString("th-TH") + ')</span>';
           }).join("") +
           '<span><span class="legend-dot" style="background:var(--text);"></span>เส้นประ = ยอดรวมผู้มารับบริการ/วัน</span>';
       }
@@ -4362,23 +4372,53 @@
       renderCrossTabInsight_(insightEl, data);
     }
 
-    /** กล่องข้อความสรุปแนวโน้ม + ประมาณการวันที่คาดว่าจุดรับยาค้างจะบริการ "จบพอดี" */
+    /** กล่องข้อความสรุป: (1) วันที่ค้างที่มีคนมารับมากที่สุด (ตอบคำถาม "ส่วนใหญ่ค้างวันที่อะไร")
+     *  (2) แนวโน้ม + ประมาณการวันที่คาดว่าจุดรับยาค้างจะบริการ "จบพอดี" */
     function renderCrossTabInsight_(el, data) {
       if (!el) return;
-      const proj = data && data.projection;
-      if (!proj) { el.innerHTML = ""; return; }
+      data = data || {};
+      const top = data.topPendingDate;
+      const proj = data.projection;
+
+      let html = "";
+
+      if (top) {
+        html +=
+          '<div style="background:var(--background); border-radius:10px; padding:12px 14px; font-size:13.5px; line-height:1.65; margin-bottom:10px;">' +
+            '<div style="font-weight:700; color:var(--secondary); margin-bottom:4px; display:flex; gap:6px; align-items:center;">' +
+              '<span class="material-icons-outlined" style="font-size:19px;">event</span>' +
+              '<span>วันที่ค้างที่มีคนมารับยามากที่สุด คือวันที่ ' + formatThaiDateShort_(top.date) + '</span>' +
+            '</div>' +
+            '<div style="color:var(--muted);">มารับยาไปแล้ว ' + top.count.toLocaleString("th-TH") +
+              ' ครั้ง (คิดเป็น ' + top.percent + '% ของทุกครั้งที่มารับยาค้าง)</div>' +
+            (top.distinctPendingDateCount
+              ? ('<div style="color:var(--muted); margin-top:2px;">ทั้งแคมเปญมีวันที่ค้างที่แตกต่างกันทั้งหมด ' +
+                  top.distinctPendingDateCount + ' วัน — ' +
+                  (top.percent < 15
+                    ? 'ยาค้างกระจายตัวอยู่หลายวัน ไม่ได้กระจุกอยู่ที่วันใดวันหนึ่งเป็นพิเศษ'
+                    : 'ยาค้างส่วนใหญ่กระจุกตัวอยู่ที่วันดังกล่าวชัดเจน') +
+                  '</div>')
+              : '') +
+          '</div>';
+      }
+
+      if (!proj) {
+        el.innerHTML = html;
+        return;
+      }
 
       if (!proj.reliable) {
-        el.innerHTML =
+        html +=
           '<div style="background:var(--background); border-radius:10px; padding:12px 14px; font-size:13px; color:var(--muted); display:flex; gap:8px; align-items:flex-start;">' +
             '<span class="material-icons-outlined" style="font-size:18px; flex:none;">info</span>' +
             '<span>' + escapeHtml_(proj.reason || "") + '</span>' +
           '</div>';
+        el.innerHTML = html;
         return;
       }
 
       const finishLabel = formatThaiDateShort_(proj.estimatedFinishDate);
-      el.innerHTML =
+      html +=
         '<div style="background:var(--background); border-radius:10px; padding:12px 14px; font-size:13.5px; line-height:1.65;">' +
           '<div style="font-weight:700; color:var(--primary); margin-bottom:4px; display:flex; gap:6px; align-items:center;">' +
             '<span class="material-icons-outlined" style="font-size:19px;">insights</span>' +
@@ -4388,6 +4428,7 @@
           '<div style="color:var(--muted); margin-top:4px;">แนวโน้ม: จำนวนผู้มารับบริการเปลี่ยนแปลง ' +
             proj.slopePerDay + ' เคส/วันทำการ (คำนวณจากข้อมูลล่าสุด)</div>' +
         '</div>';
+      el.innerHTML = html;
     }
 
     // ---------------- ยาที่จ่ายไปมากที่สุด (Top 7) แยกทีละชนิดยา (แท่งแนวนอน) ----------------
