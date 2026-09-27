@@ -2565,11 +2565,12 @@
 
           <div class="card" style="margin-bottom:16px;">
             <div class="card-title">
-              <span class="material-icons-outlined" style="color:var(--primary);">grid_on</span>
-              กราฟไขว้: วันที่บันทึก x สัปดาห์วันที่ค้าง (แนวโน้มการเคลียร์ยาค้าง)
+              <span class="material-icons-outlined" style="color:var(--primary);">stacked_bar_chart</span>
+              องค์ประกอบผู้มารับยาค้าง แยกตามอายุความค้าง ในแต่ละวันที่บันทึก
             </div>
-            <p class="card-sub">แต่ละคอลัมน์ = วันที่บันทึกจริง 1 วัน, แต่ละแถว = สัปดาห์ของ "วันที่ค้าง" · ตัวเลข/สีเข้ม = จำนวนครั้งที่มารับยาของสัปดาห์ค้างนั้นในวันที่บันทึกนั้น ใช้ดูว่าผู้มารับยาค้างส่วนใหญ่มาจากสัปดาห์ไหน และแนวโน้มการเคลียร์ยาค้างเก่ากำลังไล่ทันหรือไม่ (ไม่ผูกกับตัวกรองช่วงเวลาด้านบน แสดงข้อมูลทั้งหมดเสมอ)</p>
+            <p class="card-sub">แต่ละแท่ง = 1 วันที่บันทึกจริง แบ่งสีตาม "อายุความค้าง" (วันที่บันทึก − วันที่ค้าง) · เส้นประ = ยอดรวมผู้มารับบริการ/วัน ใช้ดูว่าจุดบริการกำลังไล่เคลียร์ยาค้างเก่า (สีแดง/ส้ม) ให้หมดไปเรื่อย ๆ หรือไม่ (ไม่ผูกกับตัวกรองช่วงเวลาด้านบน แสดงข้อมูลทั้งหมดเสมอ)</p>
             <div id="crosstab-chart"></div>
+            <div class="legend-row" id="crosstab-legend" style="flex-wrap:wrap; gap:8px 14px; margin-top:10px;"></div>
             <div id="crosstab-insight" style="margin-top:12px;"></div>
           </div>
 
@@ -3887,6 +3888,7 @@
 
       document.getElementById("crosstab-chart").innerHTML =
         skeletonBlock_("100%", "220px", "border-radius:12px;");
+      document.getElementById("crosstab-legend").innerHTML = "";
       document.getElementById("crosstab-insight").innerHTML =
         skeletonBlock_("100%", "64px", "border-radius:10px;");
 
@@ -4252,71 +4254,110 @@
       renderHorizontalBarList_("week-breakdown-chart", items, "var(--secondary)", "calendar_view_week", "ยังไม่มีข้อมูลในช่วงที่เลือก");
     }
 
-    // ---------------- กราฟไขว้ (Heatmap): วันที่บันทึก x สัปดาห์วันที่ค้าง ----------------
+    // ---------------- กราฟแท่งซ้อน: องค์ประกอบยาค้างตามอายุความค้าง ต่อวันที่บันทึก ----------------
     // วาดด้วย SVG ล้วน (ไม่พึ่งไลบรารีภายนอก) ตามธรรมเนียมเดิมของกราฟอื่นในหน้านี้
+    // เลือกใช้ "แท่งซ้อน (stacked bar)" แทน Heatmap ตาราง เพราะอ่านง่ายกว่ามากสำหรับ
+    // ผู้บริหาร: จำนวนกลุ่มอายุคงที่แค่ 6 กลุ่ม (ไม่ใช่หลายสิบสัปดาห์) และเห็น "เรื่องราว"
+    // ได้ในสายตาเดียวจากสีที่หดตัวลง (ยาค้างเก่าลดลง) พร้อมเส้นประกำกับยอดรวม/วัน
+    const AGE_BUCKET_COLORS_ = ["#12A594", "#0B5FBA", "#F59E0B", "#F97316", "#DC2626", "#7C2D12"];
+
     function renderCrossTabChart_(data) {
       const container = document.getElementById("crosstab-chart");
+      const legendEl = document.getElementById("crosstab-legend");
       const insightEl = document.getElementById("crosstab-insight");
       if (!container) return;
       data = data || {};
       const recordDates = data.recordDates || [];
-      const weekRows = data.weekRows || [];
+      const bucketRows = data.bucketRows || [];
       const matrix = data.matrix || [];
 
-      if (recordDates.length === 0 || weekRows.length === 0) {
+      if (recordDates.length === 0 || bucketRows.length === 0) {
         container.style.overflowX = "";
-        container.innerHTML = emptyStateHtml_("grid_on", "ยังไม่มีข้อมูลเพียงพอสำหรับกราฟไขว้นี้");
+        container.innerHTML = emptyStateHtml_("stacked_bar_chart", "ยังไม่มีข้อมูลเพียงพอสำหรับกราฟนี้");
+        if (legendEl) legendEl.innerHTML = "";
         if (insightEl) insightEl.innerHTML = "";
         return;
       }
 
-      const rowLabelW = 104, cellW = 56, cellH = 30, gap = 3, padT = 10, padB = 30;
-      const innerW = recordDates.length * cellW;
-      const w = rowLabelW + innerW + 8;
-      const h = padT + weekRows.length * (cellH + gap) + padB;
+      const containerWidth = container.clientWidth || 320;
+      const naturalWidth = recordDates.length * 64;
+      const w = Math.max(containerWidth, naturalWidth), h = 260, padL = 40, padR = 16, padT = 18, padB = 34;
+      const innerW = w - padL - padR, innerH = h - padT - padB;
+      const barSlot = innerW / recordDates.length;
+      const barW = Math.min(46, barSlot * 0.58);
 
-      let maxCell = 1;
-      matrix.forEach(function (row) {
-        row.forEach(function (v) { if (v > maxCell) maxCell = v; });
+      const totals = recordDates.map(function (rd, ci) {
+        let s = 0;
+        matrix.forEach(function (row) { s += row[ci] || 0; });
+        return s;
       });
+      const maxVal = Math.max.apply(null, totals.concat([4]));
 
-      let cells = "", rowLabels = "", colLabels = "";
-      weekRows.forEach(function (wr, ri) {
-        const y = padT + ri * (cellH + gap);
-        rowLabels +=
-          '<text x="' + (rowLabelW - 10) + '" y="' + (y + cellH / 2 + 4) + '" font-size="10.5" ' +
-          'fill="var(--text)" text-anchor="end">สัปดาห์ ' + escapeHtml_(wr.label) + '</text>';
+      let gridLines = "";
+      const steps = 4;
+      for (let i = 0; i <= steps; i++) {
+        const y = padT + innerH - (innerH * i / steps);
+        const val = Math.round(maxVal * i / steps);
+        gridLines += '<line x1="' + padL + '" x2="' + (w - padR) + '" y1="' + y + '" y2="' + y + '" stroke="var(--border)" stroke-width="1"/>';
+        gridLines += '<text x="' + (padL - 8) + '" y="' + (y + 4) + '" font-size="10" fill="var(--muted)" text-anchor="end">' + val + '</text>';
+      }
 
-        recordDates.forEach(function (rd, ci) {
-          const v = (matrix[ri] && matrix[ri][ci]) || 0;
-          const x = rowLabelW + ci * cellW;
-          const opacity = v === 0 ? 0.06 : Math.min(1, 0.18 + (v / maxCell) * 0.82);
-          cells +=
-            '<rect x="' + x + '" y="' + y + '" width="' + (cellW - gap) + '" height="' + cellH + '" rx="4" ' +
-            'fill="var(--primary)" fill-opacity="' + opacity.toFixed(2) + '"/>';
-          if (v > 0) {
-            const textColor = opacity > 0.55 ? "#fff" : "var(--text)";
-            cells +=
-              '<text x="' + (x + (cellW - gap) / 2) + '" y="' + (y + cellH / 2 + 4) + '" font-size="10.5" ' +
-              'font-weight="600" fill="' + textColor + '" text-anchor="middle">' + v + '</text>';
-          }
-        });
-      });
-
+      let bars = "", colLabels = "";
+      const points = [];
       recordDates.forEach(function (rd, ci) {
-        const x = rowLabelW + ci * cellW + (cellW - gap) / 2;
-        const y = padT + weekRows.length * (cellH + gap) + 16;
+        const x = padL + ci * barSlot + (barSlot - barW) / 2;
+        let yCursor = padT + innerH;
+        bucketRows.forEach(function (b, bi) {
+          const v = (matrix[bi] && matrix[bi][ci]) || 0;
+          if (v <= 0) return;
+          const segH = innerH * (v / maxVal);
+          const y = yCursor - segH;
+          const color = AGE_BUCKET_COLORS_[bi % AGE_BUCKET_COLORS_.length];
+          bars += '<rect x="' + x + '" y="' + y + '" width="' + barW + '" height="' + Math.max(segH, 0.5) + '" fill="' + color + '"/>';
+          if (segH > 13) {
+            bars +=
+              '<text x="' + (x + barW / 2) + '" y="' + (y + segH / 2 + 4) + '" font-size="10" font-weight="600" ' +
+              'fill="#fff" text-anchor="middle">' + v + '</text>';
+          }
+          yCursor = y;
+        });
         colLabels +=
-          '<text x="' + x + '" y="' + y + '" font-size="10.5" fill="var(--muted)" text-anchor="middle">' +
+          '<text x="' + (x + barW / 2) + '" y="' + (h - 10) + '" font-size="10.5" fill="var(--muted)" text-anchor="middle">' +
           trendDayLabel_(rd) + '</text>';
+
+        const cx = padL + ci * barSlot + barSlot / 2;
+        const cy = padT + innerH - innerH * (totals[ci] / maxVal);
+        points.push({ x: cx, y: cy, total: totals[ci] });
       });
+
+      const linePath = "M" + points.map(function (p) { return p.x + "," + p.y; }).join(" L");
+      const dots = points.map(function (p) {
+        const labelAbove = p.y > padT + 12;
+        const labelY = labelAbove ? p.y - 8 : p.y + 15;
+        return (
+          '<circle cx="' + p.x + '" cy="' + p.y + '" r="3.5" fill="var(--text)" stroke="#fff" stroke-width="1.5"/>' +
+          '<text x="' + p.x + '" y="' + labelY + '" font-size="10.5" font-weight="700" fill="var(--text)" text-anchor="middle">' + p.total + '</text>'
+        );
+      }).join("");
 
       container.style.overflowX = "auto";
       container.style.webkitOverflowScrolling = "touch";
       container.innerHTML =
         '<svg viewBox="0 0 ' + w + ' ' + h + '" width="' + w + '" height="' + h + '" style="display:block;">' +
-          cells + rowLabels + colLabels +
+          gridLines + bars +
+          '<path d="' + linePath + '" fill="none" stroke="var(--text)" stroke-width="1.6" stroke-dasharray="4 3"/>' +
+          dots + colLabels +
         '</svg>';
+
+      if (legendEl) {
+        legendEl.innerHTML =
+          bucketRows.map(function (b, bi) {
+            const color = AGE_BUCKET_COLORS_[bi % AGE_BUCKET_COLORS_.length];
+            return '<span><span class="legend-dot" style="background:' + color + ';"></span>' +
+              escapeHtml_(b.label) + ' (' + b.total.toLocaleString("th-TH") + ')</span>';
+          }).join("") +
+          '<span><span class="legend-dot" style="background:var(--text);"></span>เส้นประ = ยอดรวมผู้มารับบริการ/วัน</span>';
+      }
 
       renderCrossTabInsight_(insightEl, data);
     }
