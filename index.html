@@ -343,6 +343,26 @@
       transition: transform 0.18s ease;
     }
 
+    .nav-badge {
+      margin-left: auto;
+      min-width: 19px;
+      height: 19px;
+      padding: 0 5px;
+      border-radius: 999px;
+      background: var(--danger);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 19px;
+      text-align: center;
+    }
+    .bottom-nav-item .nav-badge {
+      position: absolute;
+      top: 2px;
+      right: 18%;
+      margin-left: 0;
+    }
+
     .sidebar-nav-item:hover {
       background: rgba(255, 255, 255, 0.09);
       color: #fff;
@@ -1058,13 +1078,74 @@
        ปรับความประณีตของอินเทอร์เฟซ (micro-interaction / accessibility)
        ============================================================ */
     .page-section.active {
-      animation: sectionFade 0.25s ease both;
+      animation: sectionFade 0.35s cubic-bezier(.16,.84,.44,1) both;
     }
 
     @keyframes sectionFade {
-      from { opacity: 0; transform: translateY(6px); }
+      from { opacity: 0; transform: translateY(10px); }
       to   { opacity: 1; transform: none; }
     }
+
+    /* ============================================================
+       Animation การเปิดหน้า/เลื่อนเข้าของการ์ดและกราฟ (รูปแบบสากล:
+       fade + slide-up แบบไล่ลำดับ/stagger เหมือนแอปมือถือทั่วไป)
+       ตัวแปร --reveal-i ถูกตั้งค่าจาก JS (ดู applyRevealStagger_) ทุกครั้งที่
+       สลับหน้า เพื่อให้การ์ดแต่ละใบไล่โผล่ทีละใบแทนที่จะโผล่พร้อมกันหมด
+       ============================================================ */
+    @keyframes cardRiseIn {
+      from { opacity: 0; transform: translateY(18px) scale(.985); }
+      to   { opacity: 1; transform: none; }
+    }
+    .page-section.active .card,
+    .page-section.active .stat-card {
+      animation: cardRiseIn 0.55s cubic-bezier(.16,.84,.44,1) both;
+      animation-delay: calc(var(--reveal-i, 0) * 55ms);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .page-section.active,
+      .page-section.active .card,
+      .page-section.active .stat-card { animation: none !important; }
+    }
+
+    /* กราฟ/แผนภูมิ SVG ที่วาดสดด้วย JS (ไม่มีไลบรารีภายนอก) — ทุกครั้งที่ข้อมูลโหลด
+       เสร็จแล้วแทรก <svg> ใหม่เข้าไปแทนที่ของเดิม จะ "โผล่ออกมา" เบาๆ โดยอัตโนมัติ */
+    @keyframes chartPopIn {
+      from { opacity: 0; transform: scale(.94) translateY(8px); }
+      to   { opacity: 1; transform: none; }
+    }
+    #trend-chart svg, #donut-chart svg, #hourly-trend-chart svg,
+    #week-breakdown-chart svg, #crosstab-chart svg,
+    #medication-chart svg, #med-pie-chart svg {
+      animation: chartPopIn 0.5s cubic-bezier(.16,.84,.44,1) both;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #trend-chart svg, #donut-chart svg, #hourly-trend-chart svg,
+      #week-breakdown-chart svg, #crosstab-chart svg,
+      #medication-chart svg, #med-pie-chart svg { animation: none !important; }
+    }
+
+    /* แถวตารางไล่เลื่อนเข้าจากซ้ายทีละแถว (จำกัด stagger ไว้ 10 แถวแรกเพื่อไม่ให้
+       รายการยาวๆ ต้องรอ animation จบนานเกินไป แถวถัดจากนั้นใช้ค่าหน่วงสูงสุดร่วมกัน) */
+    @keyframes rowSlideIn {
+      from { opacity: 0; transform: translateX(-8px); }
+      to   { opacity: 1; transform: none; }
+    }
+    .case-table tbody tr, .history-table tbody tr, .followup-table tbody tr {
+      animation: rowSlideIn 0.4s cubic-bezier(.16,.84,.44,1) both;
+    }
+    .case-table tbody tr:nth-child(n+11), .history-table tbody tr:nth-child(n+11), .followup-table tbody tr:nth-child(n+11) {
+      animation-delay: .32s;
+    }
+    .case-table tbody tr:nth-child(1), .history-table tbody tr:nth-child(1), .followup-table tbody tr:nth-child(1) { animation-delay: 0.03s; }
+    .case-table tbody tr:nth-child(2), .history-table tbody tr:nth-child(2), .followup-table tbody tr:nth-child(2) { animation-delay: 0.06s; }
+    .case-table tbody tr:nth-child(3), .history-table tbody tr:nth-child(3), .followup-table tbody tr:nth-child(3) { animation-delay: 0.09s; }
+    .case-table tbody tr:nth-child(4), .history-table tbody tr:nth-child(4), .followup-table tbody tr:nth-child(4) { animation-delay: 0.12s; }
+    .case-table tbody tr:nth-child(5), .history-table tbody tr:nth-child(5), .followup-table tbody tr:nth-child(5) { animation-delay: 0.15s; }
+    .case-table tbody tr:nth-child(6), .history-table tbody tr:nth-child(6), .followup-table tbody tr:nth-child(6) { animation-delay: 0.18s; }
+    .case-table tbody tr:nth-child(7), .history-table tbody tr:nth-child(7), .followup-table tbody tr:nth-child(7) { animation-delay: 0.21s; }
+    .case-table tbody tr:nth-child(8), .history-table tbody tr:nth-child(8), .followup-table tbody tr:nth-child(8) { animation-delay: 0.24s; }
+    .case-table tbody tr:nth-child(9), .history-table tbody tr:nth-child(9), .followup-table tbody tr:nth-child(9) { animation-delay: 0.27s; }
+    .case-table tbody tr:nth-child(10), .history-table tbody tr:nth-child(10), .followup-table tbody tr:nth-child(10) { animation-delay: 0.30s; }
 
     .card { transition: box-shadow 0.18s ease; }
 
@@ -2430,6 +2511,11 @@
           <span class="material-icons-outlined">edit_note</span>
           <span>บันทึกการรับยา</span>
         </div>
+        <div class="sidebar-nav-item" data-page="followup">
+          <span class="material-icons-outlined">assignment_turned_in</span>
+          <span>เคสที่ต้องติดตามต่อ</span>
+          <span class="nav-badge hidden" id="followup-nav-badge">0</span>
+        </div>
         <div class="sidebar-nav-item" data-page="history">
           <span class="material-icons-outlined">history</span>
           <span>ประวัติการบันทึก</span>
@@ -2465,6 +2551,11 @@
       <div class="bottom-nav-item sidebar-nav-item" data-page="record-form">
         <span class="material-icons-outlined">edit_note</span>
         <span>บันทึก</span>
+      </div>
+      <div class="bottom-nav-item sidebar-nav-item" data-page="followup">
+        <span class="material-icons-outlined">assignment_turned_in</span>
+        <span>ติดตาม</span>
+        <span class="nav-badge hidden" id="followup-nav-badge-mobile">0</span>
       </div>
       <div class="bottom-nav-item sidebar-nav-item" data-page="history">
         <span class="material-icons-outlined">history</span>
@@ -2874,6 +2965,92 @@
           </div>
         </section>
 
+        <!-- ============ เคสที่ต้องติดตามต่อ (ปิดเคส/เปิดเคสใหม่) ============ -->
+        <section class="page-section" id="section-followup">
+          <div class="section-header">
+            <h2>เคสที่ต้องติดตามต่อ</h2>
+            <button class="btn btn-secondary" id="btn-refresh-followup" style="width:auto;">
+              <span class="material-icons-outlined">refresh</span>
+              <span class="btn-label">รีเฟรชข้อมูล</span>
+              <span class="spinner"></span>
+            </button>
+          </div>
+          <p class="card-sub" style="margin:-6px 0 14px;">
+            เคสที่ได้ยา "ไม่ครบ" จากจุดนี้และยังไม่ได้รับยาส่วนที่ขาด หากทราบว่าผู้ป่วยได้รับยาครบแล้ว
+            ผ่านช่องทางอื่น (เช่น มารับที่จุดจ่ายยาปกติ OPD โดยไม่ได้ย้อนกลับมาที่จุดนี้) ให้กด "ปิดเคส"
+            เพื่อไม่ต้องติดตามซ้ำ โดยจะไม่มีผลย้อนหลังกับประวัติการบันทึกเดิม
+          </p>
+
+          <div class="stat-grid">
+            <div class="stat-card">
+              <div class="stat-icon" style="color:var(--danger); background:rgba(220,38,38,0.1);"><span class="material-icons-outlined">report</span></div>
+              <div class="stat-value" id="followup-stat-open">-</div>
+              <div class="stat-label">เคสที่ยังค้างติดตามอยู่ตอนนี้</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon" style="color:var(--secondary); background:rgba(18,165,148,0.1);"><span class="material-icons-outlined">task_alt</span></div>
+              <div class="stat-value" id="followup-stat-hot">-</div>
+              <div class="stat-label">ค้างเกิน 4 วัน (ควรติดตามด่วน)</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon" style="color:var(--primary); background:rgba(11,95,186,0.1);"><span class="material-icons-outlined">history_toggle_off</span></div>
+              <div class="stat-value" id="followup-stat-closed">-</div>
+              <div class="stat-label">ปิดเคสผ่านช่องทางอื่นแล้ว (50 รายการล่าสุด)</div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-bottom:16px;">
+            <div class="card-title">
+              <span class="material-icons-outlined" style="color:var(--danger);">report</span>
+              รายการเคสที่ต้องติดตามต่อทั้งหมด
+            </div>
+            <div class="form-field" style="max-width:340px; margin-bottom:12px;">
+              <label>ค้นหา (ชื่อ / HN)</label>
+              <input type="text" id="followup-search" placeholder="พิมพ์ชื่อหรือ HN">
+            </div>
+            <div class="table-wrap">
+              <table class="followup-table case-table">
+                <thead>
+                  <tr>
+                    <th>HN</th>
+                    <th>ชื่อ-สกุล</th>
+                    <th>วันที่ค้าง</th>
+                    <th>ขาดเหลือ</th>
+                    <th>เบอร์โทร</th>
+                    <th>ค้างมาแล้ว</th>
+                    <th>จัดการ</th>
+                  </tr>
+                </thead>
+                <tbody id="followup-manage-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">
+              <span class="material-icons-outlined" style="color:var(--primary);">history_toggle_off</span>
+              ประวัติการปิดเคสล่าสุด
+            </div>
+            <p class="card-sub">ถ้าปิดเคสผิด สามารถกด "เปิดเคสใหม่" เพื่อให้กลับมาแสดงในรายการค้างติดตามได้ทันที</p>
+            <div class="table-wrap">
+              <table class="followup-table case-table">
+                <thead>
+                  <tr>
+                    <th>HN</th>
+                    <th>ชื่อ-สกุล</th>
+                    <th>วันที่ค้าง</th>
+                    <th>ช่องทางที่ได้รับยา</th>
+                    <th>หมายเหตุ</th>
+                    <th>ปิดโดย / เมื่อ</th>
+                    <th>จัดการ</th>
+                  </tr>
+                </thead>
+                <tbody id="followup-closed-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
         <!-- ============ ประวัติการบันทึก ============ -->
         <section class="page-section" id="section-history">
           <div class="section-header">
@@ -3147,6 +3324,68 @@
       </div>
     </div>
   </div>
+  <!-- ================= Modal: ปิดเคสติดตาม (ได้รับยาผ่านช่องทางอื่นแล้ว) ================= -->
+  <div class="modal-overlay hidden" id="modal-close-case">
+    <div class="modal-box" style="max-width:520px; text-align:left;">
+      <h3><span class="material-icons-outlined" style="color:var(--secondary);">task_alt</span> ปิดเคสติดตาม</h3>
+      <p class="hint" style="text-align:left;">
+        <strong id="close-case-patient-name">-</strong><br>
+        HN: <span id="close-case-hn">-</span> · ยาค้างวันที่ <span id="close-case-pending-date">-</span>
+      </p>
+
+      <div class="form-field full" style="margin-top:10px;">
+        <label>ผู้ป่วยได้รับยาครบแล้วผ่านช่องทางใด <span class="req">*</span></label>
+        <div class="choice-group" id="close-case-channel-group" style="flex-direction:column; align-items:stretch;"></div>
+      </div>
+
+      <div class="form-field full">
+        <label>หมายเหตุเพิ่มเติม</label>
+        <textarea id="close-case-note" maxlength="1000" placeholder="เช่น ตรวจสอบกับ OPD แล้วเมื่อวันที่ ... / เบอร์ที่ติดต่อ ..."></textarea>
+      </div>
+
+      <div class="form-field full">
+        <label>ผู้ปิดเคส <span class="req">*</span></label>
+        <input type="text" id="close-case-by" maxlength="100" placeholder="ชื่อผู้ดำเนินการ">
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-outline" id="btn-cancel-close-case">ยกเลิก</button>
+        <button type="button" class="btn btn-primary" id="btn-confirm-close-case" style="width:auto;">
+          <span class="material-icons-outlined">check_circle</span>
+          <span class="btn-label">ยืนยันปิดเคส</span>
+          <span class="spinner"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= Modal: เปิดเคสที่ปิดไว้กลับมาใหม่ ================= -->
+  <div class="modal-overlay hidden" id="modal-reopen-case">
+    <div class="modal-box" style="max-width:480px; text-align:left;">
+      <h3><span class="material-icons-outlined" style="color:var(--danger);">restart_alt</span> เปิดเคสนี้กลับมาติดตามต่อ?</h3>
+      <p class="hint" style="text-align:left;">
+        <strong id="reopen-case-patient-name">-</strong><br>
+        HN: <span id="reopen-case-hn">-</span> · ยาค้างวันที่ <span id="reopen-case-pending-date">-</span>
+      </p>
+      <div class="form-field full">
+        <label>เหตุผล (ถ้ามี)</label>
+        <textarea id="reopen-case-reason" maxlength="1000" placeholder="เช่น ปิดเคสผิดคน / ข้อมูลที่ได้รับมาไม่ถูกต้อง"></textarea>
+      </div>
+      <div class="form-field full">
+        <label>ผู้ดำเนินการ <span class="req">*</span></label>
+        <input type="text" id="reopen-case-by" maxlength="100" placeholder="ชื่อผู้ดำเนินการ">
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-outline" id="btn-cancel-reopen-case">ยกเลิก</button>
+        <button type="button" class="btn btn-primary" id="btn-confirm-reopen-case" style="width:auto;">
+          <span class="material-icons-outlined">restart_alt</span>
+          <span class="btn-label">ยืนยันเปิดเคสใหม่</span>
+          <span class="spinner"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
 <!-- ================= Modal: เปิดกล้อง WebCam ================= -->
   <div class="modal-overlay hidden" id="modal-camera">
     <div class="modal-box" style="text-align: center; max-width: 900px; width: 90%;">
@@ -3618,6 +3857,22 @@
 
       buildMedPool_();
 
+      // ---------------- หน้า "เคสที่ต้องติดตามต่อ" ----------------
+      document.getElementById("btn-refresh-followup").addEventListener("click", function () {
+        loadFollowUp_(this);
+      });
+      document.getElementById("followup-search").addEventListener("input", renderFollowUpManageTable_);
+      document.getElementById("btn-cancel-close-case").addEventListener("click", closeCloseCaseModal_);
+      document.getElementById("modal-close-case").addEventListener("click", function (e) {
+        if (e.target === this) closeCloseCaseModal_();
+      });
+      document.getElementById("btn-confirm-close-case").addEventListener("click", submitCloseCase_);
+      document.getElementById("btn-cancel-reopen-case").addEventListener("click", closeReopenCaseModal_);
+      document.getElementById("modal-reopen-case").addEventListener("click", function (e) {
+        if (e.target === this) closeReopenCaseModal_();
+      });
+      document.getElementById("btn-confirm-reopen-case").addEventListener("click", submitReopenCase_);
+
       const medSearchInput = document.getElementById("field-med-search");
       medSearchInput.addEventListener("input", renderMedSuggestDropdown_);
       medSearchInput.addEventListener("focus", renderMedSuggestDropdown_);
@@ -3721,7 +3976,9 @@
         document.getElementById("page-app").classList.remove("hidden");
         setButtonLoading_(btn, false);
         renderRecorderNameInSidebar_();
+        applyRevealStagger_(document.getElementById("section-dashboard"));
         loadDashboard_();
+        refreshFollowUpBadge_();
       }, 60);
     }
 
@@ -3756,6 +4013,7 @@
       closeMobileSidebar_();
 
       if (pageKey === "dashboard") loadDashboard_();
+      if (pageKey === "followup") loadFollowUp_();
       if (pageKey === "history") loadHistory_();
       if (pageKey === "med-search") loadMedTotals_();
       if (pageKey === "line-notify") loadLineSummary_();
@@ -3777,7 +4035,9 @@
       document.querySelectorAll(".page-section").forEach(function (sec) {
         sec.classList.remove("active");
       });
-      document.getElementById("section-" + pageKey).classList.add("active");
+      const activeSection = document.getElementById("section-" + pageKey);
+      activeSection.classList.add("active");
+      applyRevealStagger_(activeSection);
 
       document.querySelectorAll(".sidebar-nav-item").forEach(function (item) {
         item.classList.toggle("active", item.getAttribute("data-page") === pageKey);
@@ -3786,11 +4046,23 @@
       const titles = {
         dashboard: "Dashboard",
         "record-form": "บันทึกการรับยา",
+        followup: "เคสที่ต้องติดตามต่อ",
         history: "ประวัติการบันทึก",
         "med-search": "ค้นยอดจ่ายยา",
         "line-notify": "แจ้งเตือน LINE"
       };
       document.getElementById("topbar-title").textContent = titles[pageKey] || "";
+    }
+
+    /** ตั้งค่า --reveal-i ให้การ์ด/สรุปยอดในหน้าที่กำลังเปิด ไล่โผล่ทีละใบ (universal stagger
+     * animation) ดู @keyframes cardRiseIn ใน CSS — เรียกทุกครั้งที่สลับหน้าเพื่อให้ animation
+     * เล่นซ้ำใหม่เสมอ ไม่ใช่แค่ครั้งแรกที่โหลดหน้าเว็บ */
+    function applyRevealStagger_(sectionEl) {
+      if (!sectionEl) return;
+      const nodes = sectionEl.querySelectorAll(".card, .stat-card");
+      nodes.forEach(function (el, i) {
+        el.style.setProperty("--reveal-i", i);
+      });
     }
 
     function closeMobileSidebar_() {
@@ -4307,8 +4579,12 @@
         return;
       }
 
-      const bucketColors = bucketRows.map(function (b) { return b.color; });
-      const bucketLabels = bucketRows.map(function (b) { return b.label; });
+      const FALLBACK_BUCKET_COLORS_ = ["#12A594", "#0BA5EC", "#F59E0B", "#F97316", "#DC2626", "#94A3B8"];
+      const bucketColors = bucketRows.map(function (b, bi) { return b.color || FALLBACK_BUCKET_COLORS_[bi % FALLBACK_BUCKET_COLORS_.length]; });
+      const bucketLabels = bucketRows.map(function (b, bi) { return b.label || (b.isOther ? "อื่น ๆ" : ("หมวด " + (bi + 1))); });
+      // ถ้า backend ยังเป็นเวอร์ชันเก่า (ยังไม่ได้ redeploy Code.gs ใหม่) จะไม่มี avgWeeksLate
+      // ส่งมาเลย — กันไว้ไม่ให้ขึ้น "เฉลี่ย 0 สัปดาห์" หลอก ๆ ทุกแท่ง โดยซ่อนบรรทัดนี้ไปแทน
+      const hasAvgWeeksLate = Array.isArray(data.avgWeeksLate) && data.avgWeeksLate.length === recordDates.length;
 
       // เผื่อพื้นที่ให้กว้าง-สูงขึ้นกว่าเดิมชัดเจน (แก้ปัญหากราฟดูอัดแน่น อ่านยาก):
       // - แต่ละแท่งกว้างขึ้น (naturalWidth ต่อคอลัมน์ 64→104px) มีช่องไฟระหว่างแท่งมากขึ้น
@@ -4361,13 +4637,17 @@
         });
 
         // บรรทัดวันที่ (บน) + ค่าเฉลี่ยจำนวนสัปดาห์ที่ค้างของวันนั้น สีไล่ตามระดับ (เขียว=ใกล้จบ)
-        const avgWk = avgWeeksLate[ci] || 0;
-        const avgColor = avgWk <= 0.5 ? "#12A594" : (avgWk <= 1.5 ? "#F59E0B" : "#DC2626");
+        // (แสดงเฉพาะเมื่อ backend ส่ง avgWeeksLate มาจริง — ดู hasAvgWeeksLate ด้านบน)
         colLabels +=
           '<text x="' + (x + barW / 2) + '" y="' + (h - 34) + '" font-size="11.5" font-weight="600" fill="var(--text)" text-anchor="middle">' +
-          trendDayLabel_(rd) + '</text>' +
-          '<text x="' + (x + barW / 2) + '" y="' + (h - 15) + '" font-size="11" font-weight="700" fill="' + avgColor + '" text-anchor="middle">' +
-          'เฉลี่ย ' + avgWk.toLocaleString("th-TH") + ' สัปดาห์</text>';
+          trendDayLabel_(rd) + '</text>';
+        if (hasAvgWeeksLate) {
+          const avgWk = avgWeeksLate[ci] || 0;
+          const avgColor = avgWk <= 0.5 ? "#12A594" : (avgWk <= 1.5 ? "#F59E0B" : "#DC2626");
+          colLabels +=
+            '<text x="' + (x + barW / 2) + '" y="' + (h - 15) + '" font-size="11" font-weight="700" fill="' + avgColor + '" text-anchor="middle">' +
+            'เฉลี่ย ' + avgWk.toLocaleString("th-TH") + ' สัปดาห์</text>';
+        }
 
         const cx = padL + ci * barSlot + barSlot / 2;
         const cy = padT + innerH - innerH * (totals[ci] / maxVal);
@@ -4402,19 +4682,27 @@
           '<span class="legend-chip"><span class="legend-dot" style="background:var(--text);"></span>เส้นประ = ยอดรวมผู้มารับบริการ/วัน</span>';
       }
 
-      renderCrossTabInsight_(insightEl, data);
+      renderCrossTabInsight_(insightEl, data, !hasAvgWeeksLate);
     }
 
     /** กล่องข้อความสรุป: (1) แนวโน้ม "ค่าเฉลี่ยจำนวนสัปดาห์ที่ค้าง" กำลังไล่ใกล้ชิดกับวันที่
      *  เปิดบริการหรือไม่ (ตอบคำถามหลัก "ควรเปิดบริการต่อถึงวันไหน")
      *  (2) แนวโน้มยอดรวม + ประมาณการวันที่คาดว่าจุดรับยาค้างจะบริการ "จบพอดี" */
-    function renderCrossTabInsight_(el, data) {
+    function renderCrossTabInsight_(el, data, backendOutdated) {
       if (!el) return;
       data = data || {};
       const wf = data.weekFocus;
       const proj = data.projection;
 
       let html = "";
+
+      if (backendOutdated) {
+        html +=
+          '<div style="background:#FEF2F2; border:1px solid #FECACA; border-radius:10px; padding:12px 14px; font-size:13px; color:#B91C1C; display:flex; gap:8px; align-items:flex-start; margin-bottom:10px;">' +
+            '<span class="material-icons-outlined" style="font-size:18px; flex:none;">warning</span>' +
+            '<span>กราฟนี้ยังแสดงผลไม่ครบ เพราะ Apps Script backend (Code.gs) ที่เชื่อมอยู่ยังเป็นเวอร์ชันเก่า — กรุณาอัปเดต Code.gs แล้ว Deploy เวอร์ชันใหม่ (Deploy &gt; Manage deployments &gt; Edit &gt; New version) จึงจะเห็นสีและค่าเฉลี่ยครบถ้วน</span>' +
+          '</div>';
+      }
 
       if (wf) {
         const trendColor = wf.narrowing ? "var(--secondary)" : "#DC2626";
@@ -4938,6 +5226,256 @@
           '<td><span class="badge badge-incomplete">ค้างติดตาม</span></td>' +
         '</tr>';
       }).join("");
+    }
+
+    // ================================================================
+    // หน้า "เคสที่ต้องติดตามต่อ" (จัดการเต็มรูปแบบ: ค้นหา / ปิดเคส / เปิดเคสใหม่)
+    // ================================================================
+    let followUpCasesData_ = [];
+    let followUpClosuresData_ = [];
+    let followUpChannels_ = [];
+    let pendingCloseCase_ = null;
+    let pendingReopenCase_ = null;
+
+    function loadFollowUp_(btnEl) {
+      if (btnEl) setButtonLoading_(btnEl, true);
+      beginBusy_();
+      google.script.run
+        .withSuccessHandler(busyHandler_(function (data) {
+          if (btnEl) setButtonLoading_(btnEl, false);
+          renderFollowUpManage_(data);
+        }))
+        .withFailureHandler(busyHandler_(function (err) {
+          if (btnEl) setButtonLoading_(btnEl, false);
+          showToast("โหลดรายการเคสที่ต้องติดตามต่อไม่สำเร็จ: " + errMsg_(err), "error");
+        }))
+        .getFollowUpCases();
+    }
+
+    /** โหลดจำนวนเคสค้างติดตามแบบเงียบๆ (ไม่สลับหน้า) เพื่อตั้งเลขตัวเลขแจ้งเตือนที่เมนู
+     * ทันทีหลังเข้าระบบ โดยไม่ต้องรอให้ผู้ใช้กดเข้าไปที่หน้านี้ก่อน */
+    function refreshFollowUpBadge_() {
+      google.script.run
+        .withSuccessHandler(function (data) {
+          followUpCasesData_ = (data && data.openCases) || [];
+          followUpClosuresData_ = (data && data.recentClosures) || [];
+          followUpChannels_ = (data && data.channels) || [];
+          updateFollowupBadge_(followUpCasesData_.length);
+        })
+        .withFailureHandler(function () { /* ไม่ใช่การกระทำที่ผู้ใช้รอผลอยู่ จึงไม่แจ้ง error รบกวน */ })
+        .getFollowUpCases();
+    }
+
+    function updateFollowupBadge_(count) {
+      [document.getElementById("followup-nav-badge"), document.getElementById("followup-nav-badge-mobile")].forEach(function (el) {
+        if (!el) return;
+        el.textContent = count > 99 ? "99+" : String(count);
+        el.classList.toggle("hidden", !count);
+      });
+    }
+
+    function renderFollowUpManage_(data) {
+      data = data || {};
+      followUpCasesData_ = data.openCases || [];
+      followUpClosuresData_ = data.recentClosures || [];
+      followUpChannels_ = data.channels || [];
+
+      document.getElementById("followup-stat-open").textContent = followUpCasesData_.length.toLocaleString("th-TH");
+      document.getElementById("followup-stat-hot").textContent =
+        followUpCasesData_.filter(function (c) { return c.daysOpen >= 4; }).length.toLocaleString("th-TH");
+      document.getElementById("followup-stat-closed").textContent = followUpClosuresData_.length.toLocaleString("th-TH");
+
+      updateFollowupBadge_(followUpCasesData_.length);
+      renderFollowUpManageTable_();
+      renderClosedCasesTable_();
+    }
+
+    function renderFollowUpManageTable_() {
+      const tbody = document.getElementById("followup-manage-tbody");
+      const q = (document.getElementById("followup-search").value || "").trim().toLowerCase();
+
+      const list = !q ? followUpCasesData_ : followUpCasesData_.filter(function (c) {
+        return (c.fullName || "").toLowerCase().indexOf(q) !== -1 || (c.hn || "").toLowerCase().indexOf(q) !== -1;
+      });
+
+      if (list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px;">' +
+          (followUpCasesData_.length === 0 ? 'ไม่มีเคสค้างติดตามเลย 🎉' : 'ไม่พบเคสที่ตรงกับคำค้นหา') + '</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = list.map(function (c, i) {
+        const hot = c.daysOpen >= 4;
+        return '<tr>' +
+          '<td>' + escapeHtml_(c.hn) + '</td>' +
+          '<td>' + escapeHtml_((c.prefix || "") + c.fullName) + '</td>' +
+          '<td>' + formatThaiDateShort_(c.pendingDate) + '</td>' +
+          '<td>' + escapeHtml_(c.shortageDetail || "-") + '</td>' +
+          '<td>' + escapeHtml_(c.phone || "-") + '</td>' +
+          '<td class="days-open' + (hot ? " hot" : "") + '">' + c.daysOpen + ' วัน</td>' +
+          '<td><button type="button" class="btn btn-outline" style="width:auto; padding:6px 12px; font-size:12.5px;" data-close-case-index="' + i + '">' +
+            '<span class="material-icons-outlined" style="font-size:16px;">task_alt</span><span class="btn-label">ปิดเคส</span>' +
+          '</button></td>' +
+        '</tr>';
+      }).join("");
+
+      tbody.querySelectorAll("[data-close-case-index]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          openCloseCaseModal_(list[parseInt(this.getAttribute("data-close-case-index"), 10)]);
+        });
+      });
+    }
+
+    function renderClosedCasesTable_() {
+      const tbody = document.getElementById("followup-closed-tbody");
+      if (!followUpClosuresData_ || followUpClosuresData_.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px;">ยังไม่มีเคสที่ปิดผ่านช่องทางอื่น</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = followUpClosuresData_.map(function (ev, i) {
+        return '<tr>' +
+          '<td>' + escapeHtml_(ev.hn) + '</td>' +
+          '<td>' + escapeHtml_((ev.prefix || "") + ev.fullName) + '</td>' +
+          '<td>' + formatThaiDateShort_(ev.pendingDate) + '</td>' +
+          '<td>' + escapeHtml_(ev.channel || "-") + '</td>' +
+          '<td>' + escapeHtml_(ev.note || "-") + '</td>' +
+          '<td>' + escapeHtml_(ev.actedBy || "-") + '<br><span style="color:var(--muted); font-size:12px;">' + formatThaiDateTime_(ev.timestamp) + '</span></td>' +
+          '<td><button type="button" class="btn btn-outline" style="width:auto; padding:6px 12px; font-size:12.5px;" data-reopen-case-index="' + i + '">' +
+            '<span class="material-icons-outlined" style="font-size:16px;">restart_alt</span><span class="btn-label">เปิดเคสใหม่</span>' +
+          '</button></td>' +
+        '</tr>';
+      }).join("");
+
+      tbody.querySelectorAll("[data-reopen-case-index]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          openReopenCaseModal_(followUpClosuresData_[parseInt(this.getAttribute("data-reopen-case-index"), 10)]);
+        });
+      });
+    }
+
+    function openCloseCaseModal_(caseObj) {
+      if (!caseObj) return;
+      pendingCloseCase_ = caseObj;
+
+      document.getElementById("close-case-patient-name").textContent = (caseObj.prefix || "") + caseObj.fullName;
+      document.getElementById("close-case-hn").textContent = caseObj.hn;
+      document.getElementById("close-case-pending-date").textContent = formatThaiDateShort_(caseObj.pendingDate);
+      document.getElementById("close-case-note").value = "";
+      document.getElementById("close-case-by").value = currentRecorderName_ || "";
+
+      const group = document.getElementById("close-case-channel-group");
+      const fallbackChannels = ["ได้รับยาครบจากจุดจ่ายยาปกติ (OPD)", "ได้รับยาครบทางช่องทางอื่น (ระบุในหมายเหตุ)", "ติดต่อผู้ป่วยไม่ได้ / ไม่ประสงค์รับยาส่วนที่ขาดแล้ว"];
+      group.innerHTML = (followUpChannels_.length ? followUpChannels_ : fallbackChannels).map(function (ch, i) {
+        return '<label class="choice-pill">' +
+          '<input type="radio" name="closeCaseChannel" value="' + escapeHtml_(ch) + '"' + (i === 0 ? " checked" : "") + '>' +
+          '<span>' + escapeHtml_(ch) + '</span>' +
+        '</label>';
+      }).join("");
+      group.querySelectorAll('input[name="closeCaseChannel"]').forEach(function (el) {
+        el.addEventListener("change", updatePillStates_);
+      });
+      updatePillStates_();
+
+      document.getElementById("modal-close-case").classList.remove("hidden");
+    }
+
+    function closeCloseCaseModal_() {
+      document.getElementById("modal-close-case").classList.add("hidden");
+      pendingCloseCase_ = null;
+    }
+
+    function submitCloseCase_() {
+      if (!pendingCloseCase_) return;
+      const channelInput = document.querySelector('input[name="closeCaseChannel"]:checked');
+      const closedBy = document.getElementById("close-case-by").value.trim();
+
+      if (!channelInput) {
+        showToast("กรุณาเลือกช่องทางที่ได้รับยา", "warning");
+        return;
+      }
+      if (!closedBy) {
+        showToast("กรุณาระบุชื่อผู้ปิดเคส", "warning");
+        document.getElementById("close-case-by").focus();
+        return;
+      }
+
+      const payload = {
+        hn: pendingCloseCase_.hn,
+        prefix: pendingCloseCase_.prefix,
+        fullName: pendingCloseCase_.fullName,
+        pendingDate: pendingCloseCase_.pendingDate,
+        channel: channelInput.value,
+        note: document.getElementById("close-case-note").value.trim(),
+        closedBy: closedBy
+      };
+
+      const btn = document.getElementById("btn-confirm-close-case");
+      setButtonLoading_(btn, true);
+      google.script.run
+        .withSuccessHandler(function () {
+          setButtonLoading_(btn, false);
+          closeCloseCaseModal_();
+          showToast("ปิดเคสเรียบร้อยแล้ว", "success");
+          loadFollowUp_();
+        })
+        .withFailureHandler(function (err) {
+          setButtonLoading_(btn, false);
+          showToast("ปิดเคสไม่สำเร็จ: " + errMsg_(err), "error");
+        })
+        .closeFollowUpCase(payload);
+    }
+
+    function openReopenCaseModal_(closureObj) {
+      if (!closureObj) return;
+      pendingReopenCase_ = closureObj;
+
+      document.getElementById("reopen-case-patient-name").textContent = (closureObj.prefix || "") + closureObj.fullName;
+      document.getElementById("reopen-case-hn").textContent = closureObj.hn;
+      document.getElementById("reopen-case-pending-date").textContent = formatThaiDateShort_(closureObj.pendingDate);
+      document.getElementById("reopen-case-reason").value = "";
+      document.getElementById("reopen-case-by").value = currentRecorderName_ || "";
+
+      document.getElementById("modal-reopen-case").classList.remove("hidden");
+    }
+
+    function closeReopenCaseModal_() {
+      document.getElementById("modal-reopen-case").classList.add("hidden");
+      pendingReopenCase_ = null;
+    }
+
+    function submitReopenCase_() {
+      if (!pendingReopenCase_) return;
+      const reopenedBy = document.getElementById("reopen-case-by").value.trim();
+      if (!reopenedBy) {
+        showToast("กรุณาระบุชื่อผู้ดำเนินการ", "warning");
+        document.getElementById("reopen-case-by").focus();
+        return;
+      }
+
+      const payload = {
+        hn: pendingReopenCase_.hn,
+        prefix: pendingReopenCase_.prefix,
+        fullName: pendingReopenCase_.fullName,
+        pendingDate: pendingReopenCase_.pendingDate,
+        reason: document.getElementById("reopen-case-reason").value.trim(),
+        reopenedBy: reopenedBy
+      };
+
+      const btn = document.getElementById("btn-confirm-reopen-case");
+      setButtonLoading_(btn, true);
+      google.script.run
+        .withSuccessHandler(function () {
+          setButtonLoading_(btn, false);
+          closeReopenCaseModal_();
+          showToast("เปิดเคสกลับมาติดตามต่อแล้ว", "success");
+          loadFollowUp_();
+        })
+        .withFailureHandler(function (err) {
+          setButtonLoading_(btn, false);
+          showToast("เปิดเคสใหม่ไม่สำเร็จ: " + errMsg_(err), "error");
+        })
+        .reopenFollowUpCase(payload);
     }
 
     function statusBadgeClass_(status) {
