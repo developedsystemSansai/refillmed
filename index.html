@@ -2209,6 +2209,49 @@
       width: 100%;
     }
 
+    /* แถบเตือน "พบข้อมูลซ้ำ" แบบฝังในฟอร์ม (ไม่ลอยทับช่องกรอก ไม่บล็อกการบันทึก) */
+    .dup-notice {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin: 0 0 16px 0;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #F59E0B;
+      border-left-width: 4px;
+      background: rgba(245, 158, 11, 0.10);
+      color: var(--text);
+      font-size: 13px;
+      line-height: 1.5;
+      animation: dupNoticeIn 0.18s ease;
+    }
+    .dup-notice.hidden { display: none; }
+    .dup-notice .dup-notice-icon { color: #B45309; font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+    .dup-notice .dup-notice-body { flex: 1; min-width: 0; }
+    .dup-notice .dup-notice-title { font-weight: 700; color: #92400E; }
+    .dup-notice .dup-notice-detail { color: var(--text); }
+    .dup-notice .dup-notice-hint { color: var(--muted); font-size: 12px; margin-top: 2px; }
+    .dup-notice .dup-notice-close {
+      flex-shrink: 0;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 2px;
+      border-radius: 6px;
+      line-height: 0;
+    }
+    .dup-notice .dup-notice-close:hover { background: rgba(0, 0, 0, 0.06); }
+    /* ไฮไลต์ช่องที่ตรงกับข้อมูลเดิม */
+    .form-field input.dup-flag {
+      border-color: #F59E0B !important;
+      background: rgba(245, 158, 11, 0.07);
+    }
+    @keyframes dupNoticeIn {
+      from { opacity: 0; transform: translateY(-3px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     .toast.success { background: #0F5132; }
     .toast.error { background: #7F1D1D; }
     .toast.warning { background: #92400E; }
@@ -2498,6 +2541,125 @@
         display: none;
       }
     }
+
+    /* ============================================================
+       ยาขาดคลัง / เหลือน้อย (Low-stock)
+       ============================================================ */
+    .lowstock-alert {
+      margin-top: 10px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(220, 38, 38, 0.09), rgba(217, 119, 6, 0.10));
+      border: 1px solid rgba(220, 38, 38, 0.28);
+      border-left: 5px solid var(--danger);
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      animation: lsAlertIn 0.25s ease;
+    }
+    .lowstock-alert.hidden { display: none; }
+    .lowstock-alert .ls-alert-icon { color: var(--danger); font-size: 24px; flex-shrink: 0; }
+    .lowstock-alert .ls-alert-title { font-weight: 700; font-size: 13.5px; color: var(--danger); margin-bottom: 2px; }
+    .lowstock-alert .ls-alert-text { font-size: 13px; color: var(--text); line-height: 1.5; }
+    .lowstock-alert ul { margin: 6px 0 0 0; padding-left: 18px; }
+    .lowstock-alert li { margin: 2px 0; font-size: 13px; }
+    @keyframes lsAlertIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+    .lowstock-hint {
+      margin-top: 8px;
+      padding: 8px 12px;
+      border-radius: 10px;
+      background: rgba(217, 119, 6, 0.12);
+      color: #B45309;
+      font-size: 12.5px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .lowstock-hint.hidden { display: none; }
+
+    .ls-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      margin-left: 6px;
+      padding: 1px 7px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      vertical-align: 1px;
+      white-space: nowrap;
+    }
+    .ls-tag.out { background: rgba(220, 38, 38, 0.12); color: var(--danger); }
+    .ls-tag.low { background: rgba(217, 119, 6, 0.14); color: #B45309; }
+    .med-selected-row.row-lowstock { box-shadow: inset 4px 0 0 var(--danger); }
+
+    .ls-summary { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 4px; }
+    .ls-chip {
+      padding: 6px 12px; border-radius: 20px; font-size: 12.5px; font-weight: 700;
+      background: rgba(107, 114, 128, 0.12); color: #4B5563;
+    }
+    .ls-chip.out { background: rgba(220, 38, 38, 0.12); color: var(--danger); }
+    .ls-chip.low { background: rgba(217, 119, 6, 0.14); color: #B45309; }
+    .ls-chip.ok { background: rgba(18, 165, 148, 0.12); color: var(--secondary); }
+
+    .ls-toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+    .ls-toolbar .form-field { margin: 0; min-width: 170px; }
+
+    .ls-list { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+    .ls-item {
+      border: 1px solid var(--border);
+      border-left: 5px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 14px;
+      background: var(--surface);
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.6fr);
+      gap: 10px 16px;
+      align-items: center;
+      transition: box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+    .ls-item:hover { box-shadow: 0 6px 18px rgba(15, 23, 42, 0.07); }
+    .ls-item.st-out { border-left-color: var(--danger); background: rgba(220, 38, 38, 0.035); }
+    .ls-item.st-low { border-left-color: #D97706; background: rgba(217, 119, 6, 0.04); }
+    .ls-item.st-ok { border-left-color: var(--secondary); }
+    .ls-item.muted-off { opacity: 0.6; }
+    .ls-name { font-weight: 700; font-size: 14.5px; }
+    .ls-meta { font-size: 11.5px; color: var(--muted); margin-top: 2px; word-break: break-word; }
+    .ls-seg { display: inline-flex; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .ls-seg button {
+      border: 0; background: transparent; padding: 8px 12px; font: inherit; font-size: 12.5px;
+      font-weight: 600; color: var(--muted); cursor: pointer; transition: background 0.15s, color 0.15s;
+      min-height: 38px;
+    }
+    .ls-seg button + button { border-left: 1px solid var(--border); }
+    .ls-seg button:hover { background: rgba(var(--primary-rgb), 0.06); }
+    .ls-seg button.on-out { background: var(--danger); color: #fff; }
+    .ls-seg button.on-low { background: #D97706; color: #fff; }
+    .ls-seg button.on-ok { background: var(--secondary); color: #fff; }
+    .ls-controls { display: flex; flex-direction: column; gap: 8px; }
+    .ls-note-input {
+      width: 100%; border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px;
+      font: inherit; font-size: 13px; background: var(--surface); color: var(--text);
+    }
+    .ls-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    .ls-mini-btn {
+      border: 1px solid var(--border); background: transparent; color: var(--muted); border-radius: 8px;
+      padding: 4px 9px; font: inherit; font-size: 12px; cursor: pointer;
+    }
+    .ls-mini-btn:hover { color: var(--primary); border-color: var(--primary); }
+    .ls-mini-btn.danger:hover { color: var(--danger); border-color: var(--danger); }
+    .ls-edit-box {
+      grid-column: 1 / -1; display: grid; gap: 8px; padding-top: 8px; border-top: 1px dashed var(--border);
+    }
+    .ls-edit-box.hidden { display: none; }
+    .ls-hist td, .ls-hist th { padding: 8px 10px; font-size: 13px; vertical-align: top; }
+    @media (max-width: 720px) {
+      .ls-item { grid-template-columns: 1fr; }
+      .ls-seg { width: 100%; }
+      .ls-seg button { flex: 1; padding: 8px 4px; }
+    }
   </style>
 </head>
 <body>
@@ -2570,6 +2732,11 @@
           <span class="material-icons-outlined">query_stats</span>
           <span>ค้นยอดจ่ายยา</span>
         </div>
+        <div class="sidebar-nav-item" data-page="lowstock">
+          <span class="material-icons-outlined">production_quantity_limits</span>
+          <span>ยาขาดคลัง/เหลือน้อย</span>
+          <span class="nav-badge hidden" id="lowstock-nav-badge">0</span>
+        </div>
         <div class="sidebar-nav-item" data-page="line-notify">
           <svg class="line-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
             <rect x="1" y="1" width="22" height="22" rx="6" fill="#06C755"/>
@@ -2610,6 +2777,11 @@
       <div class="bottom-nav-item sidebar-nav-item" data-page="med-search">
         <span class="material-icons-outlined">query_stats</span>
         <span>ค้นยา</span>
+      </div>
+      <div class="bottom-nav-item sidebar-nav-item" data-page="lowstock">
+        <span class="material-icons-outlined">production_quantity_limits</span>
+        <span>ยาขาด</span>
+        <span class="nav-badge hidden" id="lowstock-nav-badge-mobile">0</span>
       </div>
       <div class="bottom-nav-item sidebar-nav-item" data-page="line-notify">
         <svg class="line-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
@@ -2865,6 +3037,18 @@
                 </div>
               </div>
 
+              <div class="dup-notice hidden" id="dup-notice" role="status" aria-live="polite">
+                <span class="material-icons-outlined dup-notice-icon">warning_amber</span>
+                <div class="dup-notice-body">
+                  <div class="dup-notice-title">พบข้อมูลซ้ำของวันนี้</div>
+                  <div class="dup-notice-detail" id="dup-notice-detail"></div>
+                  <div class="dup-notice-hint">หากเป็นซองยาเพิ่มเติมของผู้ป่วยคนเดิม สามารถบันทึกต่อได้ตามปกติ</div>
+                </div>
+                <button type="button" class="dup-notice-close" id="dup-notice-close" aria-label="ปิดการแจ้งเตือน" title="ปิด">
+                  <span class="material-icons-outlined" style="font-size:18px;">close</span>
+                </button>
+              </div>
+
               <div class="form-field full">
                 <label>รับ ไอเทมยา <span class="req">*</span></label>
 
@@ -2872,6 +3056,9 @@
                   <input type="text" id="field-med-search" class="med-search-input med-search-input--no-icon" placeholder="พิมพ์ชื่อยา หรือคำใกล้เคียง เช่น เบาหวาน, ความดัน..." autocomplete="off">
                   <div class="med-suggest-dropdown hidden" id="med-suggest-dropdown"></div>
                 </div>
+
+                <div class="lowstock-hint hidden" id="lowstock-typing-hint" role="status"></div>
+                <div class="lowstock-alert hidden" id="lowstock-alert" role="alert"></div>
 
                 <div class="med-selected-list" id="med-selected-list"></div>
 
@@ -3231,6 +3418,60 @@
         </section>
 
         <!-- ================= หน้า: แจ้งเตือน LINE ================= -->
+        <section class="page-section" id="section-lowstock">
+          <div class="section-header">
+            <h2>ยาขาดคลัง / เหลือน้อย</h2>
+          </div>
+
+          <div class="card">
+            <p class="card-sub" style="margin-top:0;">
+              รายการยาที่ไม่มีหรือเหลือน้อยในคลัง — เมื่อเจ้าหน้าที่พิมพ์/เลือกยาเหล่านี้ในหน้า
+              "บันทึกการรับยา" ระบบจะขึ้นแจ้งเตือนให้ตรวจสอบกับเภสัชกรทันที
+              เลือกวันที่เพื่อดู/แก้ไขสถานะย้อนหลังเป็นรายวันได้ (สถานะจะสืบทอดต่อไปยังวันถัด ๆ ไปจนกว่าจะมีการแก้ไข)
+            </p>
+
+            <div class="ls-toolbar">
+              <div class="form-field">
+                <label for="ls-date">ดูสถานะของวันที่</label>
+                <input type="date" id="ls-date">
+              </div>
+              <button type="button" class="btn btn-secondary" id="ls-btn-today">วันนี้</button>
+              <button type="button" class="btn btn-outline" id="ls-btn-add-toggle">
+                <span class="material-icons-outlined" style="font-size:18px;">add</span> เพิ่มรายการยา
+              </button>
+            </div>
+
+            <div class="ls-edit-box hidden" id="ls-add-box" style="margin-top:12px;">
+              <div class="form-field" style="margin:0;">
+                <label>ชื่อยา (ที่จะแสดงในรายการ)</label>
+                <input type="text" id="ls-add-name" placeholder="เช่น Warfarin 3 mg">
+              </div>
+              <div class="form-field" style="margin:0;">
+                <label>คำค้นสำหรับจับคำที่เจ้าหน้าที่พิมพ์ (คั่นทางเลือกด้วย , )</label>
+                <input type="text" id="ls-add-keywords" placeholder="เช่น warfarin 3, coumadin 3">
+              </div>
+              <div style="display:flex; gap:8px;">
+                <button type="button" class="btn btn-primary" id="ls-add-save" style="width:auto;">บันทึกรายการ</button>
+                <button type="button" class="btn btn-outline" id="ls-add-cancel">ยกเลิก</button>
+              </div>
+            </div>
+
+            <div class="ls-summary" id="ls-summary"></div>
+            <div class="ls-list" id="ls-list"></div>
+          </div>
+
+          <div class="card" style="margin-top:16px;">
+            <h3 style="margin:0 0 4px 0; font-size:15px;">ประวัติย้อนหลัง 14 วัน — วันไหนไม่มียาอะไร</h3>
+            <p class="card-sub" style="margin-top:0;">กดที่แถวเพื่อเปิดดู/แก้ไขสถานะของวันนั้น</p>
+            <div class="table-wrap">
+              <table class="history-table ls-hist" style="min-width:560px;">
+                <thead><tr><th style="width:130px;">วันที่</th><th>ไม่มีในคลัง</th><th>เหลือน้อย</th></tr></thead>
+                <tbody id="ls-history-body"><tr><td colspan="3" style="color:var(--muted);">กำลังโหลด...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
         <section class="page-section" id="section-line-notify">
           <div class="section-header">
             <h2 style="display:flex; align-items:center; gap:8px;">
@@ -3890,11 +4131,14 @@
         el.addEventListener("change", updatePillStates_);
       });
 
-      // เช็คข้อมูลซ้ำแบบเรียลไทม์ขณะพิมพ์ (debounce ในตัวฟังก์ชัน) แทนที่จะรอ blur
-      // เพื่อให้เจ้าหน้าที่เห็นคำเตือนทันทีที่กำลังกรอกข้อมูลที่อาจซ้ำ
-      document.getElementById("field-queue").addEventListener("input", checkDuplicateAndWarn_);
-      document.getElementById("field-hn").addEventListener("input", checkDuplicateAndWarn_);
-      document.getElementById("field-fullname").addEventListener("input", checkDuplicateAndWarn_);
+      // เช็คข้อมูลซ้ำ "หลังพิมพ์เสร็จ" (ตอนออกจากช่อง/กดปุ่มบันทึก) ไม่เช็คทุกตัวอักษรที่พิมพ์
+      // เพื่อไม่ให้แจ้งเตือนเด้งรบกวนระหว่างกรอก — ระหว่างพิมพ์ถ้ามีแถบเตือนเก่าค้างอยู่ให้ซ่อนทันที
+      ["field-queue", "field-hn", "field-fullname"].forEach(function (id) {
+        const el = document.getElementById(id);
+        el.addEventListener("input", onDuplicateFieldInput_);
+        el.addEventListener("blur", checkDuplicateAndWarn_);
+      });
+      document.getElementById("dup-notice-close").addEventListener("click", hideDuplicateNotice_);
       document.getElementById("field-pendingdate").addEventListener("change", checkPendingDateAndWarn_);
       initPendingDatePicker_();
 
@@ -4025,6 +4269,7 @@
         applyRevealStagger_(document.getElementById("section-dashboard"));
         loadDashboard_();
         refreshFollowUpBadge_();
+        loadLowStockToday_();
       }, 60);
     }
 
@@ -4063,6 +4308,7 @@
       if (pageKey === "history") loadHistory_();
       if (pageKey === "med-search") loadMedTotals_();
       if (pageKey === "line-notify") loadLineSummary_();
+      if (pageKey === "lowstock") initLowStockPage_();
       // โฟกัสช่องแรกของฟอร์มบันทึกให้อัตโนมัติ ผู้ใช้พิมพ์ต่อได้ทันทีโดยไม่ต้องแตะช่องกรอกก่อน
       // ช่วยให้ลงข้อมูลติดต่อกันหลายรายการได้เร็วขึ้น (ไม่นับกรณีกำลังแก้ไขรายการเดิมอยู่)
       if (pageKey === "record-form" && !editingRecordId) focusFirstRecordField_();
@@ -4095,6 +4341,7 @@
         followup: "เคสที่ต้องติดตามต่อ",
         history: "ประวัติการบันทึก",
         "med-search": "ค้นยอดจ่ายยา",
+        lowstock: "ยาขาดคลัง/เหลือน้อย",
         "line-notify": "แจ้งเตือน LINE"
       };
       document.getElementById("topbar-title").textContent = titles[pageKey] || "";
@@ -5300,6 +5547,295 @@
 
     /** โหลดจำนวนเคสค้างติดตามแบบเงียบๆ (ไม่สลับหน้า) เพื่อตั้งเลขตัวเลขแจ้งเตือนที่เมนู
      * ทันทีหลังเข้าระบบ โดยไม่ต้องรอให้ผู้ใช้กดเข้าไปที่หน้านี้ก่อน */
+
+    // ================================================================
+    // ยาขาดคลัง / เหลือน้อย — แจ้งเตือนในฟอร์มบันทึก + หน้าจัดการรายวัน
+    // ================================================================
+    let lowStockToday_ = [];          // รายการยา + สถานะของ "วันนี้" ใช้จับคำในฟอร์มบันทึก
+    let lowStockPageData_ = null;     // ข้อมูลของวันที่ที่เลือกในหน้าจัดการ
+    let lowStockPageDate_ = "";
+    let lowStockAlertsBound_ = false;
+
+    // แตกข้อความเป็นคำ: ตัวพิมพ์เล็ก, ตัดสัญลักษณ์, แยกตัวเลข/ตัวอักษรที่ติดกัน (เช่น 50mg -> 50 mg)
+    function lsWords_(str) {
+      return String(str || "").toLowerCase()
+        .replace(/([0-9])([a-z])/g, "$1 $2").replace(/([a-z])([0-9])/g, "$1 $2")
+        .replace(/[^a-z0-9\u0E00-\u0E7F]+/g, " ").trim().split(/\s+/).filter(Boolean);
+    }
+
+    // คืนรายการที่ตรงกับ "ชื่อยา + ขนาด" — ตรงเมื่อพบทุกคำของทางเลือกใดทางเลือกหนึ่ง
+    // ตัวเลขต้องตรงทั้งค่า (50 ไม่ตรง 500) ถ้ายังไม่มีตัวเลขเลย (ยังไม่ระบุขนาด) ให้เตือนไว้ก่อน
+    function matchLowStock_(name, size) {
+      const words = lsWords_(name + " " + (size || ""));
+      if (!words.length) return [];
+      const hay = words.join(" ");
+      const hasDigit = words.some(function (w) { return /^[0-9]+$/.test(w); });
+      const wordSet = {};
+      words.forEach(function (w) { wordSet[w] = true; });
+
+      return lowStockToday_.filter(function (it) {
+        if (!it.alertOn || it.status === "มีปกติ") return false;
+        return String(it.keywords || it.name).split(",").some(function (alt) {
+          const toks = lsWords_(alt);
+          if (!toks.length) return false;
+          const textToks = toks.filter(function (t) { return !/^[0-9]+$/.test(t); });
+          const numToks = toks.filter(function (t) { return /^[0-9]+$/.test(t); });
+          const textOk = textToks.every(function (t) { return hay.indexOf(t) !== -1; });
+          if (!textOk || (!textToks.length && !numToks.length)) return false;
+          if (!numToks.length) return true;
+          if (numToks.every(function (t) { return wordSet[t]; })) return true;
+          return !hasDigit; // ยังไม่ระบุขนาด → เตือนไว้ก่อนให้ตรวจ
+        });
+      });
+    }
+
+    function lowStockTagHtml_(name, size) {
+      const hits = matchLowStock_(name, size);
+      if (!hits.length) return "";
+      const out = hits.some(function (h) { return h.status === "ไม่มีในคลัง"; });
+      return '<span class="ls-tag ' + (out ? "out" : "low") + '">' +
+        '<span class="material-icons-outlined" style="font-size:13px;">warning</span>' +
+        (out ? "ไม่มีในคลัง" : "เหลือน้อย") + '</span>';
+    }
+
+    function updateLowStockTypingHint_(query) {
+      const el = document.getElementById("lowstock-typing-hint");
+      if (!el) return;
+      const hits = query ? matchLowStock_(query, "") : [];
+      if (!hits.length) { el.classList.add("hidden"); el.innerHTML = ""; return; }
+      el.innerHTML = '<span class="material-icons-outlined" style="font-size:18px;">warning_amber</span>' +
+        '<span>รายการ "' + escapeHtml_(hits[0].name) + '" ' + (hits[0].status === "ไม่มีในคลัง" ? "อาจไม่มีในคลัง" : "เหลือน้อยในคลัง") +
+        ' — โปรดตรวจสอบกับเภสัชกรก่อน</span>';
+      el.classList.remove("hidden");
+    }
+
+    // กล่องแจ้งเตือนถาวรใต้ช่องค้นหา: สรุปยาที่เลือกไว้แล้วเข้าข่ายไม่มี/เหลือน้อย
+    function renderLowStockAlert_() {
+      const el = document.getElementById("lowstock-alert");
+      if (!el) return;
+      const flagged = [];
+      selectedMeds.forEach(function (m) {
+        const hits = matchLowStock_(m.name, m.size);
+        if (hits.length) flagged.push({ name: m.name + (m.size ? " (" + m.size + ")" : ""), status: hits[0].status, note: hits[0].statusNote });
+      });
+      if (!flagged.length) { el.classList.add("hidden"); el.innerHTML = ""; return; }
+      el.innerHTML =
+        '<span class="material-icons-outlined ls-alert-icon">report_problem</span>' +
+        '<div><div class="ls-alert-title">โปรดตรวจสอบกับเภสัชกร — รายการนี้อาจไม่มีในคลัง</div>' +
+        '<div class="ls-alert-text">ยาต่อไปนี้ถูกระบุว่าไม่มี/เหลือน้อยในคลังวันนี้ ควรยืนยันกับเภสัชกรก่อนบันทึกจำนวนที่ได้รับ:</div><ul>' +
+        flagged.map(function (f) {
+          return "<li><b>" + escapeHtml_(f.name) + "</b> — " + escapeHtml_(f.status) + (f.note ? " (" + escapeHtml_(f.note) + ")" : "") + "</li>";
+        }).join("") + "</ul></div>";
+      el.classList.remove("hidden");
+    }
+
+    function updateLowStockNavBadge_() {
+      const n = lowStockToday_.filter(function (it) { return it.alertOn && it.status !== "มีปกติ"; }).length;
+      ["lowstock-nav-badge", "lowstock-nav-badge-mobile"].forEach(function (id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.textContent = String(n);
+        el.classList.toggle("hidden", !n);
+      });
+    }
+
+    // โหลดสถานะ "วันนี้" ไว้ใช้จับคำในฟอร์ม (เรียกตอนเข้าแอป และหลังแก้ไขสถานะของวันนี้)
+    function loadLowStockToday_() {
+      google.script.run
+        .withSuccessHandler(function (data) {
+          lowStockToday_ = (data && data.items) || [];
+          updateLowStockNavBadge_();
+          renderLowStockAlert_();
+        })
+        .withFailureHandler(function () { /* เงียบไว้ ไม่ให้รบกวนการบันทึกข้อมูล */ })
+        .getLowStockList(formatDateThaiISO_(new Date()));
+    }
+
+    // ---------------- หน้าจัดการ ----------------
+    function initLowStockPage_() {
+      const dateEl = document.getElementById("ls-date");
+      if (!lowStockAlertsBound_) {
+        lowStockAlertsBound_ = true;
+        dateEl.addEventListener("change", function () { loadLowStockPage_(dateEl.value); });
+        document.getElementById("ls-btn-today").addEventListener("click", function () {
+          const t = formatDateThaiISO_(new Date());
+          dateEl.value = t;
+          loadLowStockPage_(t);
+        });
+        document.getElementById("ls-btn-add-toggle").addEventListener("click", function () {
+          document.getElementById("ls-add-box").classList.toggle("hidden");
+          document.getElementById("ls-add-name").focus();
+        });
+        document.getElementById("ls-add-cancel").addEventListener("click", function () {
+          document.getElementById("ls-add-box").classList.add("hidden");
+        });
+        document.getElementById("ls-add-save").addEventListener("click", function () {
+          const name = document.getElementById("ls-add-name").value.trim();
+          if (!name) { showToast("กรุณาระบุชื่อยา", "warning"); return; }
+          saveLowStockItem_({ name: name, keywords: document.getElementById("ls-add-keywords").value.trim(), alertOn: true }, function () {
+            document.getElementById("ls-add-name").value = "";
+            document.getElementById("ls-add-keywords").value = "";
+            document.getElementById("ls-add-box").classList.add("hidden");
+          });
+        });
+      }
+      if (!dateEl.value) dateEl.value = formatDateThaiISO_(new Date());
+      loadLowStockPage_(dateEl.value);
+      loadLowStockHistory_();
+    }
+
+    function loadLowStockPage_(dateIso) {
+      lowStockPageDate_ = dateIso || formatDateThaiISO_(new Date());
+      beginBusy_();
+      google.script.run
+        .withSuccessHandler(busyHandler_(function (data) {
+          lowStockPageData_ = data;
+          renderLowStockPage_();
+        }))
+        .withFailureHandler(busyHandler_(function (err) {
+          showToast("โหลดรายการยาขาดคลังไม่สำเร็จ: " + errMsg_(err), "error");
+        }))
+        .getLowStockList(lowStockPageDate_);
+    }
+
+    function isLsToday_() { return lowStockPageDate_ === formatDateThaiISO_(new Date()); }
+
+    function lsStClass_(st) { return st === "ไม่มีในคลัง" ? "out" : (st === "เหลือน้อย" ? "low" : "ok"); }
+
+    function renderLowStockPage_() {
+      const data = lowStockPageData_;
+      const list = document.getElementById("ls-list");
+      if (!data) return;
+      const items = data.items || [];
+      const cnt = { out: 0, low: 0, ok: 0 };
+      items.forEach(function (it) { cnt[lsStClass_(it.status)]++; });
+
+      document.getElementById("ls-summary").innerHTML =
+        '<span class="ls-chip out">ไม่มีในคลัง ' + cnt.out + '</span>' +
+        '<span class="ls-chip low">เหลือน้อย ' + cnt.low + '</span>' +
+        '<span class="ls-chip ok">มีปกติ ' + cnt.ok + '</span>' +
+        '<span class="ls-chip">ข้อมูลของ ' + escapeHtml_(formatThaiDateShort_(data.date)) + (isLsToday_() ? " (วันนี้)" : "") + '</span>';
+
+      list.innerHTML = "";
+      if (!items.length) {
+        list.innerHTML = '<div style="color:var(--muted); padding:16px 0;">ยังไม่มีรายการ — กด "เพิ่มรายการยา"</div>';
+        return;
+      }
+      // เรียง: ไม่มี > เหลือน้อย > มีปกติ
+      const order = { out: 0, low: 1, ok: 2 };
+      items.slice().sort(function (a, b) { return order[lsStClass_(a.status)] - order[lsStClass_(b.status)]; }).forEach(function (it) {
+        const row = document.createElement("div");
+        row.className = "ls-item st-" + lsStClass_(it.status) + (it.alertOn ? "" : " muted-off");
+        row.innerHTML =
+          '<div>' +
+            '<div class="ls-name">' + escapeHtml_(it.name) + '</div>' +
+            '<div class="ls-meta">คำค้น: ' + escapeHtml_(it.keywords) +
+              (it.statusDate && !it.fromDaily ? ' • สถานะตามที่ตั้งไว้เมื่อ ' + escapeHtml_(formatThaiDateShort_(it.statusDate)) : '') +
+              (it.alertOn ? '' : ' • ปิดการแจ้งเตือน') + '</div>' +
+            '<div class="ls-actions" style="margin-top:8px;">' +
+              '<button type="button" class="ls-mini-btn" data-act="edit">แก้ไขรายการ</button>' +
+              '<button type="button" class="ls-mini-btn danger" data-act="del">ลบ</button>' +
+            '</div>' +
+          '</div>' +
+          '<div class="ls-controls">' +
+            '<div class="ls-seg" role="group" aria-label="สถานะ">' +
+              (data.statuses || []).map(function (st) {
+                const c = lsStClass_(st);
+                return '<button type="button" data-st="' + escapeHtml_(st) + '"' + (it.status === st ? ' class="on-' + c + '"' : '') + '>' + escapeHtml_(st) + '</button>';
+              }).join("") +
+            '</div>' +
+            '<input type="text" class="ls-note-input" placeholder="หมายเหตุของวันนี้ (เช่น รอของเข้าวันพุธ)" maxlength="200" value="' + escapeHtml_(it.statusNote) + '">' +
+          '</div>' +
+          '<div class="ls-edit-box hidden">' +
+            '<div class="form-field" style="margin:0;"><label>ชื่อยา</label><input type="text" class="ls-e-name" value="' + escapeHtml_(it.name) + '"></div>' +
+            '<div class="form-field" style="margin:0;"><label>คำค้น (คั่นทางเลือกด้วย , — แต่ละทางเลือกต้องพบทุกคำ)</label><input type="text" class="ls-e-kw" value="' + escapeHtml_(it.keywords) + '"></div>' +
+            '<label style="display:flex; gap:8px; align-items:center; font-size:13px;"><input type="checkbox" class="ls-e-on"' + (it.alertOn ? ' checked' : '') + '> เปิดแจ้งเตือนในหน้าบันทึก</label>' +
+            '<div style="display:flex; gap:8px;"><button type="button" class="btn btn-primary ls-e-save" style="width:auto;">บันทึก</button><button type="button" class="btn btn-outline ls-e-cancel">ยกเลิก</button></div>' +
+          '</div>';
+
+        const noteEl = row.querySelector(".ls-note-input");
+        const currentStatus = function () { return it.status; };
+        row.querySelectorAll(".ls-seg button").forEach(function (b) {
+          b.addEventListener("click", function () { saveLowStockStatus_(it, b.getAttribute("data-st"), noteEl.value); });
+        });
+        noteEl.addEventListener("change", function () { saveLowStockStatus_(it, currentStatus(), noteEl.value); });
+
+        const editBox = row.querySelector(".ls-edit-box");
+        row.querySelector('[data-act="edit"]').addEventListener("click", function () { editBox.classList.toggle("hidden"); });
+        row.querySelector(".ls-e-cancel").addEventListener("click", function () { editBox.classList.add("hidden"); });
+        row.querySelector(".ls-e-save").addEventListener("click", function () {
+          const nm = row.querySelector(".ls-e-name").value.trim();
+          if (!nm) { showToast("กรุณาระบุชื่อยา", "warning"); return; }
+          saveLowStockItem_({ id: it.id, name: nm, keywords: row.querySelector(".ls-e-kw").value.trim(), alertOn: row.querySelector(".ls-e-on").checked, note: it.note });
+        });
+        row.querySelector('[data-act="del"]').addEventListener("click", function () {
+          if (!window.confirm('ลบ "' + it.name + '" ออกจากรายการเฝ้าระวัง?')) return;
+          beginBusy_();
+          google.script.run
+            .withSuccessHandler(busyHandler_(function () { showToast("ลบรายการแล้ว", "success"); loadLowStockPage_(lowStockPageDate_); loadLowStockToday_(); loadLowStockHistory_(); }))
+            .withFailureHandler(busyHandler_(function (err) { showToast("ลบไม่สำเร็จ: " + errMsg_(err), "error"); }))
+            .deleteLowStockItem(it.id);
+        });
+        list.appendChild(row);
+      });
+    }
+
+    function saveLowStockStatus_(it, status, note) {
+      const prev = it.status;
+      it.status = status;               // อัปเดตหน้าจอทันที (optimistic)
+      renderLowStockPage_();
+      beginBusy_();
+      google.script.run
+        .withSuccessHandler(busyHandler_(function (data) {
+          lowStockPageData_ = data;
+          renderLowStockPage_();
+          if (isLsToday_()) loadLowStockToday_();
+          loadLowStockHistory_();
+          showToast("บันทึก \"" + it.name + "\" = " + status + " (" + formatThaiDateShort_(lowStockPageDate_) + ")", "success");
+        }))
+        .withFailureHandler(busyHandler_(function (err) {
+          it.status = prev;
+          renderLowStockPage_();
+          showToast("บันทึกสถานะไม่สำเร็จ: " + errMsg_(err), "error");
+        }))
+        .saveLowStockStatus(lowStockPageDate_, it.id, status, note || "", currentRecorderName_);
+    }
+
+    function saveLowStockItem_(item, done) {
+      beginBusy_();
+      google.script.run
+        .withSuccessHandler(busyHandler_(function () {
+          if (done) done();
+          showToast("บันทึกรายการแล้ว", "success");
+          loadLowStockPage_(lowStockPageDate_);
+          loadLowStockToday_();
+        }))
+        .withFailureHandler(busyHandler_(function (err) { showToast("บันทึกรายการไม่สำเร็จ: " + errMsg_(err), "error"); }))
+        .saveLowStockItem(item, currentRecorderName_);
+    }
+
+    function loadLowStockHistory_() {
+      const body = document.getElementById("ls-history-body");
+      google.script.run
+        .withSuccessHandler(function (rows) {
+          body.innerHTML = "";
+          (rows || []).forEach(function (r) {
+            const tr = document.createElement("tr");
+            tr.style.cursor = "pointer";
+            const fmt = function (arr) { return arr.length ? escapeHtml_(arr.join(", ")) : '<span style="color:var(--muted);">—</span>'; };
+            tr.innerHTML = "<td><b>" + escapeHtml_(formatThaiDateShort_(r.date)) + "</b></td><td>" + fmt(r.out) + "</td><td>" + fmt(r.low) + "</td>";
+            tr.addEventListener("click", function () {
+              document.getElementById("ls-date").value = r.date;
+              loadLowStockPage_(r.date);
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            });
+            body.appendChild(tr);
+          });
+        })
+        .withFailureHandler(function () { body.innerHTML = '<tr><td colspan="3" style="color:var(--muted);">โหลดประวัติไม่สำเร็จ</td></tr>'; })
+        .getLowStockHistory(14);
+    }
+
     function refreshFollowUpBadge_() {
       google.script.run
         .withSuccessHandler(function (data) {
@@ -5656,6 +6192,7 @@
       const query = searchInput.value;
       const trimmedQuery = query.trim();
       const matches = filterMedSuggestions_(query);
+      updateLowStockTypingHint_(trimmedQuery);
 
       dropdown.innerHTML = "";
 
@@ -5664,7 +6201,8 @@
         item.className = "med-suggest-item";
         item.innerHTML =
           escapeHtml_(med.name) +
-          (med.size ? ' <span style="opacity:.6; font-size:12px;">(' + escapeHtml_(med.size) + ')</span>' : "");
+          (med.size ? ' <span style="opacity:.6; font-size:12px;">(' + escapeHtml_(med.size) + ')</span>' : "") +
+          lowStockTagHtml_(med.name, med.size);
         item.addEventListener("mousedown", function (e) {
           e.preventDefault(); // กัน input เสีย focus ก่อน click จะทำงาน
           addSelectedMed_(med);
@@ -5717,6 +6255,10 @@
           noMedGiven: false
         });
         renderSelectedMedList_();
+        const lsHit = matchLowStock_(trimmed, hasFixedSize ? med.size : "");
+        if (lsHit.length) {
+          showToast("⚠ \"" + trimmed + "\" อาจไม่มีในคลัง — โปรดตรวจสอบกับเภสัชกร", "warning");
+        }
         document.getElementById("med-selection-error").style.display = "none";
         // แจ้งเตือนทันทีว่าเลือกสำเร็จ เพราะ dropdown รายการยาบังรายการที่เพิ่งเพิ่มไว้
         // ด้านล่าง ทำให้ผู้กดไม่แน่ใจว่ากดติดหรือยัง
@@ -5803,7 +6345,8 @@
 
       selectedMeds.forEach(function (item) {
         const row = document.createElement("div");
-        row.className = "med-selected-row" + ((showMedRowErrors_ && !isMedItemComplete_(item)) ? " row-error" : "");
+        row.className = "med-selected-row" + ((showMedRowErrors_ && !isMedItemComplete_(item)) ? " row-error" : "") +
+          (matchLowStock_(item.name, item.size).length ? " row-lowstock" : "");
 
         const sizeControlHtml = item.fixedSize
           ? '<span class="med-size-wrap">' +
@@ -5821,7 +6364,7 @@
         row.innerHTML =
           '<div class="med-selected-name">' +
             '<span class="material-icons-outlined" style="font-size:16px; vertical-align:-3px; color:var(--primary);">medication</span> ' +
-            escapeHtml_(item.name) +
+            escapeHtml_(item.name) + lowStockTagHtml_(item.name, item.size) +
           '</div>' +
           '<div class="med-selected-inputs">' +
             '<input type="number" min="0" step="1" inputmode="numeric" class="med-qty-input" placeholder="จำนวน" value="' + escapeHtml_(item.qty) + '">' +
@@ -5903,6 +6446,7 @@
 
         wrap.appendChild(row);
       });
+      renderLowStockAlert_();
     }
 
     // ประกอบ string ต่อรายการยา 1 ตัว ในรูปแบบ "ชื่อยา x จำนวน หน่วย | ขนาด: ขนาดยา"
@@ -6129,39 +6673,78 @@
 
     // ---------------- แจ้งเตือนแบบไม่บล็อก (advisory เท่านั้น ไม่ได้บังคับให้แก้) ----------------
 
-    let duplicateCheckTimer_ = null;
+    let duplicateCheckSeq_ = 0;    // ลำดับคำขอเช็คซ้ำล่าสุด ใช้ทิ้งผลลัพธ์ที่ตอบกลับมาช้ากว่าคำขอใหม่
+    let duplicateLastKey_ = "";    // ค่า HN/ชื่อ/คิวที่เช็คไปล่าสุด กันเช็คซ้ำโดยที่ข้อมูลไม่เปลี่ยน
+    const DUP_FIELD_IDS_ = { hn: "field-hn", name: "field-fullname", queue: "field-queue" };
+
+    function duplicateKey_() {
+      return ["field-queue", "field-hn", "field-fullname"].map(function (id) {
+        return document.getElementById(id).value.trim().toLowerCase();
+      }).join("||");
+    }
+
+    function hideDuplicateNotice_() {
+      document.getElementById("dup-notice").classList.add("hidden");
+      Object.keys(DUP_FIELD_IDS_).forEach(function (k) {
+        document.getElementById(DUP_FIELD_IDS_[k]).classList.remove("dup-flag");
+      });
+    }
+
+    /** ล้างสถานะเช็คซ้ำทั้งหมด (ตอนล้างฟอร์ม/เปิดโหมดแก้ไข) — seed=true คือถือว่าค่าปัจจุบันเช็คแล้ว */
+    function resetDuplicateNotice_(seed) {
+      duplicateCheckSeq_++;
+      hideDuplicateNotice_();
+      duplicateLastKey_ = seed ? duplicateKey_() : "";
+    }
+
+    /** พิมพ์แก้ไขอยู่: ข้อความเตือนเดิมล้าสมัยแล้ว จึงซ่อนไว้ก่อนแล้วค่อยเช็คใหม่ตอนพิมพ์เสร็จ */
+    function onDuplicateFieldInput_() {
+      duplicateLastKey_ = "";
+      duplicateCheckSeq_++; // ทิ้งคำขอที่ยังค้างอยู่
+      if (!document.getElementById("dup-notice").classList.contains("hidden")) hideDuplicateNotice_();
+    }
 
     /**
-     * เตือนว่า "กำลังจะบันทึกข้อมูลซ้ำ" — เรียกทันทีขณะผู้ใช้พิมพ์หมายเลขคิว/HN/ชื่อ-สกุล
-     * (debounce 400ms กันยิง request ถี่เกินไป) เป็นแค่การแจ้งเตือน ไม่ได้ห้ามบันทึก เพราะ
-     * บางครั้งผู้ป่วยคนเดิมมารับยาเพิ่มเติมสำหรับเคสเดิมจริงๆ ก็ถือเป็นการบันทึกซ้ำที่ถูกต้อง
-     * เจ้าหน้าที่ต้องเป็นคนตัดสินใจเอง
+     * เตือนว่า "อาจบันทึกข้อมูลซ้ำ" — เรียกเมื่อพิมพ์เสร็จ (blur) ของช่องหมายเลขคิว/HN/ชื่อ-สกุล
+     * แสดงเป็นแถบเตือนฝังในฟอร์ม + ไฮไลต์ช่องที่ตรงกัน (ไม่ใช้ toast ลอยทับช่องกรอก)
+     * เป็นแค่การแจ้งเตือน ไม่ได้ห้ามบันทึก เพราะบางครั้งผู้ป่วยคนเดิมมีหลายซองยาต้องลงหลายรายการ
+     * เจ้าหน้าที่ต้องเป็นคนตัดสินใจเอง (ฝั่ง backend เทียบแบบ normalize แล้ว: ตัดช่องว่าง/คำนำหน้า/0 นำหน้า HN)
      */
     function checkDuplicateAndWarn_() {
-      clearTimeout(duplicateCheckTimer_);
-      duplicateCheckTimer_ = setTimeout(function () {
-        const queueNumber = document.getElementById("field-queue").value.trim();
-        const hn = document.getElementById("field-hn").value.trim();
-        const fullName = document.getElementById("field-fullname").value.trim();
-        if (!hn && !fullName && !queueNumber) return;
+      const key = duplicateKey_();
+      if (key === duplicateLastKey_) return; // ข้อมูลไม่เปลี่ยนจากที่เช็คไปแล้ว
+      duplicateLastKey_ = key;
 
-        google.script.run
-          .withSuccessHandler(function (res) {
-            if (!res || !res.isDuplicate) return;
-            const latest = res.matches && res.matches[0];
-            const dateNote = latest && latest.pendingDate ? (" ล่าสุดวันที่ค้าง " + formatThaiDateShort_(latest.pendingDate)) : "";
-            const fieldsNote = (res.matchedFields && res.matchedFields.length)
-              ? (" (ตรงกันที่: " + res.matchedFields.join(", ") + ")")
-              : "";
-            showToast(
-              "⚠️ กำลังบันทึกข้อมูลซ้ำ: พบข้อมูล \"" + (fullName || hn || queueNumber) + "\" ในระบบแล้ว " +
-              res.count + " ครั้ง" + fieldsNote + dateNote + " — กรุณาตรวจสอบก่อนบันทึกว่าไม่ได้ซ้ำโดยไม่ตั้งใจ",
-              "warning"
-            );
-          })
-          .withFailureHandler(function () { /* เช็คซ้ำไม่สำเร็จ ไม่ใช่ปัญหาร้ายแรง จึงไม่แจ้ง error รบกวนผู้ใช้ */ })
-          .checkDuplicateName(queueNumber, hn, fullName, editingRecordId || "");
-      }, 400);
+      const queueNumber = document.getElementById("field-queue").value.trim();
+      const hn = document.getElementById("field-hn").value.trim();
+      const fullName = document.getElementById("field-fullname").value.trim();
+      if (!hn && !fullName && !queueNumber) { hideDuplicateNotice_(); return; }
+
+      const seq = ++duplicateCheckSeq_;
+      google.script.run
+        .withSuccessHandler(function (res) {
+          if (seq !== duplicateCheckSeq_) return; // มีการพิมพ์/เช็คใหม่กว่านี้แล้ว ทิ้งผลเก่า
+          hideDuplicateNotice_();
+          if (!res || !res.isDuplicate) return;
+
+          const labels = (res.matchedFields && res.matchedFields.length) ? res.matchedFields.join(", ") : "ข้อมูล";
+          const latest = res.matches && res.matches[0];
+          const rows = res.rowCount || res.count || 1;
+          const dateNote = latest && latest.pendingDate ? (" · ล่าสุดวันที่ค้าง " + formatThaiDateShort_(latest.pendingDate)) : "";
+          document.getElementById("dup-notice-detail").textContent =
+            labels + " ตรงกับรายการที่บันทึกไว้แล้ววันนี้ (" + rows + " รายการ)" + dateNote;
+
+          (res.matchedKeys || []).forEach(function (k) {
+            const el = DUP_FIELD_IDS_[k] && document.getElementById(DUP_FIELD_IDS_[k]);
+            if (el) el.classList.add("dup-flag");
+          });
+          document.getElementById("dup-notice").classList.remove("hidden");
+        })
+        .withFailureHandler(function () {
+          // เช็คซ้ำไม่สำเร็จ ไม่ใช่ปัญหาร้ายแรง จึงไม่แจ้ง error รบกวนผู้ใช้ — ปล่อยให้เช็คใหม่ได้รอบหน้า
+          if (seq === duplicateCheckSeq_) duplicateLastKey_ = "";
+        })
+        .checkDuplicateName(queueNumber, hn, fullName, editingRecordId || "");
     }
 
     /**
@@ -6599,6 +7182,7 @@
       renderSelectedMedList_();
       toggleShortageField_();
       updatePillStates_();
+      resetDuplicateNotice_(false);
     }
 
     function enterEditMode_(record) {
@@ -6641,6 +7225,7 @@
       renderPhotoThumbs_();
 
       updatePillStates_();
+      resetDuplicateNotice_(true); // ค่าที่โหลดมาถือว่าเช็คแล้ว จะเตือนก็ต่อเมื่อผู้ใช้แก้ HN/ชื่อ/คิว
       // แก้ไขในหน้าประวัติเลย: เปิดฟอร์มเป็นหน้าต่าง modal ทับหน้าประวัติ
       // แทนที่จะเปลี่ยนหน้าไปหน้า "บันทึกการรับยา" แบบเดิม
       openRecordModal_();
