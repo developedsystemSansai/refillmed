@@ -3496,6 +3496,18 @@
               <span class="skeleton" style="width:70%; height:14px;"></span>
             </div>
 
+            <div id="line-send-switch" style="display:flex; flex-wrap:wrap; align-items:center; gap:12px; justify-content:space-between; padding:12px 14px; border-radius:12px; background:#ECFDF5; border:1px solid #A7F3D0; margin-bottom:14px;">
+              <div style="min-width:200px; flex:1;">
+                <div id="line-send-state-title" style="font-weight:700; color:#065F46;">กำลังตรวจสอบสถานะการส่ง LINE…</div>
+                <div id="line-send-state-sub" class="card-sub" style="margin:2px 0 0;"></div>
+              </div>
+              <button type="button" class="btn btn-outline" id="btn-toggle-line-send" style="width:auto;">
+                <span class="material-icons-outlined" id="btn-toggle-line-send-icon">notifications_off</span>
+                <span class="btn-label" id="btn-toggle-line-send-label">ปิดการส่ง LINE</span>
+                <span class="spinner"></span>
+              </button>
+            </div>
+
             <div id="line-summary-stats-loading">
               <div style="display:flex; flex-wrap:wrap; gap:12px; margin-bottom:14px;">
                 <span class="skeleton" style="flex:1; min-width:120px; height:64px; border-radius:12px;"></span>
@@ -3606,6 +3618,24 @@
         <button type="button" class="btn btn-primary" id="btn-confirm-send-summary" style="width:auto;">
           <span class="material-icons-outlined">check_circle</span>
           <span class="btn-label">ยืนยันส่ง</span>
+          <span class="spinner"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="modal-overlay hidden" id="modal-confirm-disable-line">
+    <div class="modal-box" style="max-width:480px; text-align:left;">
+      <h3><span class="material-icons-outlined" style="color:#DC2626;">notifications_off</span> ยืนยันการปิดการส่ง LINE</h3>
+      <p class="hint">
+        เมื่อปิดแล้ว ระบบจะ <strong>ไม่ส่ง</strong> ทั้งการแจ้งเตือนเคสที่ได้ยาไม่ครบทันที และสรุปประจำวัน
+        (รวมถึงที่ตั้งเวลาไว้ 16:00 น.) ไปยัง LINE ของแอดมินทุกคน จนกว่าจะกดเปิดใหม่<br>
+        การบันทึกข้อมูลลงระบบยังทำงานตามปกติ
+      </p>
+      <div class="form-actions">
+        <button type="button" class="btn btn-outline" id="btn-cancel-disable-line">ยกเลิก</button>
+        <button type="button" class="btn btn-primary" id="btn-confirm-disable-line" style="width:auto; background:#DC2626;">
+          <span class="material-icons-outlined">notifications_off</span>
+          <span class="btn-label">ยืนยันปิดการส่ง</span>
           <span class="spinner"></span>
         </button>
       </div>
@@ -4232,6 +4262,24 @@
       });
       document.getElementById("btn-confirm-send-summary").addEventListener("click", function () {
         sendDailySummaryNow_(this);
+      });
+
+      // ── สวิตช์ เปิด/ปิด การส่ง LINE ──
+      document.getElementById("btn-toggle-line-send").addEventListener("click", function () {
+        if (lineSendEnabled_) {
+          document.getElementById("modal-confirm-disable-line").classList.remove("hidden"); // ปิด = ต้องยืนยัน
+        } else {
+          setLineSendEnabledOnServer_(true, this); // เปิด = ทำทันที
+        }
+      });
+      document.getElementById("btn-cancel-disable-line").addEventListener("click", function () {
+        document.getElementById("modal-confirm-disable-line").classList.add("hidden");
+      });
+      document.getElementById("modal-confirm-disable-line").addEventListener("click", function (e) {
+        if (e.target === this) this.classList.add("hidden");
+      });
+      document.getElementById("btn-confirm-disable-line").addEventListener("click", function () {
+        setLineSendEnabledOnServer_(false, this);
       });
 
       document.getElementById("field-pendingdate").value = formatDateThaiISO_(new Date());
@@ -5177,6 +5225,7 @@
 
     function renderLineSummary_(stats) {
       stats = stats || {};
+      renderLineSendState_(stats.lineSendEnabled !== false, null);
       document.getElementById("line-summary-stats-loading").classList.add("hidden");
 
       const statsBox = document.getElementById("line-summary-stats");
@@ -5222,6 +5271,58 @@
           );
         }).join("");
       }
+    }
+
+    // ── สวิตช์ เปิด/ปิด การส่งข้อความ LINE ──────────────────────────────
+    // ฟังก์ชันฝั่งเซิร์ฟเวอร์ที่ใช้: setLineSendEnabled(enabled, recorderName)
+    let lineSendEnabled_ = true;
+
+    function renderLineSendState_(enabled, info) {
+      lineSendEnabled_ = !!enabled;
+      const box = document.getElementById("line-send-switch");
+      const title = document.getElementById("line-send-state-title");
+      const sub = document.getElementById("line-send-state-sub");
+      const icon = document.getElementById("btn-toggle-line-send-icon");
+      const label = document.getElementById("btn-toggle-line-send-label");
+      const sendBtn = document.getElementById("btn-send-daily-summary");
+
+      if (lineSendEnabled_) {
+        box.style.background = "#ECFDF5"; box.style.borderColor = "#A7F3D0";
+        title.style.color = "#065F46";
+        title.textContent = "การส่ง LINE: เปิดอยู่";
+        icon.textContent = "notifications_off";
+        label.textContent = "ปิดการส่ง LINE";
+      } else {
+        box.style.background = "#FEF2F2"; box.style.borderColor = "#FECACA";
+        title.style.color = "#991B1B";
+        title.textContent = "การส่ง LINE: ปิดอยู่ (ไม่มีการแจ้งเตือนออกไป)";
+        icon.textContent = "notifications_active";
+        label.textContent = "เปิดการส่ง LINE";
+      }
+      sub.textContent = (info && info.changedBy)
+        ? "เปลี่ยนล่าสุดโดย " + info.changedBy + (info.changedAt ? " เมื่อ " + info.changedAt : "")
+        : (lineSendEnabled_ ? "" : "ระบบยังบันทึกข้อมูลได้ตามปกติ แต่จะไม่ส่งข้อความไปที่ LINE");
+      sendBtn.disabled = !lineSendEnabled_;
+      sendBtn.style.opacity = lineSendEnabled_ ? "" : "0.5";
+    }
+
+    function setLineSendEnabledOnServer_(enable, btnEl) {
+      setButtonLoading_(btnEl, true);
+      google.script.run
+        .withSuccessHandler(function (res) {
+          setButtonLoading_(btnEl, false);
+          document.getElementById("modal-confirm-disable-line").classList.add("hidden");
+          res = res || {};
+          renderLineSendState_(res.enabled !== false, res);
+          showToast(res.message || (enable ? "เปิดการส่ง LINE แล้ว" : "ปิดการส่ง LINE แล้ว"),
+            res.enabled === false ? "warning" : "success");
+        })
+        .withFailureHandler(function (err) {
+          setButtonLoading_(btnEl, false);
+          document.getElementById("modal-confirm-disable-line").classList.add("hidden");
+          showToast("เปลี่ยนสถานะการส่ง LINE ไม่สำเร็จ: " + errMsg_(err), "error");
+        })
+        .setLineSendEnabled(enable, currentRecorderName_);
     }
 
     function lineStatBox_(label, value, color) {
